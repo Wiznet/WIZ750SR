@@ -14,6 +14,7 @@
 uint16_t get_firmware_from_network(uint8_t sock, uint8_t * buf);
 void reset_fw_update_timer(void);
 
+
 uint8_t enable_fw_update_timer = SEGCP_DISABLE;
 volatile uint16_t fw_update_time = 0;
 uint8_t flag_fw_update_timeout = SEGCP_DISABLE;
@@ -415,7 +416,6 @@ uint16_t get_firmware_from_network(uint8_t sock, uint8_t * buf)
 	
 	return len;
 }
-
 
 // function for timer
 void device_timer_msec(void)

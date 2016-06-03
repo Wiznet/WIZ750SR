@@ -8,6 +8,15 @@
 
 typedef enum
 {
+	IO_DIGITAL_INPUT  = 0,
+	IO_DIGITAL_OUTPUT = 1,
+	IO_ANALOG_INPUT   = 2,
+	IO_ANALOG_OUTPUT  = 3,
+	IO_UNKNOWN        = 0xff
+} USER_IO_Define;
+
+typedef enum
+{
 	IO_INPUT  = 0,
 	IO_OUTPUT = 1
 } USER_IO_Direction;

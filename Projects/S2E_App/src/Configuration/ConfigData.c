@@ -32,7 +32,7 @@ void set_DevConfig_to_factory_value(void)
 	dev_config.module_type[1] = 0x01;
 	dev_config.module_type[2] = 0x00;
 	
-	memset(dev_config.module_name, 0x00, 25);
+	memset(dev_config.module_name, 0x00, 15);
 	memcpy(dev_config.module_name, DEVICE_ID_DEFAULT, sizeof(DEVICE_ID_DEFAULT));
 
 	dev_config.fw_ver[0] = MAJOR_VER;
@@ -89,10 +89,9 @@ void set_DevConfig_to_factory_value(void)
 	//dev_config.serial_info[0].serial_debug_en = SEGCP_DISABLE;
 	dev_config.serial_info[0].serial_debug_en = SEGCP_ENABLE;
 	
-	memset(dev_config.options.pw_setting, 0x00, sizeof(dev_config.options.pw_setting));		// Added for WIZ107SR compatibility;
+	//memset(dev_config.options.pw_setting, 0x00, sizeof(dev_config.options.pw_setting));		// Added for WIZ107SR compatibility;
 	memset(dev_config.options.pw_search, 0x00, sizeof(dev_config.options.pw_search));		// Added for WIZ107SR compatibility;
 	memset(dev_config.options.pw_connect, 0x00, sizeof(dev_config.options.pw_connect));
-	//memcpy(dev_config.options.pw_connect, "hello", 5);
 	dev_config.options.pw_connect_en = SEGCP_DISABLE;
 	
 	dev_config.options.dhcp_use = SEGCP_DISABLE;
@@ -111,10 +110,10 @@ void set_DevConfig_to_factory_value(void)
 	dev_config.options.serial_trigger[1] = 0x2b;
 	dev_config.options.serial_trigger[2] = 0x2b;
 	
-	dev_config.user_io_info.user_io_enable = USER_IO_A | USER_IO_B | USER_IO_C | USER_IO_D; // [Enabled] / Disabled
-	//dev_config.user_io_info.user_io_type = ~(USER_IO_A | USER_IO_B | USER_IO_C | USER_IO_D); // [Digital] / Analog
-	dev_config.user_io_info.user_io_type = USER_IO_A | USER_IO_B; // Digital: USER_IO_C, USER_IO_D / Analog: USER_IO_A, USER_IO_B
-	dev_config.user_io_info.user_io_direction = ~(USER_IO_A | USER_IO_B | USER_IO_C | ~(USER_IO_D)); // [Input] / Output
+	dev_config.user_io_info.user_io_enable = USER_IO_A | USER_IO_B | USER_IO_C | USER_IO_D; // [Enabled] / Disabled	
+	dev_config.user_io_info.user_io_type = USER_IO_A; // Analog: USER_IO_A, / Digital: USER_IO_B, USER_IO_C, USER_IO_D
+	dev_config.user_io_info.user_io_direction = USER_IO_C | USER_IO_D; // IN / IN / OUT / OUT
+	dev_config.user_io_info.user_io_status = 0;
 	
 	dev_config.firmware_update.fwup_flag = SEGCP_DISABLE;
 	dev_config.firmware_update.fwup_port = DEVICE_FWUP_PORT;
@@ -125,10 +124,10 @@ void set_DevConfig_to_factory_value(void)
 	dev_config.firmware_update_extend.fwup_server_use_default = SEGCP_ENABLE;
 	
 	// Planned to apply
-	//memset(dev_config.firmware_update_extend.fwup_server_domain, 0x00, sizeof(dev_config.firmware_update_extend.fwup_server_domain));
-	//memcpy(dev_config.firmware_update_extend.fwup_server_domain, FWUP_SERVER_DOMAIN, sizeof(FWUP_SERVER_DOMAIN));
-	//memset(dev_config.firmware_update_extend.fwup_server_binpath, 0x00, sizeof(dev_config.firmware_update_extend.fwup_server_binpath));
-	//memcpy(dev_config.firmware_update_extend.fwup_server_binpath, FWUP_SERVER_BINPATH, sizeof(FWUP_SERVER_BINPATH));
+	memset(dev_config.firmware_update_extend.fwup_server_domain, 0x00, sizeof(dev_config.firmware_update_extend.fwup_server_domain));
+	memcpy(dev_config.firmware_update_extend.fwup_server_domain, FWUP_SERVER_DOMAIN, sizeof(FWUP_SERVER_DOMAIN));
+	memset(dev_config.firmware_update_extend.fwup_server_binpath, 0x00, sizeof(dev_config.firmware_update_extend.fwup_server_binpath));
+	memcpy(dev_config.firmware_update_extend.fwup_server_binpath, FWUP_SERVER_BINPATH, sizeof(FWUP_SERVER_BINPATH));
 }
 
 void load_DevConfig_from_storage(void)

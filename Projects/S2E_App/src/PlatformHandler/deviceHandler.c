@@ -16,7 +16,6 @@
 #include "dns.h"
 
 uint16_t get_firmware_from_network(uint8_t sock, uint8_t * buf);
-//uint16_t get_firmware_from_server(uint8_t sock, uint8_t * buf);
 uint16_t get_firmware_from_server(uint8_t sock, uint8_t * server_ip, uint8_t * buf);
 uint16_t gen_http_fw_request(uint8_t * buf);
 int8_t process_dns_fw_server(uint8_t * domain_ip, uint8_t * buf);
@@ -33,7 +32,6 @@ volatile uint16_t fw_from_network_time = 0;
 uint8_t flag_fw_from_network_timeout = SEGCP_DISABLE;
 
 uint8_t flag_fw_from_server_failed = SEGCP_DISABLE;
-
 static uint16_t any_port = 0;
 
 //extern uint8_t g_send_buf[DATA_BUF_SIZE]; // for dns query to HTTP server
@@ -311,50 +309,6 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 
 #endif
 
-int8_t process_dns_fw_server(uint8_t * fw_remote_ip, uint8_t * buf)
-{
-	struct __firmware_update_extend *fwupdate_server = (struct __firmware_update_extend *)&(get_DevConfig_pointer()->firmware_update_extend);
-	struct __options *option = (struct __options *)&(get_DevConfig_pointer()->options);
-	
-	int8_t ret = 0;
-	uint8_t dns_retry = 0;
-	//uint8_t dns_server_ip[4];
-	//sprintf((char *)g_send_buf, "%s%s", FWUP_SERVER_DOMAIN, FWUP_SERVER_BINPATH);
-	
-#ifdef _FWUP_DEBUG_
-	printf(" - DNS Client running: FW update server\r\n");
-#endif
-	
-	DNS_init(SOCK_DNS, buf);
-	
-	while(1) 
-	{
-		if((ret = DNS_run(option->dns_server_ip, (uint8_t *)FWUP_SERVER_DOMAIN, (uint8_t *)fw_remote_ip)) == 1)
-		{
-#ifdef _FWUP_DEBUG_
-			printf(" - DNS Success: Firmware Server IP is %d.%d.%d.%d\r\n", fw_remote_ip[0], fw_remote_ip[1], fw_remote_ip[2], fw_remote_ip[3]);
-#endif
-			break;
-		}
-		else
-		{
-			dns_retry++;
-#ifdef _FWUP_DEBUG_
-			if(dns_retry <= 2) printf(" - DNS Timeout occurred and retry [%d]\r\n", dns_retry);
-#endif
-		}
-
-		if(dns_retry > 2) {
-#ifdef _FWUP_DEBUG_
-			printf(" - DNS Failed\r\n\r\n");
-#endif
-			break;
-		}
-	}
-	
-	return ret;
-}
-
 
 uint16_t get_firmware_from_network(uint8_t sock, uint8_t * buf)
 {
@@ -615,6 +569,49 @@ uint16_t get_firmware_from_server(uint8_t sock, uint8_t * server_ip, uint8_t * b
 	return len;
 }
 
+int8_t process_dns_fw_server(uint8_t * fw_remote_ip, uint8_t * buf)
+{
+	struct __firmware_update_extend *fwupdate_server = (struct __firmware_update_extend *)&(get_DevConfig_pointer()->firmware_update_extend);
+	struct __options *option = (struct __options *)&(get_DevConfig_pointer()->options);
+	
+	int8_t ret = 0;
+	uint8_t dns_retry = 0;
+	//uint8_t dns_server_ip[4];
+	//sprintf((char *)g_send_buf, "%s%s", FWUP_SERVER_DOMAIN, FWUP_SERVER_BINPATH);
+	
+#ifdef _FWUP_DEBUG_
+	printf(" - DNS Client running: FW update server\r\n");
+#endif
+	
+	DNS_init(SOCK_DNS, buf);
+	
+	while(1) 
+	{
+		if((ret = DNS_run(option->dns_server_ip, (uint8_t *)FWUP_SERVER_DOMAIN, (uint8_t *)fw_remote_ip)) == 1)
+		{
+#ifdef _FWUP_DEBUG_
+			printf(" - DNS Success: Firmware Server IP is %d.%d.%d.%d\r\n", fw_remote_ip[0], fw_remote_ip[1], fw_remote_ip[2], fw_remote_ip[3]);
+#endif
+			break;
+		}
+		else
+		{
+			dns_retry++;
+#ifdef _FWUP_DEBUG_
+			if(dns_retry <= 2) printf(" - DNS Timeout occurred and retry [%d]\r\n", dns_retry);
+#endif
+		}
+
+		if(dns_retry > 2) {
+#ifdef _FWUP_DEBUG_
+			printf(" - DNS Failed\r\n\r\n");
+#endif
+			break;
+		}
+	}
+	
+	return ret;
+}
 
 uint16_t gen_http_fw_request(uint8_t * buf)
 {
@@ -626,7 +623,6 @@ uint16_t gen_http_fw_request(uint8_t * buf)
 	len = sprintf((char *)buf, "GET %s HTTP/1.1\r\n", FWUP_SERVER_BINPATH);
 	len += sprintf((char *)buf+len, "Host: %s\r\n", FWUP_SERVER_DOMAIN);
 	len += sprintf((char *)buf+len, "Connection: keep-alive\r\n");
-	//len += sprintf((char *)buf+len, "Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8\r\n");
 	len += sprintf((char *)buf+len, "\r\n");
 	
 #ifdef _FWUP_DEBUG_

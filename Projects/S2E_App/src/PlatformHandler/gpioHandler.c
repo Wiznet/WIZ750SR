@@ -63,8 +63,9 @@ void init_user_io(uint8_t io_sel)
 {
 	struct __user_io_info *user_io_info = (struct __user_io_info *)&(get_DevConfig_pointer()->user_io_info);
 	uint8_t idx = 0;
-	GPIOMode_TypeDef gpio_mode;
-
+	
+	uint8_t io_status = 0;
+	
 	if((user_io_info->user_io_enable & io_sel) == io_sel)
 	{
 		idx = get_user_io_bitorder(io_sel);
@@ -84,18 +85,19 @@ void init_user_io(uint8_t io_sel)
 			// Digital Input / Output
 			if((user_io_info->user_io_direction & io_sel) == io_sel) // IO_OUTPUT == 1
 			{
-				gpio_mode = GPIO_Mode_OUT;
+				GPIO_Configuration(USER_IO_PORT[idx], USER_IO_PIN[idx], GPIO_Mode_OUT, USER_IO_DEFAULT_PAD_AF);
+				io_status = user_io_info->user_io_status;
+				
+				if(io_status == IO_HIGH)
+					GPIO_SetBits(USER_IO_PORT[idx], USER_IO_PIN[idx]);
+				else
+					GPIO_ResetBits(USER_IO_PORT[idx], USER_IO_PIN[idx]);
 			}
 			else
 			{
-				gpio_mode = GPIO_Mode_IN;
+				GPIO_Configuration(USER_IO_PORT[idx], USER_IO_PIN[idx], GPIO_Mode_IN, USER_IO_DEFAULT_PAD_AF);
+				USER_IO_PORT[idx]->OUTENCLR = USER_IO_PIN[idx];
 			}
-			
-			GPIO_Configuration(USER_IO_PORT[idx], USER_IO_PIN[idx], gpio_mode, USER_IO_DEFAULT_PAD_AF);
-			
-			// User IO pin init (set to low)
-			USER_IO_PORT[idx]->OUTENSET = USER_IO_PIN[idx];
-			//if(gpio_mode == GPIO_Mode_OUT) GPIO_ResetBits(USER_IO_PORT[idx], USER_IO_PIN[idx]);
 		}
 	}
 }
@@ -306,8 +308,17 @@ uint8_t set_user_io_val(uint16_t io_sel, uint16_t * val)
 		{
 			idx = get_user_io_bitorder(io_sel);
 			
-			if(*val == 0) GPIO_ResetBits(USER_IO_PORT[idx], USER_IO_PIN[idx]);
-			else if(*val == 1) GPIO_SetBits(USER_IO_PORT[idx], USER_IO_PIN[idx]);
+			if(*val == 0)
+			{
+				user_io_info->user_io_status = IO_LOW;
+				GPIO_ResetBits(USER_IO_PORT[idx], USER_IO_PIN[idx]);
+			}
+			else if(*val == 1)
+			{
+				user_io_info->user_io_status = IO_HIGH;
+				GPIO_SetBits(USER_IO_PORT[idx], USER_IO_PIN[idx]);
+			}
+			
 			ret = 1;
 		}
 	}
@@ -333,7 +344,7 @@ uint8_t get_user_io_bitorder(uint16_t io_sel)
 	return ret;
 }
 
-// 12-bit ADC resolution
+// Read ADC val: 12-bit ADC resolution
 uint16_t read_ADC(ADC_CH ch)
 {
 	ADC_ChannelSelect(ch);				///< Select ADC channel to CH0

@@ -422,7 +422,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 				{
 					case SEGCP_MC:
 						if((dev_config->network_info_common.mac[0] == 0x00) && (dev_config->network_info_common.mac[1] == 0x08) && (dev_config->network_info_common.mac[2] == 0xDC)) ret |= SEGCP_RET_ERR_IGNORED;
-						else if(!is_macaddr(param, ".:-", dev_config->network_info_common.mac)) ret |= SEGCP_RET_ERR_INVALIDPARAM;			
+						else if(!is_macaddr(param, ".:-", dev_config->network_info_common.mac)) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						break;
 					case SEGCP_VR: 
 					case SEGCP_MN:
@@ -677,12 +677,15 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						}
 						else
 						{
-							sscanf(param,"%x", &dev_config->network_info[0].packing_delimiter[0]);
+							sscanf(param,"%x", &tmp_int);
+							dev_config->network_info[0].packing_delimiter[0] = (uint8_t)tmp_int;
+							
 							if(dev_config->network_info[0].packing_delimiter[0] == 0x00) 
 								dev_config->network_info[0].packing_delimiter_length = 0;
 							else 
 								dev_config->network_info[0].packing_delimiter_length = 1;
 						}
+						
 						break;
 					case SEGCP_TE:
 						tmp_byte = is_hex(*param);
@@ -692,7 +695,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 					case SEGCP_SS:
 						if(param_len != 6 || !is_hexstr(param) || !str_to_hex(param, dev_config->options.serial_trigger))
 						{
-							printf(">> SEGCP_SS = %.2X %.2X %.2X", dev_config->options.serial_trigger[0], dev_config->options.serial_trigger[1], dev_config->options.serial_trigger[2]);
+							//printf(">> SEGCP_SS = %.2X %.2X %.2X", dev_config->options.serial_trigger[0], dev_config->options.serial_trigger[1], dev_config->options.serial_trigger[2]);
 							ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						}
 						break;

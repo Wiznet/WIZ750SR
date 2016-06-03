@@ -17,7 +17,10 @@
 // FWUP Domain array size / binpath array size depends on FWUP_DOMAIN_SIZE / FWUP_BINPATH_SIZE (ConfigData.h)
 #define FWUP_SERVER_PORT			80
 #define FWUP_SERVER_DOMAIN			"device.wizwiki.net"
-#define FWUP_SERVER_BINPATH			"/w7500s2e/fw/W7500x_S2E_App.bin"
+#define FWUP_SERVER_BINPATH			"/wiz750sr/fw/W7500x_S2E_App.bin"
+
+// HTTP Response: Status code
+#define STATUS_HTTP_OK				200
 
 /* W7500S2E Application flash memory map */
 #define DEVICE_BOOT_SIZE					(28*1024)

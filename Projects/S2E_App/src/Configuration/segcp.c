@@ -40,8 +40,8 @@ uint8_t * tbSEGCPCMD[] = {"MC", "VR", "MN", "IM", "OP", "DD", "CP", "PO", "DG", 
 							"LG", "ER", "FW", "MA", "PW", "SV", "EX", "RT", "UN", "ST",
 							"FR", "EC", "K!", "UE", "GA", "GB", "GC", "GD", "CA", "CB", 
 							"CC", "CD", "SC", "S0", "S1", "RX", "FS", "FC", "FP", "FD",
-							"FH", 0};
-                            
+							"FH", "UI", 0};
+
 uint8_t * tbSEGCPERR[] = {"ERNULL", "ERNOTAVAIL", "ERNOPARAM", "ERIGNORED", "ERNOCOMMAND", "ERINVALIDPARAM", "ERNOPRIVILEGE"};
 
 uint8_t gSEGCPPRIVILEGE = SEGCP_PRIVILEGE_CLR;
@@ -293,6 +293,9 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 	uint16_t param_len = 0;
 	
 	uint8_t  io_num = 0;
+	uint8_t  io_type = 0;
+	uint8_t  io_dir = 0;
+	
 	uint8_t  tmp_byte = 0;
 	uint16_t tmp_int = 0;
 	uint32_t tmp_long = 0;
@@ -478,7 +481,10 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 					case SEGCP_CC:
 					case SEGCP_CD:
 						io_num = (teSEGCPCMDNUM)cmdnum - SEGCP_CA;
-						sprintf(trep, "%d%d", get_user_io_type(USER_IO_SEL[io_num]), get_user_io_direction(USER_IO_SEL[io_num]));
+						io_type = get_user_io_type(USER_IO_SEL[io_num]);
+						io_dir = get_user_io_direction(USER_IO_SEL[io_num]);
+						sprintf(trep, "%d", (((io_type & 0x01) << 1) | io_dir));
+						//sprintf(trep, "%d%d", get_user_io_type(USER_IO_SEL[io_num]), get_user_io_direction(USER_IO_SEL[io_num]));
 						break;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Status Pins
@@ -556,11 +562,15 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						else ret |= SEGCP_RET_ERR_NOPRIVILEGE;
 						break;
 					case SEGCP_UN:
-						// NEW: UART Interface - TTL/RS-232 or RS-422/485
+						// NEW: UART Interface String - TTL/RS-232 or RS-422/485
 						sprintf(trep, "%s", uart_if_table[dev_config->serial_info[0].uart_interface]);
 						
 						// OLD: UART COUNT
 						//sprintf(trep, "%d", DEVICE_UART_CNT); 
+						break;
+					case SEGCP_UI: 
+						// NEW: UART Interface Number- [0] TTL/RS-232 or [1] RS-422/485
+						sprintf(trep, "%d", dev_config->serial_info[0].uart_interface);
 						break;
 					case SEGCP_ST: sprintf(trep, "%s", strDEVSTATUS[dev_config->network_info[0].state]);
 						break;
@@ -855,12 +865,15 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						}
 						else
 						{
-							sscanf(param,"%x", &dev_config->network_info[0].packing_delimiter[0]);
+							sscanf(param,"%x", &tmp_int);
+							dev_config->network_info[0].packing_delimiter[0] = (uint8_t)tmp_int;
+							
 							if(dev_config->network_info[0].packing_delimiter[0] == 0x00) 
 								dev_config->network_info[0].packing_delimiter_length = 0;
 							else 
 								dev_config->network_info[0].packing_delimiter_length = 1;
 						}
+						
 						break;
 					case SEGCP_TE:
 						tmp_byte = is_hex(*param);
@@ -870,7 +883,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 					case SEGCP_SS:
 						if(param_len != 6 || !is_hexstr(param) || !str_to_hex(param, dev_config->options.serial_trigger))
 						{
-							printf(">> SEGCP_SS = %.2X %.2X %.2X", dev_config->options.serial_trigger[0], dev_config->options.serial_trigger[1], dev_config->options.serial_trigger[2]);
+							//printf(">> SEGCP_SS = %.2X %.2X %.2X", dev_config->options.serial_trigger[0], dev_config->options.serial_trigger[1], dev_config->options.serial_trigger[2]);
 							ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						}
 						break;
@@ -937,7 +950,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 					case SEGCP_GD:
 						io_num = (teSEGCPCMDNUM)cmdnum - SEGCP_GA;
 						tmp_int = is_hex(*param);
-						if(param_len != 1 || tmp_byte > IO_OUTPUT) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						if(param_len != 1 || tmp_int > IO_HIGH) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else
 						{
 							if(set_user_io_val(USER_IO_SEL[io_num], &tmp_int) == 0) ret |= SEGCP_RET_ERR_INVALIDPARAM;
@@ -952,24 +965,24 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						io_num = (teSEGCPCMDNUM)cmdnum - SEGCP_CA;
 						sscanf(param, "%x", &tmp_int);
 						
-						tmp_byte = (uint8_t)((tmp_int & 0xF0) >> 4); // io type; digital or analog
-						tmp_int = (tmp_int & 0x0F); // io direction; input or output
+						io_type = (uint8_t)(tmp_int >> 1);
+						io_dir = (uint8_t)(tmp_int & 0x01);
 						
-						if((param_len > 2) || (tmp_byte > IO_ANALOG_IN) || (tmp_int > IO_OUTPUT)) // Invalid parameters
+						if((param_len > 2) || (io_type > IO_ANALOG_IN) || (io_dir > IO_OUTPUT)) // Invalid parameters
 						{
 							ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						}
 						else
 						{
-							if((tmp_byte == IO_ANALOG_IN) && (tmp_int == IO_OUTPUT)) // This case not allowed. (Analog output)
+							if((io_type == IO_ANALOG_IN) && (io_dir == IO_OUTPUT)) // This case not allowed. (Analog output)
 							{
 								ret |= SEGCP_RET_ERR_INVALIDPARAM;
 							}
 							else
 							{
 								// IO type and Direction settings
-								set_user_io_type(USER_IO_SEL[io_num], tmp_byte);
-								set_user_io_direction(USER_IO_SEL[io_num], (uint8_t)tmp_int);
+								set_user_io_type(USER_IO_SEL[io_num], io_type);
+								set_user_io_direction(USER_IO_SEL[io_num], io_dir);
 								init_user_io(USER_IO_SEL[io_num]);
 							}
 						}
@@ -1052,6 +1065,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						break;
 
 					case SEGCP_UN:
+					case SEGCP_UI:
 					case SEGCP_ST:
 					case SEGCP_LG:
 					case SEGCP_ER: 

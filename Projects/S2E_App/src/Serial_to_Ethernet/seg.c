@@ -249,9 +249,8 @@ void proc_SEG_udp(uint8_t sock)
 			
 			if(socket(sock, Sn_MR_UDP, net->local_port, 0) == sock)
 			{
-				//net->state = ST_OPEN;
-				//set_device_status(ST_OPEN);
 				set_device_status(ST_UDP);
+				
 				if(net->packing_time) modeswitch_gap_time = net->packing_time; // replace the GAP time (default: 500ms)
 				
 				if(serial->serial_debug_en == SEG_ENABLE)
@@ -918,14 +917,8 @@ uint16_t get_serial_data(void)
 	struct __network_info *netinfo = (struct __network_info *)&(get_DevConfig_pointer()->network_info);
 	uint16_t i;
 	uint16_t len;
-	//int32_t ret;
 	
 	len = BUFFER_USED_SIZE(data_rx);
-	
-	//{ // ## for debugging
-	//ret = uart_gets(SEG_DATA_UART, g_send_buf, len);
-	//return (uint16_t)ret;
-	//}
 	
 	if((len + u2e_size) >= DATA_BUF_SIZE) // Avoiding u2e buffer (g_send_buf) overflow	
 	{
@@ -983,7 +976,8 @@ uint16_t get_serial_data(void)
 	// Packing delimiter: time option
 	if((netinfo->packing_time != 0) && (u2e_size != 0) && (flag_serial_input_time_elapse))
 	{
-		flag_serial_input_time_elapse = SEG_DISABLE; // ##
+		if(BUFFER_USED_SIZE(data_rx) == 0) flag_serial_input_time_elapse = SEG_DISABLE; // ##
+		
 		return u2e_size;
 	}
 	
@@ -996,6 +990,7 @@ void ether_to_uart(uint8_t sock)
 	struct __serial_info *serial = (struct __serial_info *)get_DevConfig_pointer()->serial_info;
 	struct __options *option = (struct __options *)&(get_DevConfig_pointer()->options);
 	uint16_t len;
+	uint16_t i;
 	
 	// H/W Socket buffer -> User's buffer
 	len = getSn_RX_RSR(sock);
@@ -1090,7 +1085,13 @@ void ether_to_uart(uint8_t sock)
 		}
 		else
 		{
-			uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
+			//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
+			
+			for(i = 0; i < e2u_size; i++)
+			{
+				uart_putc(SEG_DATA_UART, g_recv_buf[i]);
+			}
+			
 			add_data_transfer_bytecount(SEG_ETHER_TX, e2u_size);
 			e2u_size = 0;
 		}

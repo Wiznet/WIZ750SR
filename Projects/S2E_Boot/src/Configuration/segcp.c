@@ -25,7 +25,7 @@ uint16_t uart_get_commandline(uint8_t uartNum, uint8_t* buf, uint16_t maxSize);
 static uint8_t gSEGCPREQ[CONFIG_BUF_SIZE];
 static uint8_t gSEGCPREP[CONFIG_BUF_SIZE];
 
-uint8_t * strDEVSTATUS[]  = {"BOOT", "OPEN", "CONNECT", "UPGARDE", "ATMODE", "UDP", 0};
+uint8_t * strDEVSTATUS[]  = {"BOOT", "OPEN", "CONNECT", "UPGRADE", "ATMODE", "UDP", 0};
 
 // V4.4 Add Command EE : EEPROM ERASE
 uint8_t * tbSEGCPCMD[] = {"MC", "VR", "MN", "IM", "OP", "DD", "CP", "PO", "DG", "KA", 

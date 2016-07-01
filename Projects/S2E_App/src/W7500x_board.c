@@ -13,7 +13,6 @@
 #endif
 
 static void PHY_Init(void);
-static void delay_ms(uint32_t ms);
 
 GPIO_TypeDef* LED_PORT[LEDn] = {LED1_GPIO_PORT, LED2_GPIO_PORT};
 const uint16_t LED_PIN[LEDn] = {LED1_PIN, LED2_PIN};
@@ -112,14 +111,7 @@ void init_hw_trig_pin(void)
 uint8_t get_hw_trig_pin(void)
 {
 	// HW_TRIG input; Active low
-	uint8_t hw_trig, i;
-	for(i = 0; i < 5; i++)
-	{
-		hw_trig = GPIO_ReadInputDataBit(HW_TRIG_PORT, HW_TRIG_PIN);
-		if(hw_trig != 0) return 1; // High
-		delay_ms(5);
-	}
-	return 0; // Low
+	return GPIO_ReadInputDataBit(HW_TRIG_PORT, HW_TRIG_PIN);
 }
 
 
@@ -236,17 +228,4 @@ void LED_Toggle(Led_TypeDef Led)
 uint8_t get_LED_Status(Led_TypeDef Led)
 {
 	return GPIO_ReadOutputDataBit(LED_PORT[Led], LED_PIN[Led]);
-}
-
-/**
-  * @brief  Inserts a delay time when the situation cannot use the timer interrupt.
-  * @param  ms: specifies the delay time length, in milliseconds.
-  * @retval None
-  */
-static void delay_ms(uint32_t ms)
-{
-	volatile uint32_t nCount;
-	
-	nCount=(GetSystemClock()/10000)*ms;
-	for (; nCount!=0; nCount--);
 }

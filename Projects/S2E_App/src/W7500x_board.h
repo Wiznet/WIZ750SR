@@ -16,7 +16,6 @@
 
 /* Target Board Selector */
 //#define DEVICE_BOARD_NAME	WIZwiki_W7500ECO
-//#define DEVICE_BOARD_NAME	W7500P-S2E
 #define DEVICE_BOARD_NAME	WIZ750SR
 
 #ifdef DEVICE_BOARD_NAME
@@ -25,27 +24,15 @@
 		#define __USE_UART_IF_SELECTOR__	// RS-232/TTL or RS-422/485 selector using UART IF selector pin
 		#define __USE_EXT_EEPROM__			// External EEPROM or Internal Data flash (DAT0/1)
 		#define __USE_BOOT_ENTRY__			// Application boot mode entry pin activated
-		#define __USE_APPBACKUP_AREA__		// If this option activated, Application firmware area is consists of App (50kB) and App backup (50kB). If not, user's application can be 100kB size. (Does not use the backup area)
-		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
+		#define __USE_APPBACKUP_AREA__	// If this option activated, Application firmware area is consists of App (50kB) and App backup (50kB). If not, user's application can be 100kB size. (Does not use the backup area)
 		#define DEVICE_CLOCK_SELECT	         CLOCK_SOURCE_EXTERNAL
 		#define DEVICE_PLL_SOURCE_CLOCK      PLL_SOURCE_12MHz
 		#define DEVICE_TARGET_SYSTEM_CLOCK   SYSTEM_CLOCK_48MHz
 		#define DEVICE_ID_DEFAULT            "WIZ750SR" // Device name
-	#elif (DEVICE_BOARD_NAME == W7500P-S2E) // Chip product
-		#define __W7500P__
-		#define __USE_UART_IF_SELECTOR__	// RS-232/TTL or RS-422/485 selector using UART IF selector pin
-		#define __USE_BOOT_ENTRY__			// Application boot mode entry pin activated
-		#define __USE_APPBACKUP_AREA__
-		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
-		#define DEVICE_CLOCK_SELECT	         CLOCK_SOURCE_INTERNAL
-		#define DEVICE_PLL_SOURCE_CLOCK      PLL_SOURCE_8MHz
-		#define DEVICE_TARGET_SYSTEM_CLOCK   SYSTEM_CLOCK_48MHz
-		#define DEVICE_ID_DEFAULT            "W7500P-S2E"
 	#else
 		//#define __USE_UART_IF_SELECTOR__
 		#define __USE_EXT_EEPROM__
 		#define __USE_APPBACKUP_AREA__
-		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
 		#define DEVICE_CLOCK_SELECT	         CLOCK_SOURCE_EXTERNAL
 		#define DEVICE_PLL_SOURCE_CLOCK      PLL_SOURCE_8MHz
 		#define DEVICE_TARGET_SYSTEM_CLOCK   SYSTEM_CLOCK_48MHz
@@ -67,9 +54,6 @@
 #ifndef __W7500P__
 	#define __DEF_USED_IC101AG__ // PHY initialize for WIZwiki-W7500 Board
 #endif
-
-/* PHY Link check  */
-#define PHYLINK_CHECK_CYCLE_MSEC	1000
 
 ////////////////////////////////
 // Pin definitions			  //
@@ -169,6 +153,24 @@
 #define USER_IO_D_PORT				GPIOC
 #define USER_IO_D_ADC_CH			ADC_CH7
 
+/*
+// Pins for Sample board
+#define USER_IO_A_PIN				GPIO_Pin_5
+#define USER_IO_A_PORT				GPIOA
+#define USER_IO_A_ADC_CH			USER_IO_NO_ADC
+
+#define USER_IO_B_PIN				GPIO_Pin_6
+#define USER_IO_B_PORT				GPIOA
+#define USER_IO_B_ADC_CH			USER_IO_NO_ADC
+
+#define USER_IO_C_PIN				GPIO_Pin_7
+#define USER_IO_C_PORT				GPIOA
+#define USER_IO_C_ADC_CH			USER_IO_NO_ADC
+
+#define USER_IO_D_PIN				GPIO_Pin_8
+#define USER_IO_D_PORT				GPIOA
+#define USER_IO_D_ADC_CH			USER_IO_NO_ADC
+*/
 
 // Status LEDs define
 #if (DEVICE_BOARD_NAME == WIZ750SR)
@@ -235,6 +237,10 @@
 */
 #endif
 	
+	
+	/* PHY Link check  */
+	#define PHYLINK_CHECK_CYCLE_MSEC			1000
+
 	// LED
 	#define LEDn		2
 	typedef enum

@@ -30,7 +30,7 @@ uint16_t uart_get_commandline(uint8_t uartNum, uint8_t* buf, uint16_t maxSize);
 static uint8_t gSEGCPREQ[CONFIG_BUF_SIZE];
 static uint8_t gSEGCPREP[CONFIG_BUF_SIZE];
 
-uint8_t * strDEVSTATUS[]  = {"BOOT", "OPEN", "CONNECT", "UPGRADE", "ATMODE", "UDP", 0};
+uint8_t * strDEVSTATUS[]  = {"BOOT", "OPEN", "CONNECT", "UPGARDE", "ATMODE", "UDP", 0};
 
 // [K!]: Hidden command, Erase the MAC address and configuration data
 uint8_t * tbSEGCPCMD[] = {"MC", "VR", "MN", "IM", "OP", "DD", "CP", "PO", "DG", "KA", 
@@ -201,10 +201,7 @@ void do_segcp(void)
 		}
 		else if (segcp_ret & SEGCP_RET_REBOOT)
 		{
-			if(opmode == DEVICE_AT_MODE) 
-			{
-				if(dev_config->serial_info[0].serial_debug_en == SEGCP_ENABLE) uart_puts(SEG_DATA_UART, "REBOOT\r\n", 8);
-			}
+			if(opmode == DEVICE_AT_MODE) uart_puts(SEG_DATA_UART, "REBOOT\r\n", 8);
 			
 			device_reboot();
 		}

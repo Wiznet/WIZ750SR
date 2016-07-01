@@ -179,7 +179,7 @@ void do_seg(uint8_t sock)
 		
 		// XON/XOFF Software flow control: Check the Buffer usage and Send the start/stop commands
 		// [WIZnet Device] -> [Peer]
-		if((serial->flow_control == flow_xon_xoff) || serial->flow_control == flow_rts_cts) check_uart_flow_control(serial->flow_control);
+		if(serial->flow_control == flow_xon_xoff) check_uart_flow_control(flow_xon_xoff);
 	}
 }
 
@@ -356,7 +356,7 @@ void proc_SEG_tcp_client(uint8_t sock)
 			if((net->keepalive_en == SEG_ENABLE) && (enable_keepalive_timer == SEG_ENABLE))
 			{
 				// Send the first keee-alive packet
-				if((flag_sent_first_keepalive == SEG_DISABLE) && (keepalive_time >= net->keepalive_wait_time) && (net->keepalive_wait_time != 0))
+				if((flag_sent_first_keepalive == SEG_DISABLE) && (keepalive_time >= net->keepalive_wait_time))
 				{
 #ifdef _SEG_DEBUG_
 					printf(" >> send_keepalive_packet_first [%d]\r\n", keepalive_time);
@@ -367,7 +367,7 @@ void proc_SEG_tcp_client(uint8_t sock)
 					flag_sent_first_keepalive = SEG_ENABLE;
 				}
 				// Send the keee-alive packet periodically
-				if((flag_sent_first_keepalive == SEG_ENABLE) && (keepalive_time >= net->keepalive_retry_time) && (net->keepalive_retry_time != 0))
+				if((flag_sent_first_keepalive == SEG_ENABLE) && (keepalive_time >= net->keepalive_retry_time))
 				{
 #ifdef _SEG_DEBUG_
 					printf(" >> send_keepalive_packet_manual [%d]\r\n", keepalive_time);
@@ -497,7 +497,7 @@ void proc_SEG_tcp_server(uint8_t sock)
 			if((net->keepalive_en == SEG_ENABLE) && (enable_keepalive_timer == SEG_ENABLE))
 			{
 				// Send the first keee-alive packet
-				if((flag_sent_first_keepalive == SEG_DISABLE) && (keepalive_time >= net->keepalive_wait_time) && (net->keepalive_wait_time != 0))
+				if((flag_sent_first_keepalive == SEG_DISABLE) && (keepalive_time >= net->keepalive_wait_time))
 				{
 #ifdef _SEG_DEBUG_
 					printf(" >> send_keepalive_packet_first [%d]\r\n", keepalive_time);
@@ -508,7 +508,7 @@ void proc_SEG_tcp_server(uint8_t sock)
 					flag_sent_first_keepalive = SEG_ENABLE;
 				}
 				// Send the keee-alive packet periodically
-				if((flag_sent_first_keepalive == SEG_ENABLE) && (keepalive_time >= net->keepalive_retry_time) && (net->keepalive_retry_time != 0))
+				if((flag_sent_first_keepalive == SEG_ENABLE) && (keepalive_time >= net->keepalive_retry_time))
 				{
 #ifdef _SEG_DEBUG_
 					printf(" >> send_keepalive_packet_manual [%d]\r\n", keepalive_time);
@@ -717,7 +717,7 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 			if((net->keepalive_en == SEG_ENABLE) && (enable_keepalive_timer == SEG_ENABLE))
 			{
 				// Send the first keee-alive packet
-				if((flag_sent_first_keepalive == SEG_DISABLE) && (keepalive_time >= net->keepalive_wait_time) && (net->keepalive_wait_time != 0))
+				if((flag_sent_first_keepalive == SEG_DISABLE) && (keepalive_time >= net->keepalive_wait_time))
 				{
 #ifdef _SEG_DEBUG_
 					printf(" >> send_keepalive_packet_first [%d]\r\n", keepalive_time);
@@ -728,7 +728,7 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 					flag_sent_first_keepalive = SEG_ENABLE;
 				}
 				// Send the keee-alive packet periodically
-				if((flag_sent_first_keepalive == SEG_ENABLE) && (keepalive_time >= net->keepalive_retry_time) && (net->keepalive_retry_time != 0))
+				if((flag_sent_first_keepalive == SEG_ENABLE) && (keepalive_time >= net->keepalive_retry_time))
 				{
 #ifdef _SEG_DEBUG_
 					printf(" >> send_keepalive_packet_manual [%d]\r\n", keepalive_time);
@@ -819,13 +819,8 @@ void uart_to_ether(uint8_t sock)
 	struct __network_info *netinfo = (struct __network_info *)&(get_DevConfig_pointer()->network_info);
 	struct __serial_info *serial = (struct __serial_info *)get_DevConfig_pointer()->serial_info;
 	uint16_t len;
-	int16_t sent_len;
-	//uint16_t ret;
-	//uint16_t i; // ## for debugging
 	
-#if (DEVICE_BOARD_NAME == WIZ750SR)
-	if(get_phylink_in_pin() != 0) return; // PHY link down
-#endif
+	//uint16_t i; // ## for debugging
 	
 	// UART ring buffer -> user's buffer
 	len = get_serial_data();
@@ -864,17 +859,16 @@ void uart_to_ether(uint8_t sock)
 					else
 					{
 						// UDP 1:N mode
-						sent_len = (int16_t)sendto(sock, g_send_buf, len, peerip, peerport);
+						sendto(sock, g_send_buf, len, peerip, peerport);
 					}
 				}
 				else
 				{
 					// UDP 1:1 mode
-					sent_len = (int16_t)sendto(sock, g_send_buf, len, netinfo->remote_ip, netinfo->remote_port);
+					sendto(sock, g_send_buf, len, netinfo->remote_ip, netinfo->remote_port);
 				}
 				
-				if(sent_len > 0) u2e_size-=sent_len;
-				
+				u2e_size = 0;
 				break;
 			
 			case SOCK_ESTABLISHED: // TCP_SERVER_MODE, TCP_CLIENT_MODE, TCP_MIXED_MODE
@@ -882,23 +876,8 @@ void uart_to_ether(uint8_t sock)
 				// Connection password is only checked in the TCP SERVER MODE / TCP MIXED MODE (MIXED_SERVER)
 				if(flag_connect_pw_auth == SEG_ENABLE)
 				{
-					
-					/* ## 1
 					len = send(sock, g_send_buf, len);
 					u2e_size = 0;
-					*/
-					
-					// ## 2: TCP send operation- Stability improvements
-					/*
-					do {
-						ret = send(sock, g_send_buf, len);
-					} while(ret != len);
-					u2e_size = 0;
-					*/
-					
-					// ## 3: 
-					sent_len = (int16_t)send(sock, g_send_buf, len);
-					if(sent_len > 0) u2e_size-=sent_len;
 					
 					add_data_transfer_bytecount(SEG_UART_TX, len);
 					//printf("sent len = %d\r\n", len); // ## for debugging
@@ -1012,17 +991,7 @@ void ether_to_uart(uint8_t sock)
 	struct __options *option = (struct __options *)&(get_DevConfig_pointer()->options);
 	uint16_t len;
 	uint16_t i;
-
-	if(serial->flow_control == flow_rts_cts)
-	{
-#ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
-		if(get_uart_cts_pin(SEG_DATA_UART) != UART_CTS_LOW) return;
-#else
-		; // check the CTS reg
-#endif
-	}
-
-
+	
 	// H/W Socket buffer -> User's buffer
 	len = getSn_RX_RSR(sock);
 	if(len > DATA_BUF_SIZE) len = DATA_BUF_SIZE; // avoiding buffer overflow
@@ -1094,8 +1063,7 @@ void ether_to_uart(uint8_t sock)
 		if(serial->uart_interface == UART_IF_RS422_485)
 		{
 			uart_rs485_enable(SEG_DATA_UART);
-			//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
-			for(i = 0; i < e2u_size; i++) uart_putc(SEG_DATA_UART, g_recv_buf[i]);
+			uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
 			uart_rs485_disable(SEG_DATA_UART);
 			
 			add_data_transfer_bytecount(SEG_ETHER_TX, e2u_size);
@@ -1106,8 +1074,7 @@ void ether_to_uart(uint8_t sock)
 		{
 			if(isXON == SEG_ENABLE)
 			{
-				//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
-				for(i = 0; i < e2u_size; i++) uart_putc(SEG_DATA_UART, g_recv_buf[i]);
+				uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
 				add_data_transfer_bytecount(SEG_ETHER_TX, e2u_size);
 				e2u_size = 0;
 			}
@@ -1119,7 +1086,11 @@ void ether_to_uart(uint8_t sock)
 		else
 		{
 			//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
-			for(i = 0; i < e2u_size; i++) uart_putc(SEG_DATA_UART, g_recv_buf[i]);
+			
+			for(i = 0; i < e2u_size; i++)
+			{
+				uart_putc(SEG_DATA_UART, g_recv_buf[i]);
+			}
 			
 			add_data_transfer_bytecount(SEG_ETHER_TX, e2u_size);
 			e2u_size = 0;
@@ -1211,11 +1182,8 @@ void init_trigger_modeswitch(uint8_t mode)
 		opmode = DEVICE_AT_MODE;
 		set_device_status(ST_ATMODE);
 		
-		if(serial->serial_debug_en)
-		{
-			printf(" > SEG:AT Mode\r\n");
-			uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:AT Mode\r\n", sizeof("SEG:AT Mode\r\n"));
-		}
+		if(serial->serial_debug_en) printf(" > SEG:AT Mode\r\n");
+		uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:AT Mode\r\n", sizeof("SEG:AT Mode\r\n"));
 	}
 	else // DEVICE_GW_MODE
 	{
@@ -1223,11 +1191,8 @@ void init_trigger_modeswitch(uint8_t mode)
 		set_device_status(ST_OPEN);
 		if(netinfo->working_mode == TCP_MIXED_MODE) mixed_state = MIXED_SERVER;
 				
-		if(serial->serial_debug_en)
-		{
-			printf(" > SEG:GW Mode\r\n");
-			uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:GW Mode\r\n", sizeof("SEG:GW Mode\r\n"));
-		}
+		if(serial->serial_debug_en) printf(" > SEG:GW Mode\r\n");
+		uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:GW Mode\r\n", sizeof("SEG:GW Mode\r\n"));
 	}
 	
 	u2e_size = 0;

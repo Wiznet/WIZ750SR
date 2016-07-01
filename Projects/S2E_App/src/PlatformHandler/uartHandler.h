@@ -32,30 +32,23 @@
 #define UART_IF_DEFAULT				UART_IF_RS232_TTL
 //#define UART_IF_DEFAULT				UART_IF_RS422_485
 
-// UART RTS/CTS pins
+// UART RTS/CTS pins for RS-422/485 interface handling (Using as GPIO)
 // RTS: output, CTS: input
-
-#define UART_RTS_HIGH			1
-#define UART_RTS_LOW			0
-
-#define UART_CTS_HIGH			1
-#define UART_CTS_LOW			0
-
 // UART0
 #define UART0_RTS_PIN				GPIO_Pin_12
 #define UART0_RTS_PORT				GPIOA
 #define UART0_RTS_PAD_AF			PAD_AF1 // 2nd function, GPIO
-#define UART0_CTS_PIN				GPIO_Pin_11
-#define UART0_CTS_PORT				GPIOA
-#define UART0_CTS_PAD_AF			PAD_AF1 // 2nd function, GPIO
-
 // UART1
 #define UART1_RTS_PIN				GPIO_Pin_1
 #define UART1_RTS_PORT				GPIOC
 #define UART1_RTS_PAD_AF			PAD_AF1 // 2nd function, GPIO
-#define UART1_CTS_PIN				GPIO_Pin_7
-#define UART1_CTS_PORT				GPIOA
-#define UART1_CTS_PAD_AF			PAD_AF1 // 2nd function, GPIO
+// Not used
+//#define UART0_CTS_PIN				GPIO_Pin_11
+//#define UART0_CTS_PORT				GPIOA
+//#define UART0_CTS_PAD_AF			PAD_AF1 // 2nd function, GPIO
+//#define UART1_CTS_PIN				GPIO_Pin_7
+//#define UART1_CTS_PORT				GPIOA
+//#define UART1_CTS_PAD_AF			PAD_AF1 // 2nd function, GPIO
 
 
 enum baud {
@@ -130,13 +123,6 @@ void serial_info_init(UART_TypeDef *pUART, struct __serial_info *serial);
 
 // #1 XON/XOFF Software flow control: Check the Buffer usage and Send the start/stop commands
 void check_uart_flow_control(uint8_t flow_ctrl);
-
-// Hardware flow control by GPIOs (RTS/CTS)
-#ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
-uint8_t get_uart_cts_pin(uint8_t uartNum);
-void set_uart_rts_pin_high(uint8_t uartNum);
-void set_uart_rts_pin_low(uint8_t uartNum);
-#endif
 
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////

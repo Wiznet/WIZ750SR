@@ -240,10 +240,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>0</ColumnNumber>
+      <ColumnNumber>26</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>122</TopLine>
-      <CurrentLine>123</CurrentLine>
+      <TopLine>133</TopLine>
+      <CurrentLine>140</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\Libraries\CMSIS\Device\WIZnet\W7500\Source\system_W7500x.c</PathWithFileName>
       <FilenameWithoutPath>system_W7500x.c</FilenameWithoutPath>
@@ -266,8 +266,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+      <TopLine>38</TopLine>
+      <CurrentLine>55</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\Libraries\W7500x_stdPeriph_Driver\src\W7500x_adc.c</PathWithFileName>
       <FilenameWithoutPath>W7500x_adc.c</FilenameWithoutPath>
@@ -314,8 +314,8 @@
       <Focus>0</Focus>
       <ColumnNumber>29</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+      <TopLine>157</TopLine>
+      <CurrentLine>170</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\Libraries\W7500x_stdPeriph_Driver\src\W7500x_gpio.c</PathWithFileName>
       <FilenameWithoutPath>W7500x_gpio.c</FilenameWithoutPath>
@@ -358,12 +358,12 @@
       <GroupNumber>3</GroupNumber>
       <FileNumber>9</FileNumber>
       <FileType>1</FileType>
-      <tvExp>1</tvExp>
+      <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>14</ColumnNumber>
+      <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>222</TopLine>
-      <CurrentLine>231</CurrentLine>
+      <TopLine>365</TopLine>
+      <CurrentLine>374</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\Libraries\W7500x_stdPeriph_Driver\src\W7500x_uart.c</PathWithFileName>
       <FilenameWithoutPath>W7500x_uart.c</FilenameWithoutPath>
@@ -410,8 +410,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+      <TopLine>38</TopLine>
+      <CurrentLine>46</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\Libraries\W7500x_stdPeriph_Driver\src\W7500x_crg.c</PathWithFileName>
       <FilenameWithoutPath>W7500x_crg.c</FilenameWithoutPath>
@@ -466,8 +466,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>248</TopLine>
-      <CurrentLine>256</CurrentLine>
+      <TopLine>598</TopLine>
+      <CurrentLine>599</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\ioLibrary\Ethernet\socket.c</PathWithFileName>
       <FilenameWithoutPath>socket.c</FilenameWithoutPath>
@@ -480,10 +480,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>56</ColumnNumber>
+      <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>500</TopLine>
-      <CurrentLine>501</CurrentLine>
+      <TopLine>0</TopLine>
+      <CurrentLine>0</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\ioLibrary\Ethernet\wizchip_conf.c</PathWithFileName>
       <FilenameWithoutPath>wizchip_conf.c</FilenameWithoutPath>
@@ -498,8 +498,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>6</TopLine>
-      <CurrentLine>7</CurrentLine>
+      <TopLine>29</TopLine>
+      <CurrentLine>38</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\ioLibrary\MDIO\W7500x_miim.c</PathWithFileName>
       <FilenameWithoutPath>W7500x_miim.c</FilenameWithoutPath>
@@ -514,8 +514,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>679</TopLine>
-      <CurrentLine>680</CurrentLine>
+      <TopLine>0</TopLine>
+      <CurrentLine>0</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\ioLibrary\Internet\DHCP\dhcp.c</PathWithFileName>
       <FilenameWithoutPath>dhcp.c</FilenameWithoutPath>
@@ -546,8 +546,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+      <TopLine>6</TopLine>
+      <CurrentLine>7</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>..\..\ioLibrary\Application\loopback\loopback.c</PathWithFileName>
       <FilenameWithoutPath>loopback.c</FilenameWithoutPath>
@@ -570,8 +570,8 @@
       <Focus>0</Focus>
       <ColumnNumber>34</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+      <TopLine>5</TopLine>
+      <CurrentLine>11</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\src\Callback\dhcp_cb.c</PathWithFileName>
       <FilenameWithoutPath>dhcp_cb.c</FilenameWithoutPath>
@@ -594,8 +594,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>114</TopLine>
-      <CurrentLine>115</CurrentLine>
+      <TopLine>0</TopLine>
+      <CurrentLine>0</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\src\W7500x_it.c</PathWithFileName>
       <FilenameWithoutPath>W7500x_it.c</FilenameWithoutPath>
@@ -608,10 +608,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>51</ColumnNumber>
+      <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>5</TopLine>
-      <CurrentLine>15</CurrentLine>
+      <TopLine>12</TopLine>
+      <CurrentLine>23</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\src\retarget.c</PathWithFileName>
       <FilenameWithoutPath>retarget.c</FilenameWithoutPath>
@@ -626,8 +626,8 @@
       <Focus>0</Focus>
       <ColumnNumber>22</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>60</TopLine>
-      <CurrentLine>58</CurrentLine>
+      <TopLine>453</TopLine>
+      <CurrentLine>464</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\src\main.c</PathWithFileName>
       <FilenameWithoutPath>main.c</FilenameWithoutPath>
@@ -638,12 +638,12 @@
       <GroupNumber>6</GroupNumber>
       <FileNumber>25</FileNumber>
       <FileType>1</FileType>
-      <tvExp>1</tvExp>
+      <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>32</ColumnNumber>
+      <ColumnNumber>4</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>70</TopLine>
-      <CurrentLine>84</CurrentLine>
+      <TopLine>122</TopLine>
+      <CurrentLine>123</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\src\W7500x_board.c</PathWithFileName>
       <FilenameWithoutPath>W7500x_board.c</FilenameWithoutPath>
@@ -662,12 +662,12 @@
       <GroupNumber>7</GroupNumber>
       <FileNumber>26</FileNumber>
       <FileType>1</FileType>
-      <tvExp>0</tvExp>
+      <tvExp>1</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>22</ColumnNumber>
+      <ColumnNumber>16</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>863</TopLine>
-      <CurrentLine>878</CurrentLine>
+      <TopLine>1380</TopLine>
+      <CurrentLine>1391</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\src\Serial_to_Ethernet\seg.c</PathWithFileName>
       <FilenameWithoutPath>seg.c</FilenameWithoutPath>
@@ -688,10 +688,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>34</ColumnNumber>
+      <ColumnNumber>53</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>123</TopLine>
-      <CurrentLine>127</CurrentLine>
+      <TopLine>237</TopLine>
+      <CurrentLine>247</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\src\Configuration\ConfigData.c</PathWithFileName>
       <FilenameWithoutPath>ConfigData.c</FilenameWithoutPath>
@@ -704,10 +704,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>17</ColumnNumber>
+      <ColumnNumber>6</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>33</TopLine>
-      <CurrentLine>45</CurrentLine>
+      <TopLine>910</TopLine>
+      <CurrentLine>919</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\src\Configuration\segcp.c</PathWithFileName>
       <FilenameWithoutPath>segcp.c</FilenameWithoutPath>
@@ -722,8 +722,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+      <TopLine>210</TopLine>
+      <CurrentLine>219</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\src\Configuration\util.c</PathWithFileName>
       <FilenameWithoutPath>util.c</FilenameWithoutPath>
@@ -746,8 +746,8 @@
       <Focus>0</Focus>
       <ColumnNumber>13</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+      <TopLine>73</TopLine>
+      <CurrentLine>84</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\src\PlatformHandler\flashHandler.c</PathWithFileName>
       <FilenameWithoutPath>flashHandler.c</FilenameWithoutPath>
@@ -762,8 +762,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>57</TopLine>
-      <CurrentLine>61</CurrentLine>
+      <TopLine>65</TopLine>
+      <CurrentLine>67</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\src\PlatformHandler\storageHandler.c</PathWithFileName>
       <FilenameWithoutPath>storageHandler.c</FilenameWithoutPath>
@@ -778,8 +778,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>20</TopLine>
-      <CurrentLine>21</CurrentLine>
+      <TopLine>69</TopLine>
+      <CurrentLine>70</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\src\PlatformHandler\timerHandler.c</PathWithFileName>
       <FilenameWithoutPath>timerHandler.c</FilenameWithoutPath>
@@ -792,10 +792,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>9</ColumnNumber>
+      <ColumnNumber>1</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>530</TopLine>
-      <CurrentLine>534</CurrentLine>
+      <TopLine>258</TopLine>
+      <CurrentLine>271</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\src\PlatformHandler\uartHandler.c</PathWithFileName>
       <FilenameWithoutPath>uartHandler.c</FilenameWithoutPath>
@@ -808,10 +808,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>0</ColumnNumber>
+      <ColumnNumber>8</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>207</TopLine>
-      <CurrentLine>211</CurrentLine>
+      <TopLine>141</TopLine>
+      <CurrentLine>142</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\src\PlatformHandler\deviceHandler.c</PathWithFileName>
       <FilenameWithoutPath>deviceHandler.c</FilenameWithoutPath>
@@ -824,10 +824,10 @@
       <FileType>1</FileType>
       <tvExp>0</tvExp>
       <Focus>0</Focus>
-      <ColumnNumber>0</ColumnNumber>
+      <ColumnNumber>8</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>475</TopLine>
-      <CurrentLine>481</CurrentLine>
+      <TopLine>284</TopLine>
+      <CurrentLine>285</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\src\PlatformHandler\gpioHandler.c</PathWithFileName>
       <FilenameWithoutPath>gpioHandler.c</FilenameWithoutPath>
@@ -842,8 +842,8 @@
       <Focus>0</Focus>
       <ColumnNumber>0</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+      <TopLine>1</TopLine>
+      <CurrentLine>1</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\src\PlatformHandler\eepromHandler.c</PathWithFileName>
       <FilenameWithoutPath>eepromHandler.c</FilenameWithoutPath>
@@ -858,8 +858,8 @@
       <Focus>0</Focus>
       <ColumnNumber>80</ColumnNumber>
       <tvExpOptDlg>0</tvExpOptDlg>
-      <TopLine>0</TopLine>
-      <CurrentLine>0</CurrentLine>
+      <TopLine>8</TopLine>
+      <CurrentLine>9</CurrentLine>
       <bDave2>0</bDave2>
       <PathWithFileName>.\src\PlatformHandler\i2cHandler.c</PathWithFileName>
       <FilenameWithoutPath>i2cHandler.c</FilenameWithoutPath>

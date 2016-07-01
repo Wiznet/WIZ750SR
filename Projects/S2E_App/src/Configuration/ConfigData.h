@@ -27,7 +27,7 @@ struct __network_info_common {
 
 struct __network_info {
 	uint8_t working_mode;			// TCP_CLIENT_MODE (0), TCP_SERVER_MODE (1), TCP_MIXED_MODE (2), UDP_MODE (3)
-	uint8_t state;					// WIZ107SR: BOOT(0), OPEN (1), CONNECT (2), UPGRADE (3), ATMODE (4) // WIZ550S2E: 소켓의 상태 TCP의 경우 Not Connected, Connected, UDP의 경우 UDP
+	uint8_t state;					// WIZ107SR: BOOT(0), OPEN (1), CONNECT (2), UPGARDE (3), ATMODE (4) // WIZ550S2E: 소켓의 상태 TCP의 경우 Not Connected, Connected, UDP의 경우 UDP
 	uint8_t remote_ip[4];			// Must Be 4byte Alignment
 	uint16_t local_port;
 	uint16_t remote_port;

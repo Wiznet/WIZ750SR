@@ -10,15 +10,17 @@
 	#include <stdio.h>
 #endif
 
-const uint16_t USER_IO_PIN[USER_IOn] =     {USER_IO_A_PIN, USER_IO_B_PIN, USER_IO_C_PIN, USER_IO_D_PIN};
-GPIO_TypeDef* USER_IO_PORT[USER_IOn] =     {USER_IO_A_PORT, USER_IO_B_PORT, USER_IO_C_PORT, USER_IO_D_PORT};
-uint8_t     USER_IO_ADC_CH[USER_IOn] =     {USER_IO_A_ADC_CH, USER_IO_B_ADC_CH, USER_IO_C_ADC_CH, USER_IO_D_ADC_CH};
+#ifdef __USE_USERS_GPIO__
+	const uint16_t USER_IO_PIN[USER_IOn] =     {USER_IO_A_PIN, USER_IO_B_PIN, USER_IO_C_PIN, USER_IO_D_PIN};
+	GPIO_TypeDef* USER_IO_PORT[USER_IOn] =     {USER_IO_A_PORT, USER_IO_B_PORT, USER_IO_C_PORT, USER_IO_D_PORT};
+	uint8_t     USER_IO_ADC_CH[USER_IOn] =     {USER_IO_A_ADC_CH, USER_IO_B_ADC_CH, USER_IO_C_ADC_CH, USER_IO_D_ADC_CH};
 
-uint8_t        USER_IO_SEL[USER_IOn] =     {USER_IO_A, USER_IO_B, USER_IO_C, USER_IO_D};
-const char*    USER_IO_STR[USER_IOn] =     {"a", "b", "c", "d"};
-const char*    USER_IO_PIN_STR[USER_IOn] = {"p28\0", "p27\0", "p26\0", "p25\0",}; 
-const char*    USER_IO_TYPE_STR[] =        {"Digital", "Analog"};
-const char*    USER_IO_DIR_STR[] =         {"Input", "Output"};
+	uint8_t        USER_IO_SEL[USER_IOn] =     {USER_IO_A, USER_IO_B, USER_IO_C, USER_IO_D};
+	const char*    USER_IO_STR[USER_IOn] =     {"a", "b", "c", "d"};
+	const char*    USER_IO_PIN_STR[USER_IOn] = {"p28\0", "p27\0", "p26\0", "p25\0",}; 
+	const char*    USER_IO_TYPE_STR[] =        {"Digital", "Analog"};
+	const char*    USER_IO_DIR_STR[] =         {"Input", "Output"};
+#endif
 
 /**
   * @brief  I/O Intialize Function
@@ -39,11 +41,12 @@ void IO_Configuration(void)
 	/* GPIOs Initialization */
 	// Expansion GPIOs (4-pins, A to D)
 	// Available to the ANALOG input pins or DIGITAL input/output pins
+#ifdef __USE_USERS_GPIO__
 	if(get_user_io_enabled(USER_IO_A)) init_user_io(USER_IO_A);
 	if(get_user_io_enabled(USER_IO_B)) init_user_io(USER_IO_B);
 	if(get_user_io_enabled(USER_IO_C)) init_user_io(USER_IO_C);
 	if(get_user_io_enabled(USER_IO_D)) init_user_io(USER_IO_D);
-	
+#endif
 	
 	// ## debugging: io functions test
 	/*
@@ -58,6 +61,7 @@ void IO_Configuration(void)
 	*/
 }
 
+#ifdef __USE_USERS_GPIO__
 
 void init_user_io(uint8_t io_sel)
 {
@@ -354,6 +358,8 @@ uint16_t read_ADC(ADC_CH ch)
 	return ((uint16_t)ADC_ReadData());	///< read ADC Data
 }
 
+#endif
+
 void init_connection_status_io(void)
 {
 	struct __serial_info *serial = (struct __serial_info *)&(get_DevConfig_pointer()->serial_info);
@@ -481,7 +487,7 @@ void check_phylink_status(void)
 	static uint8_t prev_link_status = 1;
 	uint8_t link_status;
 	
-#if (DEVICE_BOARD_NAME == WIZ750SR)
+#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750MINI) || (DEVICE_BOARD_NAME == WIZ750JR))
 	link_status = get_phylink_in_pin();
 #else
 	link_status = 0;

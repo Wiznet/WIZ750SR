@@ -31,7 +31,7 @@
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
 /* Private function prototypes -----------------------------------------------*/
-extern void TimingDelay_Decrement(void);
+//extern void TimingDelay_Decrement(void);
 /* Private functions ---------------------------------------------------------*/
 
 /******************************************************************************/
@@ -77,7 +77,7 @@ void PendSV_Handler(void)
   */
 void SysTick_Handler(void)
 {
-	TimingDelay_Decrement();
+	//TimingDelay_Decrement();
 }
 
 
@@ -200,7 +200,7 @@ void DMA_Handler(void)
   */
 void DUALTIMER0_Handler(void)
 {
-	Timer_IRQ_Handler();
+	//Timer_IRQ_Handler();
 }
 
 

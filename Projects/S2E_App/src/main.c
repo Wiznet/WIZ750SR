@@ -1,13 +1,14 @@
 /**
   ******************************************************************************
   * @file    W7500x Serial to Ethernet Project - WIZ750SR App
-  * @author  Eric Jung, Team Wiki
-  * @version v1.0.0
-  * @date    Mar-2016
+  * @author  Eric Jung, Team Platform
+  * @version v1.1.0
+  * @date    Nov-2016
   * @brief   Main program body
   ******************************************************************************
   * @attention
   * @par Revision history
+  *    <2016/11/18> v1.1.0 Develop by Eric Jung
   *    <2016/03/29> v1.0.0 Develop by Eric Jung
   *    <2016/03/02> v0.8.0 Develop by Eric Jung
   *    <2015/11/24> v0.0.1 Develop by Eric Jung
@@ -194,7 +195,8 @@ int main(void)
 		if(dev_config->options.dhcp_use) DHCP_run(); // DHCP client handler for IP renewal
 		
 		// ## debugging: Data echoback
-		//loopback_tcps(6, g_recv_buf, 5001);
+		//loopback_tcps(6, g_recv_buf, 5001); // Loopback
+		//loopback_iperf(6, g_recv_buf, 5001); // iperf: Ethernet performance test
 		
 		// ## debugging: PHY link
 		if(flag_check_phylink)
@@ -405,9 +407,9 @@ void display_Dev_Info_header(void)
 
 	printf("\r\n");
 	printf("%s\r\n", STR_BAR);
-
-#if (DEVICE_BOARD_NAME == WIZ750SR)
-	printf(" WIZ750SR \r\n");
+	
+#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750MINI) || (DEVICE_BOARD_NAME == WIZ750JR))
+	printf(" %s \r\n", DEVICE_ID_DEFAULT);
 	printf(" >> WIZnet Serial to Ethernet Device\r\n");
 #else
 	#ifndef __W7500P__
@@ -488,16 +490,19 @@ void display_Dev_Info_main(void)
 		printf("\t- %s\r\n", (dev_config->options.serial_command == 1)?STR_ENABLED:STR_DISABLED);
 		printf("\t- [%.2X][%.2X][%.2X] (Hex only)\r\n", dev_config->options.serial_trigger[0], dev_config->options.serial_trigger[1], dev_config->options.serial_trigger[2]);
 	
-#if (DEVICE_BOARD_NAME == WIZ750SR)
+#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750MINI) || (DEVICE_BOARD_NAME == WIZ750JR))
 	printf(" - Hardware information: Status pins\r\n");
 		printf("\t- Status 1: [%s] - %s\r\n", "PA_10", dev_config->serial_info[0].dtr_en?"DTR":"PHY link");
 		printf("\t- Status 2: [%s] - %s\r\n", "PA_01", dev_config->serial_info[0].dsr_en?"DSR":"TCP connection"); // shared pin; HW_TRIG (input) / TCP connection indicator (output)
-	
+
+#ifdef __USE_USERS_GPIO__
 	printf(" - Hardware information: User I/O pins\r\n");
 		printf("\t- UserIO A: [%s] - %s / %s\r\n", "PC_13", USER_IO_TYPE_STR[get_user_io_type(USER_IO_SEL[0])], USER_IO_DIR_STR[get_user_io_direction(USER_IO_SEL[0])]); 
 		printf("\t- UserIO B: [%s] - %s / %s\r\n", "PC_12", USER_IO_TYPE_STR[get_user_io_type(USER_IO_SEL[1])], USER_IO_DIR_STR[get_user_io_direction(USER_IO_SEL[1])]); 
 		printf("\t- UserIO C: [%s] - %s / %s\r\n", "PC_09", USER_IO_TYPE_STR[get_user_io_type(USER_IO_SEL[2])], USER_IO_DIR_STR[get_user_io_direction(USER_IO_SEL[2])]); 
 		printf("\t- UserIO D: [%s] - %s / %s\r\n", "PC_08", USER_IO_TYPE_STR[get_user_io_type(USER_IO_SEL[3])], USER_IO_DIR_STR[get_user_io_direction(USER_IO_SEL[3])]); 
+#endif
+
 #endif
 	
 	printf("%s\r\n", STR_BAR);

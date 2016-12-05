@@ -1,9 +1,22 @@
+/*******************************************************************************************************************************************************
+ * Copyright ¡§I 2016 <WIZnet Co.,Ltd.> 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ¢®¡ÆSoftware¢®¡¾), 
+ * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED ¢®¡ÆAS IS¢®¡¾, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*********************************************************************************************************************************************************/
 /**
   ******************************************************************************
   * @file    W7500x_stdPeriph_Driver/inc/W7500x_gpio.h
   * @author  IOP Team
   * @version V1.0.5
-  * @date    05-June-2015
+  * @date    26-AUG-2015
   * @brief   This file contains all the functions prototypes for the GPIO 
   *          firmware library.
   ******************************************************************************
@@ -68,7 +81,7 @@
 
 
 #define IS_GPIO_ALL_PERIPH(PERIPH)  (((PERIPH) == GPIOA) || ((PERIPH) == GPIOB) || \
-                                     ((PERIPH) == GPIOC) || ((PERIPH) == GPIOD) )
+                                     ((PERIPH) == GPIOC))
 
 typedef enum
 {
@@ -114,14 +127,28 @@ typedef enum
     Bit_SET
 }BitAction;
 
+typedef enum
+{
+    PAD_PA=0,
+    PAD_PB,
+    PAD_PC
+}PAD_Type;
 
-#define IS_PAD_TYPE(Px)  (((Px) == PAD_PA) || ((Px) == PAD_PB) \
-                          ((Px) == PAD_PC) || ((Px) == PAD_PD))
+typedef enum
+{
+    PAD_AF0    = Px_AFSR_AF0,
+    PAD_AF1    = Px_AFSR_AF1,
+    PAD_AF2    = Px_AFSR_AF2,
+    PAD_AF3    = Px_AFSR_AF3
+}PAD_AF_TypeDef;
 
-#define IS_PA_NUM(NUM) (((NUM)>=0) && ((NUM)<16))
-#define IS_PB_NUM(NUM) (((NUM)>=0) && ((NUM)<16))
-#define IS_PC_NUM(NUM) (((NUM)>=0) && ((NUM)<16))
-#define IS_PD_NUM(NUM) (((NUM)>=0) && ((NUM)< 5))
+#define IS_PAD_TYPE(Px)  (((Px) == PAD_PA) || ((Px) == PAD_PB) || \
+                          ((Px) == PAD_PC))
+
+#define IS_PA_NUM(NUM) (((NUM)>=0) && ((NUM)<15))
+#define IS_PB_NUM(NUM) ((((NUM)>=0) && ((NUM)<7)) || (((NUM)>=14) && ((NUM)<16))) /* MDIO+MDC on 14+15*/
+
+#define IS_PC_NUM(NUM) ((((NUM)>=0) && ((NUM)<7)) || (((NUM)>=8) && ((NUM)<16)))
 
 #define IS_PAD_AF(AF)       (((AF) == PAD_AF0) || ((AF) == PAD_AF1) || \
                              ((AF) == PAD_AF2) || ((AF) == PAD_AF3))
@@ -133,7 +160,7 @@ void GPIO_DeInit(GPIO_TypeDef* GPIOx);
 void GPIO_Init(GPIO_TypeDef* GPIOx, GPIO_InitTypeDef* GPIO_InitStruct);
 void GPIO_StructInit(GPIO_InitTypeDef* GPIO_InitStruct);
 uint8_t GPIO_ReadInputDataBit(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
-uint8_t GPIO_ReadInputData(GPIO_TypeDef* GPIOx);
+uint16_t GPIO_ReadInputData(GPIO_TypeDef* GPIOx);
 uint8_t GPIO_ReadOutputDataBit(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);
 uint16_t GPIO_ReadOutputData(GPIO_TypeDef* GPIOx);
 void GPIO_SetBits(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin);

@@ -387,7 +387,18 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 					case SEGCP_ST: sprintf(trep, "%s", strDEVSTATUS[dev_config->network_info[0].state]);
 						break;
 					case SEGCP_FR: 
-						if(gSEGCPPRIVILEGE & (SEGCP_PRIVILEGE_SET|SEGCP_PRIVILEGE_WRITE)) ret |= SEGCP_RET_FACTORY | SEGCP_RET_REBOOT;
+						if(gSEGCPPRIVILEGE & (SEGCP_PRIVILEGE_SET|SEGCP_PRIVILEGE_WRITE)) 
+						{
+							// #20161110 Hidden option, Local port number [1] + FR cmd => K! (EEPROM Erase)
+							if(dev_config->network_info[0].local_port == 1)
+							{
+								ret |= SEGCP_RET_ERASE_EEPROM | SEGCP_RET_REBOOT; // EEPROM Erase
+							}
+							else
+							{
+								ret |= SEGCP_RET_FACTORY | SEGCP_RET_REBOOT; // Factory Reset
+							}
+						}
 						else ret |= SEGCP_RET_ERR_NOPRIVILEGE;
 						break;
 					case SEGCP_EC:
@@ -818,7 +829,7 @@ uint16_t proc_SEGCP_udp(uint8_t* segcp_req, uint8_t* segcp_rep)
 {
 	DevConfig *dev_config = get_DevConfig_pointer();
 	
-	uint8_t ret = 0;   
+	uint16_t ret = 0;   
 	uint16_t len = 0;
 	uint16_t i = 0;
 	

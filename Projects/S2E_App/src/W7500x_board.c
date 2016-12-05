@@ -12,8 +12,12 @@
 	#include "eepromHandler.h"
 #endif
 
+#include <stdio.h>
+
+extern void delay(__IO uint32_t nCount);
+
 static void PHY_Init(void);
-static void delay_ms(uint32_t ms);
+//static void delay_ms(uint32_t ms);
 
 GPIO_TypeDef* LED_PORT[LEDn] = {LED1_GPIO_PORT, LED2_GPIO_PORT};
 const uint16_t LED_PIN[LEDn] = {LED1_PIN, LED2_PIN};
@@ -35,7 +39,7 @@ void W7500x_Board_Init(void)
 	flag_hw_trig_enable = (get_hw_trig_pin()?0:1);
 	
 	/* PHY link input pin */
-#if (DEVICE_BOARD_NAME == WIZ750SR)
+#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750MINI) || (DEVICE_BOARD_NAME == WIZ750JR))
 	init_phylink_in_pin();
 #endif
 	
@@ -73,15 +77,28 @@ static void PHY_Init(void)
 #endif
 
 #ifdef __W7500P__ // W7500P
-	*(volatile uint32_t *)(0x41003070) = 0x61;
-	*(volatile uint32_t *)(0x41003054) = 0x61;
-	
-	//printf("\r\n[MCU: W7500P]\r\n");
+	// PB_05, PB_12 pull down
+	*(volatile uint32_t *)(0x41003070) = 0x61; // RXDV - set pull down (PB_12)
+	*(volatile uint32_t *)(0x41003054) = 0x61; // COL  - set pull down (PB_05)
 #endif
 
 #ifdef __DEF_USED_MDIO__ 
 	/* mdio Init */
-	mdio_init(GPIOB, MDC, MDIO);
+	mdio_init(GPIOB, W7500x_MDC, W7500x_MDIO);
+	//mdio_write(GPIOB, PHYREG_CONTROL, CNTL_RESET); // PHY Reset
+	
+	#ifdef __W7500P__ // W7500P
+		set_link(FullDuplex10);
+		//set_link(HalfDuplex10);
+		//set_link(FullDuplex100);
+		//set_link(HalfDuplex100);
+		//set_link(AUTONEGO);
+	#endif
+	
+	// ## for debugging
+	//printf("\r\nPHYADDR = %.3x, PHYREGADDR = %x, VAL = 0x%.4x\r\n", PHY_ADDR, 0, mdio_read(GPIOB, 0)); // [RW] Control, default: 0x3100 / 0011 0001 0000 0000b
+	//printf("PHYADDR = %.3x, PHYREGADDR = %x, VAL = 0x%.4x\r\n", PHY_ADDR, 1, mdio_read(GPIOB, 1)); // [RO] Status,  default: 0x786d / 0111 1000 0110 1101b (link up)
+	//printf("PHYADDR = %.3x, PHYREGADDR = %x, VAL = 0x%.4x\r\n", PHY_ADDR, 2, mdio_read(GPIOB, 2)); // [RO] OUI,     default: 0x001c
 #endif
 
 	set_phylink_time_check(0); // start PHY link time checker
@@ -117,7 +134,7 @@ uint8_t get_hw_trig_pin(void)
 	{
 		hw_trig = GPIO_ReadInputDataBit(HW_TRIG_PORT, HW_TRIG_PIN);
 		if(hw_trig != 0) return 1; // High
-		delay_ms(5);
+		delay(5);
 	}
 	return 0; // Low
 }
@@ -243,6 +260,17 @@ uint8_t get_LED_Status(Led_TypeDef Led)
   * @param  ms: specifies the delay time length, in milliseconds.
   * @retval None
   */
+/*
+void delay(__IO uint32_t milliseconds)
+{
+	volatile uint32_t nCount;
+	
+	nCount=(GetSystemClock()/10000)*milliseconds;
+	for (; nCount!=0; nCount--);
+}
+*/
+
+/*
 static void delay_ms(uint32_t ms)
 {
 	volatile uint32_t nCount;
@@ -250,3 +278,4 @@ static void delay_ms(uint32_t ms)
 	nCount=(GetSystemClock()/10000)*ms;
 	for (; nCount!=0; nCount--);
 }
+*/

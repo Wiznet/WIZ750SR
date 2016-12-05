@@ -1,9 +1,22 @@
+/*******************************************************************************************************************************************************
+ * Copyright ¡§I 2016 <WIZnet Co.,Ltd.> 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ¢®¡ÆSoftware¢®¡¾), 
+ * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED ¢®¡ÆAS IS¢®¡¾, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*********************************************************************************************************************************************************/
 /**
   ******************************************************************************
   * @file    W7500x_stdPeriph_Driver/src/W7500x_i2c.c    
   * @author  IOP Team
   * @version v1.0.0
-  * @date    01-May-2015
+  * @date    26-AUG-2015
   * @brief   This file contains all the functions prototypes for the i2c
   *          firmware library.
   ******************************************************************************
@@ -49,11 +62,6 @@ uint32_t I2C_Init(I2C_ConfigStruct* conf)
         GPIO_Init(GPIOC, &GPIO_InitDef);
         GPIO_SetBits(GPIOC, scl_pin_index);
     }
-    else if(scl_port_num == 3)
-    {
-        GPIO_Init(GPIOD, &GPIO_InitDef);
-        GPIO_SetBits(GPIOD, scl_pin_index);
-    }
     else
     {
         printf("SCL pin Port number error\r\n");
@@ -77,11 +85,6 @@ uint32_t I2C_Init(I2C_ConfigStruct* conf)
     {
         GPIO_Init(GPIOC, &GPIO_InitDef);
         GPIO_ResetBits(GPIOC, sda_pin_index);
-    }
-    else if(sda_port_num == 3)
-    {
-        GPIO_Init(GPIOD, &GPIO_InitDef);
-        GPIO_ResetBits(GPIOD, sda_pin_index);
     }
     else
     {
@@ -121,13 +124,6 @@ void I2C_WriteBitSCL(I2C_ConfigStruct* conf, uint8_t data)
         else
             GPIO_ResetBits(GPIOC, scl_pin_index);
     }
-    else if(scl_port_num == 3)
-    {
-        if(data == 1)
-            GPIO_SetBits(GPIOD, scl_pin_index);
-        else
-            GPIO_ResetBits(GPIOD, scl_pin_index);
-    }
 }
 
 void I2C_WriteBitSDA(I2C_ConfigStruct* conf, uint8_t data)
@@ -155,13 +151,6 @@ void I2C_WriteBitSDA(I2C_ConfigStruct* conf, uint8_t data)
             GPIOC->OUTENCLR = sda_pin_index;
         else
             GPIOC->OUTENSET = sda_pin_index;
-    }
-    else if(sda_port_num == 3)
-    {
-        if(data == 1)
-            GPIOD->OUTENCLR = sda_pin_index;
-        else
-            GPIOD->OUTENSET = sda_pin_index;
     }
 }
 
@@ -191,14 +180,7 @@ uint8_t I2C_ReadBitSDA(I2C_ConfigStruct* conf)
         else
             return 0;
     }
-    else if(sda_port_num == 3)
-    {
-        if(GPIOD->DATA & sda_pin_index)
-            return 1;
-        else
-            return 0;
-    }
-    
+   
     return 0;
 }
 

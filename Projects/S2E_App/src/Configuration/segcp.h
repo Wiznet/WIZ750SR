@@ -61,7 +61,7 @@ typedef enum {SEGCP_MC, SEGCP_VR, SEGCP_MN, SEGCP_IM, SEGCP_OP, SEGCP_DD, SEGCP_
 #define SEGCP_RET_SAVE              0x0010
 #define SEGCP_RET_FACTORY           0x0008
 
-#define SEGCP_RET_ERASE_EEPROM		0x1000
+#define SEGCP_RET_ERASE_EEPROM      0x1000
 
 #define SEGCP_NULL      ' '
 

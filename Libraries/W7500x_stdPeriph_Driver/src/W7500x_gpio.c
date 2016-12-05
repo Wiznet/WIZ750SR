@@ -1,3 +1,16 @@
+/*******************************************************************************************************************************************************
+ * Copyright ¡§I 2016 <WIZnet Co.,Ltd.> 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ¢®¡ÆSoftware¢®¡¾), 
+ * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED ¢®¡ÆAS IS¢®¡¾, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*********************************************************************************************************************************************************/
 /**
   ******************************************************************************
   * @file    W7500x_stdPeriph_Driver/src/W7500x_gpio.c    
@@ -55,25 +68,19 @@ void GPIO_DeInit(GPIO_TypeDef* GPIOx)
      */     
     if (GPIOx == GPIOA)
     {
-        px_pcr = PA_PCR;
-        px_afsr = PA_AFSR;
+        px_pcr = (P_Port_Def*)PA_PCR;
+        px_afsr = (P_Port_Def*)PA_AFSR;
     }
     else if (GPIOx == GPIOB)
     {
-        px_pcr = PB_PCR;
-        px_afsr = PB_AFSR;
+        px_pcr = (P_Port_Def*)PB_PCR;
+        px_afsr = (P_Port_Def*)PB_AFSR;
     }
-    else if (GPIOx == GPIOC)
+    else // if  (GPIOx == GPIOC)
     {
         px_pcr = PC_PCR;
         px_afsr = PC_AFSR;
     }  
-    else // if (GPIOx == GPIOD)
-    {
-        px_pcr = (P_Port_Def*)PD_PCR;
-        px_afsr = (P_Port_Def*)PD_AFSR;
-        loop = 5;
-    }
 
     for(i=0; i<loop; i++)
     {
@@ -92,13 +99,17 @@ void GPIO_Init(GPIO_TypeDef* GPIOx, GPIO_InitTypeDef* GPIO_InitStruct)
     assert_param(IS_GPIO_PIN(GPIO_InitStruct->GPIO_Pin));
     assert_param(IS_GPIO_PUPD(GPIO_InitStruct->GPIO_PuPd));
 
-    if      (GPIOx == GPIOA)        px_pcr  = PA_PCR;
-    else if (GPIOx == GPIOB)        px_pcr  = PB_PCR;
-    else if (GPIOx == GPIOC)        px_pcr  = PC_PCR;
-    else
-    {        
-        px_pcr  = (P_Port_Def*)PD_PCR;
-        loop = 5;
+    if      (GPIOx == GPIOA)       
+    {
+        px_pcr  =(P_Port_Def*)PA_PCR;
+    }
+    else if (GPIOx == GPIOB)        
+    {
+        px_pcr  = (P_Port_Def*)PB_PCR;
+    }
+    else 
+    {
+        px_pcr  = PC_PCR;
     }
 
     for(pinpos = 0x00; pinpos < loop; pinpos++)
@@ -190,7 +201,7 @@ uint8_t GPIO_ReadInputDataBit(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
     return bitstatus;
 }
 
-uint8_t GPIO_ReadInputData(GPIO_TypeDef* GPIOx)
+uint16_t GPIO_ReadInputData(GPIO_TypeDef* GPIOx)
 {
     assert_param(IS_GPIO_ALL_PERIPH(GPIOx));
     return ((uint16_t)GPIOx->DATA);
@@ -243,27 +254,13 @@ void GPIO_ResetBits(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
 
 void GPIO_WriteBit(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, BitAction BitVal)
 {
-    uint32_t temp_gpio_lb;
-    uint32_t temp_gpio_ub;
-    
     /* Check the parameters */
     assert_param(IS_GPIO_ALL_PERIPH(GPIOx));
     assert_param(IS_GET_GPIO_PIN(GPIO_Pin));
     assert_param(IS_GPIO_BIT_ACTION(BitVal)); 
-    
-    temp_gpio_lb = (GPIOx->LB_MASKED[(uint8_t)(GPIO_Pin)]);
-    temp_gpio_ub = (GPIOx->UB_MASKED[(uint8_t)((GPIO_Pin)>>8)]);
 
-    if( BitVal == Bit_SET)
-    {
-        (GPIOx->LB_MASKED[(uint8_t)(GPIO_Pin)]) = (temp_gpio_lb | GPIO_Pin);
-        (GPIOx->UB_MASKED[(uint8_t)((GPIO_Pin)>>8)]) = (temp_gpio_ub | GPIO_Pin);
-    }
-    else
-    {
-        (GPIOx->LB_MASKED[(uint8_t)(GPIO_Pin)]) = (temp_gpio_lb & ~(GPIO_Pin));
-        (GPIOx->UB_MASKED[(uint8_t)((GPIO_Pin)>>8)]) = (temp_gpio_ub & ~(GPIO_Pin));
-    }
+    (GPIOx->LB_MASKED[(uint8_t)(GPIO_Pin)]) = BitVal;
+    (GPIOx->UB_MASKED[(uint8_t)((GPIO_Pin)>>8)]) = BitVal;
 }
 
 void GPIO_Write(GPIO_TypeDef* GPIOx, uint16_t PortVal)
@@ -373,17 +370,11 @@ void PAD_AFConfig(PAD_Type Px, uint16_t GPIO_Pin, PAD_AF_TypeDef P_AF)
                 PB_AFSR->Port[i] &= ~(0x03ul);
                 PB_AFSR->Port[i] |= P_AF;
             }
-            else if(Px == PAD_PC)
+            else 
             {
                 assert_param(IS_PC_NUM(i));
                 PC_AFSR->Port[i] &= ~(0x03ul);
                 PC_AFSR->Port[i] |= P_AF;
-            }
-            else
-            {
-                assert_param(IS_PD_NUM(i));
-                PD_AFSR->Port[i] &= ~(0x03ul);
-                PD_AFSR->Port[i] |= P_AF;
             }				
         }
     }
@@ -412,14 +403,9 @@ void GPIO_Configuration(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIOMode_TypeDef
         PADx = PAD_PB;
         PAD_AFConfig(PADx,GPIO_Pin, P_AF);
     }
-    else if(GPIOx == GPIOC)
+    else 
     {
         PADx = PAD_PC;
-        PAD_AFConfig(PADx,GPIO_Pin, P_AF);
-    }
-    else
-    {
-        PADx = PAD_PD;
         PAD_AFConfig(PADx,GPIO_Pin, P_AF);
     }
 }
@@ -455,16 +441,10 @@ void GPIO_INT_Configuration(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin, GPIOPol_Type
         PAD_AFConfig(PADx,GPIO_Pin, PAD_AF1);
         NVIC_EnableIRQ(PORT1_IRQn);
     }
-    else if(GPIOx == GPIOC)
+    else
     {
         PADx = PAD_PC;
         PAD_AFConfig(PADx,GPIO_Pin, PAD_AF1);
         NVIC_EnableIRQ(PORT2_IRQn);
-    }
-    else
-    {
-        PADx = PAD_PD;
-        PAD_AFConfig(PADx,GPIO_Pin, PAD_AF1);
-        NVIC_EnableIRQ(PORT3_IRQn);
     }
 }

@@ -1,3 +1,16 @@
+/*******************************************************************************************************************************************************
+ * Copyright ¡§I 2016 <WIZnet Co.,Ltd.> 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ¢®¡ÆSoftware¢®¡¾), 
+ * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED ¢®¡ÆAS IS¢®¡¾, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*********************************************************************************************************************************************************/
 //*****************************************************************************
 //
 //! \file socket.c
@@ -6,6 +19,9 @@
 //! \version 1.0.3
 //! \date 2013/10/21
 //! \par  Revision history
+//!       <2016/04/11> V1.0.4. Refer to M20160411 // by justinkim
+//!         1.not having break statements -> break statements added
+//!         2.errata correct typos
 //!       <2014/05/01> V1.0.3. Refer to M20140501
 //!         1. Implicit type casting -> Explicit type casting.
 //!         2. replace 0x01 with PACK_REMAINED in recvfrom()
@@ -52,12 +68,12 @@
 #include "socket.h"
 #include "W7500x_wztoe.h"
 
-#define SOCK_ANY_PORT_NUM  0xC000;
+#define SOCK_ANY_PORT_NUM  (0xC000) //M20160411
 
 static uint16_t sock_any_port = SOCK_ANY_PORT_NUM;
 static uint16_t sock_io_mode = 0;
 static uint16_t sock_is_sending = 0;
-static uint16_t sock_remained_size[_WIZCHIP_SOCK_NUM_] = {0,0,};
+static uint16_t sock_remained_size[_WIZCHIP_SOCK_NUM_] = {0,}; //M20160411
 static uint8_t  sock_pack_info[_WIZCHIP_SOCK_NUM_] = {0,};
 
 #if _WIZCHIP_ == 5200
@@ -161,7 +177,7 @@ int8_t close(uint8_t sn)
     sock_is_sending &= ~(1<<sn);
     sock_remained_size[sn] = 0;
     sock_pack_info[sn] = 0;
-    //while(getSn_SR(sn) != SOCK_CLOSED);
+    while(getSn_SR(sn) != SOCK_CLOSED);
     return SOCK_OK;
 }
 
@@ -174,11 +190,8 @@ int8_t listen(uint8_t sn)
     while(getSn_CR(sn));
     while(getSn_SR(sn) != SOCK_LISTEN)
     {
-        if(getSn_CR(sn) == SOCK_CLOSED)
-        {
-            close(sn);
-            return SOCKERR_SOCKCLOSED;
-        }
+        close(sn);
+        return SOCKERR_SOCKCLOSED;
     }
     return SOCK_OK;
 }
@@ -220,11 +233,10 @@ int8_t connect(uint8_t sn, uint8_t * addr, uint16_t port)
 #endif
             return SOCKERR_TIMEOUT;
         }
-		
-		if (getSn_SR(sn) == SOCK_CLOSED)
-		{
-			return SOCKERR_SOCKCLOSED;
-		}
+        if(getSn_SR(sn) == SOCK_CLOSED)
+        {
+            return SOCKERR_SOCKCLOSED;
+        }
     }
 #if _WIZCHIP_ == 5200   // for W5200 ARP errata 
     setSUBR((uint8_t*)"\x00\x00\x00\x00");
@@ -386,7 +398,7 @@ int32_t sendto(uint8_t sn, uint8_t * buf, uint16_t len, uint8_t * addr, uint16_t
     if(tmp != SOCK_MACRAW && tmp != SOCK_UDP) return SOCKERR_SOCKSTATUS;
 
     //setSn_DIPR(sn,taddr);	
-		setSn_DIPR(sn,addr);
+	setSn_DIPR(sn,addr);
     setSn_DPORT(sn,port); 
 		
     freesize = getSn_TxMAX(sn);
@@ -590,6 +602,7 @@ int8_t  ctlsocket(uint8_t sn, ctlsock_type cstype, void* arg)
             break;
         case CS_GET_INTMASK:   
             *((uint8_t*)arg) = getSn_IMR(sn);
+            break; //M20160411
         default:
             return SOCKERR_ARG;
     }
@@ -665,6 +678,7 @@ int8_t  getsockopt(uint8_t sn, sockopt_type sotype, void* arg)
             break;
         case SO_MSS:   
             *(uint8_t*) arg = getSn_MSSR(sn);
+            break; //M20160411
         case SO_DESTIP:
 					  getSn_DIPR(sn, (uint8_t*)arg);
             break;
@@ -679,8 +693,10 @@ int8_t  getsockopt(uint8_t sn, sockopt_type sotype, void* arg)
 #endif      
         case SO_SENDBUF:
             *(uint16_t*) arg = getSn_TX_FSR(sn);
+            break; //M20160411
         case SO_RECVBUF:
             *(uint16_t*) arg = getSn_RX_RSR(sn);
+            break; //M20160411
         case SO_STATUS:
             *(uint8_t*) arg = getSn_SR(sn);
             break;

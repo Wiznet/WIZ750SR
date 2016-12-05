@@ -71,7 +71,6 @@ void do_segcp(void)
 		segcp_ret |= proc_SEGCP_uart(gSEGCPREP);
 	}
 	
-	
 	if(segcp_ret & SEGCP_RET_ERR)
 	{
 		if(dev_config->serial_info[0].serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:ERROR:%04X\r\n", segcp_ret);
@@ -102,8 +101,9 @@ void do_segcp(void)
 			//{
 #ifdef _SEGCP_DEBUG_
 				printf(">> Erase success\r\n");
-#endif
 				printf("\r\n");
+#endif
+				//printf("\r\n");
 				
 				erase_storage(STORAGE_MAC);
 				erase_storage(STORAGE_CONFIG);
@@ -468,6 +468,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						break;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // User GPIOs
+#ifdef __USE_USERS_GPIO__
 					// GET GPIOs Status / Value
 					case SEGCP_GA:
 					case SEGCP_GB:
@@ -489,6 +490,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						sprintf(trep, "%d", (((io_type & 0x01) << 1) | io_dir));
 						//sprintf(trep, "%d%d", get_user_io_type(USER_IO_SEL[io_num]), get_user_io_direction(USER_IO_SEL[io_num]));
 						break;
+#endif
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Status Pins
 					// GET Status pin's setting and status
@@ -578,8 +580,22 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 					case SEGCP_ST: sprintf(trep, "%s", strDEVSTATUS[dev_config->network_info[0].state]);
 						break;
 					case SEGCP_FR: 
-						if(gSEGCPPRIVILEGE & (SEGCP_PRIVILEGE_SET|SEGCP_PRIVILEGE_WRITE)) ret |= SEGCP_RET_FACTORY | SEGCP_RET_REBOOT;
-						else ret |= SEGCP_RET_ERR_NOPRIVILEGE;
+						if(gSEGCPPRIVILEGE & (SEGCP_PRIVILEGE_SET|SEGCP_PRIVILEGE_WRITE)) 
+						{
+							// #20161110 Hidden option, Local port number [1] + FR cmd => K! (EEPROM Erase)
+							if(dev_config->network_info[0].local_port == 1)
+							{
+								ret |= SEGCP_RET_ERASE_EEPROM | SEGCP_RET_REBOOT; // EEPROM Erase
+							}
+							else
+							{
+								ret |= SEGCP_RET_FACTORY | SEGCP_RET_REBOOT; // Factory Reset
+							}
+						}
+						else
+						{
+							ret |= SEGCP_RET_ERR_NOPRIVILEGE;
+						}
 						break;
 					case SEGCP_EC:
 						sprintf(trep,"%d",dev_config->options.serial_command_echo);
@@ -946,6 +962,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						break;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // User GPIOs
+#ifdef __USE_USERS_GPIO__
 					// SET GPIOs Status / Value (Digital output only)
 					case SEGCP_GA:
 					case SEGCP_GB:
@@ -990,6 +1007,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 							}
 						}
 						break;
+#endif
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Status Pins
 					// SET status pin mode selector
@@ -1123,7 +1141,7 @@ uint16_t proc_SEGCP_udp(uint8_t* segcp_req, uint8_t* segcp_rep)
 {
 	DevConfig *dev_config = get_DevConfig_pointer();
 	
-	uint8_t ret = 0;
+	uint16_t ret = 0;
 	uint16_t len = 0;
 	//uint16_t i = 0;
 	

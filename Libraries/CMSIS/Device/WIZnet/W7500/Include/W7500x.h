@@ -1,3 +1,16 @@
+/*******************************************************************************************************************************************************
+ * Copyright ¨Ï 2016 <WIZnet Co.,Ltd.> 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ¡°Software¡±), 
+ * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED ¡°AS IS¡±, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*********************************************************************************************************************************************************/
 /**************************************************************************/
 /**
  * @file    W7500x.h 
@@ -71,7 +84,7 @@ typedef enum IRQn
   PORT0_IRQn                   = 7,        /*!< Port 1 combined Interrupt                         */  
   PORT1_IRQn                   = 8,        /*!< Port 2 combined Interrupt                         */  
   PORT2_IRQn                   = 9,        /*!< Port 2 combined Interrupt                         */  
-  PORT3_IRQn                   = 10,       /*!< Port 2 combined Interrupt                         */  
+  /* 10 = reserved Number */
   DMA_IRQn                     = 11,       /*!< DMA combined Interrupt                            */   
   DUALTIMER0_IRQn              = 12,       /*!< Dual Timer 0 Interrupt                            */
   DUALTIMER1_IRQn              = 13,       /*!< Dual Timer 1 Interrupt                            */
@@ -314,32 +327,9 @@ typedef struct
 
 typedef struct
 {
-  __IO  uint32_t  Port[16]; /* Port_00,      offset : 0x00 */
-                            /* Port_01,      offset : 0x04 */
-                            /* Port_02,      offset : 0x08 */
-                            /* Port_03,      offset : 0x0C */
-                            /* Port_04,      offset : 0x10 */
-                            /* Port_05,      offset : 0x14 */
-                            /* Port_06,      offset : 0x18 */
-                            /* Port_07,      offset : 0x1C */
-                            /* Port_08,      offset : 0x20 */
-                            /* Port_09,      offset : 0x24 */
-                            /* Port_10,      offset : 0x28 */
-                            /* Port_11,      offset : 0x2C */
-                            /* Port_12,      offset : 0x30 */
-                            /* Port_13,      offset : 0x34 */
-                            /* Port_14,      offset : 0x38 */
-                            /* Port_15,      offset : 0x3C */
+  __IO  uint32_t  Port[16];
 } P_Port_Def;
 
-typedef struct
-{
-  __IO  uint32_t  Port[5];  /* Port_00,      offset : 0x00 */
-                            /* Port_01,      offset : 0x04 */
-                            /* Port_02,      offset : 0x08 */
-                            /* Port_03,      offset : 0x0C */
-                            /* Port_04,      offset : 0x10 */
-} P_Port_D_Def;
 
 
 /**
@@ -517,7 +507,6 @@ typedef struct
 #define GPIOA_BASE              (W7500x_AHB_BASE + 0x00000000UL)    // W7500x_AHB_BASE : 0x42000000UL
 #define GPIOB_BASE              (W7500x_AHB_BASE + 0x01000000UL)
 #define GPIOC_BASE              (W7500x_AHB_BASE + 0x02000000UL)
-#define GPIOD_BASE              (W7500x_AHB_BASE + 0x03000000UL)
 
 #define P_AFSR_BASE             (W7500x_APB2_BASE + 0x00002000UL)
 
@@ -565,22 +554,18 @@ typedef struct
 #define EXTI_PA         ((P_Port_Def *)   (EXTI_Px_BASE + 0x00000000UL))  /* PA_XX External interrupt Enable Register */
 #define EXTI_PB         ((P_Port_Def *)   (EXTI_Px_BASE + 0x00000040UL))  /* PB_XX External interrupt Enable Register */
 #define EXTI_PC         ((P_Port_Def *)   (EXTI_Px_BASE + 0x00000080UL))  /* PC_XX External interrupt Enable Register */
-#define EXTI_PD         ((P_Port_D_Def *) (EXTI_Px_BASE + 0x000000C0UL))  /* PD_XX External interrupt Enable Register */
 
 #define GPIOA   ((GPIO_TypeDef *) (GPIOA_BASE) )
 #define GPIOB   ((GPIO_TypeDef *) (GPIOB_BASE) )
 #define GPIOC   ((GPIO_TypeDef *) (GPIOC_BASE) )
-#define GPIOD   ((GPIO_TypeDef *) (GPIOD_BASE) )
 
 #define PA_AFSR ((P_Port_Def *)   (P_AFSR_BASE + 0x00000000UL))  /* PA_XX Pad Alternate Function Select Register */
 #define PB_AFSR ((P_Port_Def *)   (P_AFSR_BASE + 0x00000040UL))  /* PB_XX Pad Alternate Function Select Register */
 #define PC_AFSR ((P_Port_Def *)   (P_AFSR_BASE + 0x00000080UL))  /* PC_XX Pad Alternate Function Select Register */
-#define PD_AFSR ((P_Port_D_Def *) (P_AFSR_BASE + 0x000000C0UL))  /* PD_XX Pad Alternate Function Select Register */
 
 #define PA_PCR  ((P_Port_Def *)   (P_PCR_BASE + 0x00000000UL))   /* PA_XX Pad Control Register */
 #define PB_PCR  ((P_Port_Def *)   (P_PCR_BASE + 0x00000040UL))   /* PB_XX Pad Control Register */
 #define PC_PCR  ((P_Port_Def *)   (P_PCR_BASE + 0x00000080UL))   /* PC_XX Pad Control Register */
-#define PD_PCR  ((P_Port_D_Def *) (P_PCR_BASE + 0x000000C0UL))   /* PD_XX Pad Control Register */
 
 //#define I2C0    ((I2C_TypeDef      *)  I2C0_BASE)
 //#define I2C1    ((I2C_TypeDef      *)  I2C1_BASE)
@@ -1050,21 +1035,7 @@ typedef struct
 
 
 
-typedef enum
-{
-    PAD_PA = 0,
-    PAD_PB,
-    PAD_PC,
-    PAD_PD
-}PAD_Type;
 
-typedef enum
-{
-    PAD_AF0    = Px_AFSR_AF0,
-    PAD_AF1    = Px_AFSR_AF1,
-    PAD_AF2    = Px_AFSR_AF2,
-    PAD_AF3    = Px_AFSR_AF3
-}PAD_AF_TypeDef;
 
 
 #if !defined  (USE_HAL_DRIVER)
@@ -1093,3 +1064,4 @@ typedef enum
 
 
 /************************ (C) COPYRIGHT Wiznet *****END OF FILE****/
+

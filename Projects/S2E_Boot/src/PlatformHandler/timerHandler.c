@@ -11,12 +11,28 @@ static volatile uint16_t msec_cnt = 0;
 static volatile uint16_t sec_cnt = 0;
 static volatile uint32_t uptime_min = 0;
 
+static volatile uint32_t time_cnt = 0;
+
 extern uint8_t flag_s2e_application_running;
 
 // For Boot code only, main routine checker
 volatile uint16_t main_routine_check_time_msec = 0;
 uint8_t flag_check_main_routine  = 0;
 
+
+void Time_Counter_Configuration(void)
+{
+	time_cnt = 0;
+}
+
+void Time_Counter(void)
+{
+	if(time_cnt++ >= DEFINED_COUNT_THRESHOLD_VAL)
+	{
+		Timer_IRQ_Handler();
+		time_cnt = 0;
+	}
+}
 
 void Timer_Configuration(void)
 {
@@ -46,9 +62,9 @@ void Timer_Configuration(void)
 
 void Timer_IRQ_Handler(void)
 {
-	if(DUALTIMER_GetIntStatus(DUALTIMER0_0))
-	{
-		DUALTIMER_IntClear(DUALTIMER0_0);
+//	if(DUALTIMER_GetIntStatus(DUALTIMER0_0))
+//	{
+//		DUALTIMER_IntClear(DUALTIMER0_0);
 		
 		msec_cnt++; // millisecond counter
 		
@@ -80,12 +96,12 @@ void Timer_IRQ_Handler(void)
 			sec_cnt = 0;
 			uptime_min++;
 		}
-	}
+//	}
 
-	if(DUALTIMER_GetIntStatus(DUALTIMER0_1))
-	{
-		DUALTIMER_IntClear(DUALTIMER0_1);
-	}
+//	if(DUALTIMER_GetIntStatus(DUALTIMER0_1))
+//	{
+//		DUALTIMER_IntClear(DUALTIMER0_1);
+//	}
 }
 
 uint32_t getDeviceUptime_min(void)

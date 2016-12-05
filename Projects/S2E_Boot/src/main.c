@@ -1,13 +1,14 @@
 /**
   ******************************************************************************
   * @file    W7500x Serial to Ethernet Project - WIZ750SR Boot
-  * @author  Eric Jung, Team Wiki
-  * @version v1.0.0
-  * @date    Mar-2016
+  * @author  Eric Jung, Team Platform
+  * @version v1.1.0
+  * @date    Nov-2016
   * @brief   Boot program body
   ******************************************************************************
   * @attention
   * @par Revision history
+  *    <2016/11/18> v1.1.0 Develop by Eric Jung
   *    <2016/03/29> v1.0.0 Develop by Eric Jung
   *    <2016/03/02> v0.8.0 Develop by Eric Jung
   *    <2015/11/24> v0.0.1 Develop by Eric Jung
@@ -78,8 +79,8 @@ void Backup_Boot_Interrupt_VectorTable(void);
 
 // Delay
 void delay(__IO uint32_t milliseconds); //Notice: used ioLibray
-void TimingDelay_Decrement(void);
-void delay_ms(uint32_t ms); // loop delay
+//void TimingDelay_Decrement(void);
+//void delay_ms(uint32_t ms); // loop delay
 
 /* Private variables ---------------------------------------------------------*/
 static __IO uint32_t TimingDelay;
@@ -134,7 +135,11 @@ int main(void)
 	
 	// 1. MAC address가 없는 경우				-> MAC 주소 입력 및 save
 	
-	if(check_mac_address()) appjump_enable = ON;
+	if(check_mac_address())
+	{
+		Copy_Interrupt_VectorTable(DEVICE_APP_MAIN_ADDR);
+		appjump_enable = ON;
+	}
 	
 	// 2. Firmware update flag가 1인 경우 		-> 전체 영역 erase, Fwup_size만큼 fw update 수행, app backup (flash) >> app main (flash)
 	
@@ -150,6 +155,8 @@ int main(void)
 			dev_config->firmware_update.fwup_size = 0;
 			
 			save_DevConfig_to_storage();
+			
+			Copy_Interrupt_VectorTable(DEVICE_APP_MAIN_ADDR);
 			
 			appjump_enable = ON;
 		}
@@ -198,7 +205,8 @@ int main(void)
 	{
 		// Copy the application code interrupt vector to 0x00000000
 		//printf("\r\n copy the interrupt vector, app area [0x%.8x] ==> boot", DEVICE_APP_MAIN_ADDR);
-		Copy_Interrupt_VectorTable(DEVICE_APP_MAIN_ADDR);
+		
+		//Copy_Interrupt_VectorTable(DEVICE_APP_MAIN_ADDR);
 		
 		application_jump(DEVICE_APP_MAIN_ADDR);
 		
@@ -264,6 +272,8 @@ int main(void)
 			LED_Toggle(LED2);
 			flag_check_main_routine = 0;
 		}
+		
+		Time_Counter(); // Counter for replace the timer interrupt
 	} // End of application main loop
 } // End of main
 
@@ -300,12 +310,13 @@ static void W7500x_Init(void)
 	//SystemInit();
 	
 	/* Delay for working stabilize */
-	delay_ms(1500); // 
+	delay(1500); // 
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// W7500x ISR: Interrupt Vector Table Remap (Custom)
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	
+	/*
 	if (*(uint32_t*)BOOT_VEC_BACK_ADDR == 0xFFFFFFFF) // after boot code first write
 	{
 		Backup_Boot_Interrupt_VectorTable();
@@ -314,16 +325,20 @@ static void W7500x_Init(void)
 	{
 		Copy_Interrupt_VectorTable(BOOT_VEC_BACK_ADDR);
 	}
+	*/
 	
 	/* DualTimer Initialization */
-	Timer_Configuration();
+	//Timer_Configuration();
+	
+	/* Counter Initialization */
+	Time_Counter_Configuration(); // To replace the timer interrupt, inaccurate count value
 	
 	/* UART Initialization */
 	//CRG_FCLK_SourceSelect(CRG_RCLK);
 	UART2_Configuration(); // Simple UART (UART2) for Debugging
 	
 	/* SysTick_Config */
-	SysTick_Config((GetSystemClock()/1000));
+	//SysTick_Config((GetSystemClock()/1000));
 	
 #ifdef _MAIN_DEBUG_
 	printf("\r\n >> W7500x MCU Clock Settings ===============\r\n"); 
@@ -407,6 +422,7 @@ int8_t process_dhcp(void)
 		}
 
 		do_segcp(); // Process the requests of configuration tool during the DHCP client run.
+		Time_Counter(); // Counter for replace the timer interrupt
 	}
 		
 	return ret;
@@ -493,6 +509,7 @@ uint8_t check_mac_address(void)
 					// Set factory default
 					set_DevConfig_to_factory_value();
 					save_DevConfig_to_storage();
+					
 					ret = 1;
 					break;
 				}
@@ -555,7 +572,7 @@ void Backup_Boot_Interrupt_VectorTable(void)
 	__enable_irq();
 }
 
-
+#if 0
 /**
   * @brief  Inserts a delay time.
   * @param  nTime: specifies the delay time length, in milliseconds.
@@ -580,12 +597,22 @@ void TimingDelay_Decrement(void)
 		TimingDelay--;
 	}
 }
+#endif
 
 /**
   * @brief  Inserts a delay time when the situation cannot use the timer interrupt.
   * @param  ms: specifies the delay time length, in milliseconds.
   * @retval None
   */
+void delay(__IO uint32_t milliseconds)
+{
+	volatile uint32_t nCount;
+	
+	nCount=(GetSystemClock()/10000)*milliseconds;
+	for (; nCount!=0; nCount--);
+}
+
+/*
 void delay_ms(uint32_t ms)
 {
 	volatile uint32_t nCount;
@@ -593,3 +620,4 @@ void delay_ms(uint32_t ms)
 	nCount=(GetSystemClock()/10000)*ms;
 	for (; nCount!=0; nCount--);
 }
+*/

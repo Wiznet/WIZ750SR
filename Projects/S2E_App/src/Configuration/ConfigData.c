@@ -109,12 +109,19 @@ void set_DevConfig_to_factory_value(void)
 	dev_config.options.serial_trigger[0] = 0x2b;	// Defualt serial command mode trigger code: '+++' (0x2b, 0x2b, 0x2b)
 	dev_config.options.serial_trigger[1] = 0x2b;
 	dev_config.options.serial_trigger[2] = 0x2b;
-	
+
+#ifdef __USE_USERS_GPIO__
 	dev_config.user_io_info.user_io_enable = USER_IO_A | USER_IO_B | USER_IO_C | USER_IO_D; // [Enabled] / Disabled	
 	dev_config.user_io_info.user_io_type = USER_IO_A; // Analog: USER_IO_A, / Digital: USER_IO_B, USER_IO_C, USER_IO_D
 	dev_config.user_io_info.user_io_direction = USER_IO_C | USER_IO_D; // IN / IN / OUT / OUT
 	dev_config.user_io_info.user_io_status = 0;
-	
+#else
+	dev_config.user_io_info.user_io_enable = 0;
+	dev_config.user_io_info.user_io_type = 0;
+	dev_config.user_io_info.user_io_direction = 0;
+	dev_config.user_io_info.user_io_status = 0;
+#endif
+
 	dev_config.firmware_update.fwup_flag = SEGCP_DISABLE;
 	dev_config.firmware_update.fwup_port = DEVICE_FWUP_PORT;
 	dev_config.firmware_update.fwup_size = 0;

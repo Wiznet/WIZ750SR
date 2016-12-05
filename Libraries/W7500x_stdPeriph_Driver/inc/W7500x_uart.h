@@ -1,9 +1,22 @@
+/*******************************************************************************************************************************************************
+ * Copyright ¡§I 2016 <WIZnet Co.,Ltd.> 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ¢®¡ÆSoftware¢®¡¾), 
+ * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED ¢®¡ÆAS IS¢®¡¾, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*********************************************************************************************************************************************************/
 /**
   ******************************************************************************
   * @file    W7500x_stdPeriph_Driver/inc/W7500x_uart.h
   * @author  IOP Team
   * @version V1.0.0
-  * @date    01-May-2015
+  * @date    26-AUG-2015
   * @brief   This file contains all the functions prototypes for the UART 
   *          firmware library.
   ******************************************************************************
@@ -108,7 +121,8 @@ typedef struct
 #define UART_Mode_Rx                ((uint16_t)(UART_CR_RXE))
 #define UART_Mode_Tx                ((uint16_t)(UART_CR_TXE))
 #define IS_UART_MODE(MODE)          (((MODE) == UART_Mode_Rx) || \
-                                     ((MODE) == UART_Mode_Tx))
+                                     ((MODE) == UART_Mode_Tx) || \
+                                     ((MODE) == (URAT_Mode_Rx | UART_Mode_Tx)))
 
 /**
   * @}
@@ -273,8 +287,6 @@ typedef struct
 void        UART_StructInit         (UART_InitTypeDef* UART_InitStruct);
 
 uint32_t    UART_Init               (UART_TypeDef *UARTx, UART_InitTypeDef* UART_InitStruct);
-void        UART_FIFO_Enable        (UART_TypeDef *UARTx, uint16_t rx_fifo_level, uint16_t tx_fifo_level);
-void        UART_FIFO_Disable       (UART_TypeDef *UARTx);
 void        UART_SendData           (UART_TypeDef* UARTx, uint16_t Data);
 uint16_t    UART_ReceiveData        (UART_TypeDef* UARTx);
 void        UART_SendBreak          (UART_TypeDef* UARTx);

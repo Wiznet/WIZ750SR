@@ -1,3 +1,16 @@
+/*******************************************************************************************************************************************************
+ * Copyright ¡§I 2016 <WIZnet Co.,Ltd.> 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ¢®¡ÆSoftware¢®¡¾), 
+ * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
+ * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+ * THE SOFTWARE IS PROVIDED ¢®¡ÆAS IS¢®¡¾, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
+ * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*********************************************************************************************************************************************************/
 /**
   ******************************************************************************
   * @file    W7500x_stdPeriph_Driver/src/W7500x_pwm.c    
@@ -241,16 +254,14 @@ void PWM_CounterModeInit(PWM_CHn_TypeDef* PWM_CHn, PWM_CounterModeInitTypeDef* P
 {
     /* Check the parameters */
     assert_param(IS_PWM_ALL_CH(PWM_CHn));
-    assert_param(IS_PWM_PR_FILTER(PWM_TimerModeInitStruct->PWM_CHn_PR));
-    assert_param(IS_PWM_MR_FILTER(PWM_CHn, PWM_TimerModeInitStruct->PWM_CHn_MR));
-    assert_param(IS_PWM_LR_FILTER(PWM_CHn, PWM_TimerModeInitStruct->PWM_CHn_LR));
-    assert_param(IS_PWM_CHn_UDMR(PWM_TimerModeInitStruct->PWM_CHn_UDMR));
-    assert_param(IS_PWM_CHn_PDMR(PWM_TimerModeInitStruct->PWM_CHn_PDMR));
-    assert_param(IS_PWM_CHn_TCMR(PWM_TimerModeInitStruct->PWM_CHn_TCMR));
-    assert_param(IS_PWM_CHn_PEEER(PWM_TimerModeInitStruct->PWM_CHn_PEEER));
+    assert_param(IS_PWM_PR_FILTER(PWM_CounterModeInitStruct->PWM_CHn_PR));
+    assert_param(IS_PWM_MR_FILTER(PWM_CHn, PWM_CounterModeInitStruct->PWM_CHn_MR));
+    assert_param(IS_PWM_LR_FILTER(PWM_CHn, PWM_CounterModeInitStruct->PWM_CHn_LR));
+    assert_param(IS_PWM_CHn_UDMR(PWM_CounterModeInitStruct->PWM_CHn_UDMR));
+    assert_param(IS_PWM_CHn_PDMR(PWM_CounterModeInitStruct->PWM_CHn_PDMR));
+    assert_param(IS_PWM_CHn_TCMR(PWM_CounterModeInitStruct->PWM_CHn_TCMR));
+    assert_param(IS_PWM_CHn_PEEER(PWM_CounterModeInitStruct->PWM_CHn_PEEER));
 
-    /* Select Timer/Counter mode as Timer mode */ 
-    PWM_CHn->TCMR = PWM_CHn_TCMR_TimerMode;    
     /* Set Match register value */
     PWM_CHn->MR = PWM_CounterModeInitStruct->PWM_CHn_MR;
     /* Set Limit register value */

@@ -62,7 +62,7 @@ Various materials are could be found at [WIZ750SR Wiki page](http://wizwiki.net/
 ## Software
 These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
 - Firmware source code
-  - Application (APP)
+  - Application (App)
   - Boot
 - WIZ750SR operation manual
   - [WIZ750SR Command Manual](http://wizwiki.net/wiki/doku.php?id=products:wiz750sr:commandmanual:start)

@@ -76,3 +76,5 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
  
  
 ## Revision History
+v1.1.0
+- First release : 2016

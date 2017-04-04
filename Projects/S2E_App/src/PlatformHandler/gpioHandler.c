@@ -17,7 +17,8 @@
 
 	uint8_t        USER_IO_SEL[USER_IOn] =     {USER_IO_A, USER_IO_B, USER_IO_C, USER_IO_D};
 	const char*    USER_IO_STR[USER_IOn] =     {"a", "b", "c", "d"};
-	const char*    USER_IO_PIN_STR[USER_IOn] = {"p28\0", "p27\0", "p26\0", "p25\0",}; 
+	//const char*    USER_IO_PIN_STR[USER_IOn] = {"p28\0", "p27\0", "p26\0", "p25\0",}; 
+	const char*    USER_IO_PIN_STR[USER_IOn] = {"PC15\0", "PC14\0", "PC13\0", "PC12\0"}; // WIZ750Jr
 	const char*    USER_IO_TYPE_STR[] =        {"Digital", "Analog"};
 	const char*    USER_IO_DIR_STR[] =         {"Input", "Output"};
 #endif

@@ -17,9 +17,9 @@
 /* Target Board Selector */
 //#define DEVICE_BOARD_NAME	WIZwiki_W7500ECO
 //#define DEVICE_BOARD_NAME	W7500P_S2E
-#define DEVICE_BOARD_NAME	WIZ750SR
+//#define DEVICE_BOARD_NAME	WIZ750SR
 //#define DEVICE_BOARD_NAME	WIZ750MINI
-//#define DEVICE_BOARD_NAME	WIZ750JR
+#define DEVICE_BOARD_NAME	WIZ750JR
 
 #ifdef DEVICE_BOARD_NAME
 	#if (DEVICE_BOARD_NAME == WIZ750SR)
@@ -59,11 +59,11 @@
 		#define DEVICE_ID_DEFAULT            "WIZ750Mini" // Device name
 	#elif (DEVICE_BOARD_NAME == WIZ750JR)
 		//#define __USE_UART_IF_SELECTOR__	// RS-232/TTL or RS-422/485 selector using UART IF selector pin
-		#define __USE_EXT_EEPROM__			// External EEPROM or Internal Data flash (DAT0/1)
+		//#define __USE_EXT_EEPROM__			// External EEPROM or Internal Data flash (DAT0/1)
 		#define __USE_BOOT_ENTRY__			// Application boot mode entry pin activated
 		#define __USE_APPBACKUP_AREA__		// If this option activated, Application firmware area is consists of App (50kB) and App backup (50kB). If not, user's application can be 100kB size. (Does not use the backup area)
 		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
-		//#define __USE_USERS_GPIO__
+		#define __USE_USERS_GPIO__
 		#define DEVICE_CLOCK_SELECT	         CLOCK_SOURCE_EXTERNAL
 		#define DEVICE_PLL_SOURCE_CLOCK      PLL_SOURCE_12MHz
 		#define DEVICE_TARGET_SYSTEM_CLOCK   SYSTEM_CLOCK_48MHz
@@ -109,12 +109,13 @@
 ////////////////////////////////
 // Pin definitions			  //
 ////////////////////////////////
-// PHY link status pin: Input (PHYLINK_IN_PIN -> STATUS_PHYLINK_PIN)
-#define PHYLINK_IN_PIN				GPIO_Pin_9
-#define PHYLINK_IN_PORT				GPIOA
-#define PHYLINK_IN_PAD_AF			PAD_AF1 // PAD Config - LED used 2nd Function
 
 #if (DEVICE_BOARD_NAME == WIZ750JR) // ##20161031 WIZ750Jr
+
+	// PHY link status pin: Input (PHYLINK_IN_PIN -> STATUS_PHYLINK_PIN)
+	#define PHYLINK_IN_PIN				GPIO_Pin_0
+	#define PHYLINK_IN_PORT				GPIOA
+	#define PHYLINK_IN_PAD_AF			PAD_AF1 // PAD Config - LED used 2nd Function
 
 	// Connection status indicator pins
 	// Direction: Output
@@ -122,25 +123,30 @@
 	#define STATUS_PHYLINK_PORT			GPIOA
 	#define STATUS_PHYLINK_PAD_AF		PAD_AF1
 
-	#define STATUS_TCPCONNECT_PIN		GPIO_Pin_1
+	#define STATUS_TCPCONNECT_PIN		GPIO_Pin_9
 	#define STATUS_TCPCONNECT_PORT		STATUS_PHYLINK_PORT
 	#define STATUS_TCPCONNECT_PAD_AF	STATUS_PHYLINK_PAD_AF
 
-	#define DTR_PIN						GPIO_Pin_0
-	#define DTR_PORT					GPIOB
-	#define DTR_PAD_AF					PAD_AF1
+	#define DTR_PIN						STATUS_PHYLINK_PIN
+	#define DTR_PORT					STATUS_PHYLINK_PORT
+	#define DTR_PAD_AF					STATUS_PHYLINK_PAD_AF
 
-	#define DSR_PIN						GPIO_Pin_15
-	#define DSR_PORT					GPIOA
-	#define DSR_PAD_AF					PAD_AF1
+	#define DSR_PIN						STATUS_TCPCONNECT_PIN
+	#define DSR_PORT					STATUS_TCPCONNECT_PORT
+	#define DSR_PAD_AF					STATUS_TCPCONNECT_PAD_AF
 
 	// HW_TRIG - Command mode switch enable pin
-	// Direction: Input (Shared pin with TCP connection status pin)
-	#define HW_TRIG_PIN					GPIO_Pin_15
-	#define HW_TRIG_PORT				GPIOC
+	// Direction: Input
+	#define HW_TRIG_PIN					GPIO_Pin_9
+	#define HW_TRIG_PORT				GPIOA
 	#define HW_TRIG_PAD_AF				PAD_AF1
 
 #else // Original pins
+
+	// PHY link status pin: Input (PHYLINK_IN_PIN -> STATUS_PHYLINK_PIN)
+	#define PHYLINK_IN_PIN				GPIO_Pin_9
+	#define PHYLINK_IN_PORT				GPIOA
+	#define PHYLINK_IN_PAD_AF			PAD_AF1 // PAD Config - LED used 2nd Function
 
 	// Connection status indicator pins
 	// Direction: Output
@@ -198,9 +204,15 @@
 #endif
 
 #ifdef __USE_BOOT_ENTRY__
-	#define BOOT_ENTRY_PIN			GPIO_Pin_14
-	#define BOOT_ENTRY_PORT			GPIOC
-	#define BOOT_ENTRY_PAD_AF		PAD_AF1
+	#if (DEVICE_BOARD_NAME == WIZ750JR) // ##20170215 WIZ750Jr
+		#define BOOT_ENTRY_PIN			GPIO_Pin_8
+		#define BOOT_ENTRY_PORT			GPIOA
+		#define BOOT_ENTRY_PAD_AF		PAD_AF1
+	#else
+		#define BOOT_ENTRY_PIN			GPIO_Pin_14
+		#define BOOT_ENTRY_PORT			GPIOC
+		#define BOOT_ENTRY_PAD_AF		PAD_AF1
+	#endif
 #endif
 
 // Expansion GPIOs (4-Pins, GPIO A / B / C / D)
@@ -219,22 +231,45 @@
 
 	#define USER_IO_NO_ADC				0xff
 
-	// USER IO pins for WIZ750SR / WIZwiki-W7500ECO
-	#define USER_IO_A_PIN				GPIO_Pin_13 // ECO: P28, AIN2
-	#define USER_IO_A_PORT				GPIOC
-	#define USER_IO_A_ADC_CH			ADC_CH2
+	#if (DEVICE_BOARD_NAME == WIZ750JR) // ##20170215 WIZ750Jr
+		// USER IO pins for WIZ750Jr
+		#define USER_IO_A_PIN				GPIO_Pin_15
+		#define USER_IO_A_PORT				GPIOC
+		//#define USER_IO_A_ADC_CH			ADC_CH2
+		#define USER_IO_A_ADC_CH			ADC_CH0
 
-	#define USER_IO_B_PIN				GPIO_Pin_12 // ECO: P27, AIN3
-	#define USER_IO_B_PORT				GPIOC
-	#define USER_IO_B_ADC_CH			ADC_CH3
+		#define USER_IO_B_PIN				GPIO_Pin_14
+		#define USER_IO_B_PORT				GPIOC
+		//#define USER_IO_B_ADC_CH			ADC_CH3
+		#define USER_IO_B_ADC_CH			ADC_CH1
 
-	#define USER_IO_C_PIN				GPIO_Pin_9 // ECO: P26, AIN6
-	#define USER_IO_C_PORT				GPIOC
-	#define USER_IO_C_ADC_CH			ADC_CH6
+		#define USER_IO_C_PIN				GPIO_Pin_13
+		#define USER_IO_C_PORT				GPIOC
+		//#define USER_IO_C_ADC_CH			ADC_CH6
+		#define USER_IO_C_ADC_CH			ADC_CH2
 
-	#define USER_IO_D_PIN				GPIO_Pin_8 // ECO: P25, AIN7
-	#define USER_IO_D_PORT				GPIOC
-	#define USER_IO_D_ADC_CH			ADC_CH7
+		#define USER_IO_D_PIN				GPIO_Pin_12
+		#define USER_IO_D_PORT				GPIOC
+		//#define USER_IO_D_ADC_CH			ADC_CH7
+		#define USER_IO_D_ADC_CH			ADC_CH3
+	#else
+		// USER IO pins for WIZ750SR / WIZwiki-W7500ECO
+		#define USER_IO_A_PIN				GPIO_Pin_13 // ECO: P28, AIN2
+		#define USER_IO_A_PORT				GPIOC
+		#define USER_IO_A_ADC_CH			ADC_CH2
+
+		#define USER_IO_B_PIN				GPIO_Pin_12 // ECO: P27, AIN3
+		#define USER_IO_B_PORT				GPIOC
+		#define USER_IO_B_ADC_CH			ADC_CH3
+
+		#define USER_IO_C_PIN				GPIO_Pin_9 // ECO: P26, AIN6
+		#define USER_IO_C_PORT				GPIOC
+		#define USER_IO_C_ADC_CH			ADC_CH6
+
+		#define USER_IO_D_PIN				GPIO_Pin_8 // ECO: P25, AIN7
+		#define USER_IO_D_PORT				GPIOC
+		#define USER_IO_D_ADC_CH			ADC_CH7
+	#endif
 
 #endif
 

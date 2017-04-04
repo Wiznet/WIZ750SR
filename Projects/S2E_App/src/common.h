@@ -9,10 +9,10 @@
 /* Application Firmware Version */
 #define MAJOR_VER			1
 #define MINOR_VER			1
-#define MAINTENANCE_VER		0
+#define MAINTENANCE_VER		1
 
-//#define STR_VERSION_STATUS	"Develop" // or "Stable"
-#define STR_VERSION_STATUS	"Stable"
+#define STR_VERSION_STATUS	"Develop" // or "Stable"
+//#define STR_VERSION_STATUS	"Stable"
 
 ////////////////////////////////
 // W7500x HW Socket Definition//
@@ -106,5 +106,6 @@ typedef enum
 #define STR_ENABLED		"Enabled"
 #define STR_DISABLED	"Disabled"
 #define STR_BAR			"=================================================="
+
 
 #endif //_COMMON_H

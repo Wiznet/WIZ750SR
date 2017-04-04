@@ -846,7 +846,8 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						break;
 					case SEGCP_FL:
 						tmp_byte = is_hex(*param);
-						if(param_len != 1 || tmp_byte > flow_rts_cts)
+						//if(param_len != 1 || tmp_byte > flow_rts_cts)
+						if(param_len != 1 || tmp_byte > flow_reverserts)
 						{
 							ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						}
@@ -854,7 +855,14 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						{
 							if(dev_config->serial_info[0].uart_interface == UART_IF_RS422_485)
 							{
-								dev_config->serial_info[0].flow_control = flow_none;
+								if((tmp_byte != flow_rtsonly) && (tmp_byte != flow_reverserts))
+								{
+									dev_config->serial_info[0].flow_control = flow_none;
+								}
+								else
+								{
+									dev_config->serial_info[0].flow_control = tmp_byte;
+								}
 							}
 							else
 							{

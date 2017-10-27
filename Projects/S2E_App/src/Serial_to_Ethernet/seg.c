@@ -109,9 +109,9 @@ void add_data_transfer_bytecount(teDATADIR dir, uint16_t len);
 void do_seg(uint8_t sock)
 {
 	//DevConfig *s2e = get_DevConfig_pointer();
-	struct __network_info *net = (struct __network_info *)get_DevConfig_pointer()->network_info;
-	struct __serial_info *serial = (struct __serial_info *)get_DevConfig_pointer()->serial_info;
-	struct __firmware_update *fwupdate = (struct __firmware_update *)&(get_DevConfig_pointer()->firmware_update);
+	struct __network_connection *network_connection = (struct __network_connection *)get_DevConfig_pointer()->network_connection;
+	struct __serial_option *serial_option = (struct __serial_option *)get_DevConfig_pointer()->serial_option;
+	struct __firmware_update *firmware_update = (struct __firmware_update *)&(get_DevConfig_pointer()->firmware_update);
 	
 //#ifdef _SEG_DEBUG_
 #if 1
@@ -138,7 +138,10 @@ void do_seg(uint8_t sock)
 #endif
 	
 	// Firmware update: Do not run SEG process
-	if(fwupdate->fwup_flag == SEG_ENABLE) return;
+	if(firmware_update->fwup_flag == SEG_ENABLE) 
+    {
+        return;
+    }
 	
 	// Serial AT command mode enabled, initial settings
 	if((opmode == DEVICE_GW_MODE) && (sw_modeswitch_at_mode_on == SEG_ENABLE))
@@ -155,7 +158,7 @@ void do_seg(uint8_t sock)
 	
 	if(opmode == DEVICE_GW_MODE) 
 	{
-		switch(net->working_mode)
+		switch(network_connection[0].working_mode)
 		{
 			case TCP_CLIENT_MODE:
 				proc_SEG_tcp_client(sock);
@@ -179,65 +182,80 @@ void do_seg(uint8_t sock)
 		
 		// XON/XOFF Software flow control: Check the Buffer usage and Send the start/stop commands
 		// [WIZnet Device] -> [Peer]
-		if((serial->flow_control == flow_xon_xoff) || serial->flow_control == flow_rts_cts) check_uart_flow_control(serial->flow_control);
+		if((serial_option[0].flow_control == flow_xon_xoff) || serial_option[0].flow_control == flow_rts_cts) 
+        {
+            check_uart_flow_control(serial_option[0].flow_control);
+        }
 	}
 }
 
 void set_device_status(teDEVSTATUS status)
 {
-	struct __network_info *net = (struct __network_info *)get_DevConfig_pointer()->network_info;
-	struct __serial_info *serial = (struct __serial_info *)&(get_DevConfig_pointer()->serial_info);
+	struct __network_connection *network_connection = (struct __network_connection *)get_DevConfig_pointer()->network_connection;
 	
 	switch(status)
 	{
 		case ST_OPEN:		// TCP connection: disconnected (or UDP mode)
-			net->state = ST_OPEN;
+			network_connection[0].working_state = ST_OPEN;
 			break;
 		
 		case ST_CONNECT:	// TCP connection: connected
-			net->state = ST_CONNECT;
+			network_connection[0].working_state = ST_CONNECT;
 			break;
 		
 		case ST_UPGRADE:	// TCP connection: disconnected
-			net->state = ST_UPGRADE;
+			network_connection[0].working_state = ST_UPGRADE;
 			break;
 		
 		case ST_ATMODE:		// TCP connection: disconnected
-			net->state = ST_ATMODE;
+			network_connection[0].working_state = ST_ATMODE;
 			break;
 		
 		case ST_UDP:		// UDP mode
-			net->state = ST_UDP;
+			network_connection[0].working_state = ST_UDP;
 		default:
 			break;
 	}
 	
 	// Status indicator pins
-	if(net->state == ST_CONNECT)
+	if(network_connection[0].working_state == ST_CONNECT)
+    {
 		set_connection_status_io(STATUS_TCPCONNECT_PIN, ON); // Status I/O pin to low
+    }
 	else
+    {
 		set_connection_status_io(STATUS_TCPCONNECT_PIN, OFF); // Status I/O pin to high
+    }
 }
 
 uint8_t get_device_status(void)
 {
-	struct __network_info *net = (struct __network_info *)get_DevConfig_pointer()->network_info;
-	return net->state;
+	struct __network_connection *network_connection = (struct __network_connection *)get_DevConfig_pointer()->network_connection;
+    
+	return network_connection[0].working_state;
 }
 
 
 void proc_SEG_udp(uint8_t sock)
 {
-	DevConfig *s2e = get_DevConfig_pointer();
-	struct __network_info *net = (struct __network_info *)get_DevConfig_pointer()->network_info;
-	struct __serial_info *serial = (struct __serial_info *)get_DevConfig_pointer()->serial_info;
+	//DevConfig *s2e = get_DevConfig_pointer();
+	struct __network_connection *network_connection = (struct __network_connection *)get_DevConfig_pointer()->network_connection;
+	struct __serial_common *serial_common = (struct __serial_common *)&get_DevConfig_pointer()->serial_common;
+    struct __serial_data_packing *serial_data_packing = (struct __serial_data_packing *)get_DevConfig_pointer()->serial_data_packing;
 	
 	uint8_t state = getSn_SR(sock);
+    
 	switch(state)
 	{
 		case SOCK_UDP:
-			if(BUFFER_USED_SIZE(data_rx) || u2e_size)	uart_to_ether(sock);
-			if(getSn_RX_RSR(sock) 	|| e2u_size)		ether_to_uart(sock);
+			if(BUFFER_USED_SIZE(data_rx) || u2e_size)	
+            {
+                uart_to_ether(sock);
+            }
+			if(getSn_RX_RSR(sock) 	|| e2u_size)		
+            {
+                ether_to_uart(sock);
+            }
 			break;
 			
 		case SOCK_CLOSED:
@@ -247,13 +265,16 @@ void proc_SEG_udp(uint8_t sock)
 			u2e_size = 0;
 			e2u_size = 0;
 			
-			if(socket(sock, Sn_MR_UDP, net->local_port, 0) == sock)
+			if(socket(sock, Sn_MR_UDP, network_connection[0].local_port, 0) == sock)
 			{
 				set_device_status(ST_UDP);
 				
-				if(net->packing_time) modeswitch_gap_time = net->packing_time; // replace the GAP time (default: 500ms)
+				if(serial_data_packing[0].packing_time) 
+                {
+                    modeswitch_gap_time = serial_data_packing[0].packing_time; // replace the GAP time (default: 500ms)
+                }
 				
-				if(serial->serial_debug_en == SEG_ENABLE)
+				if(serial_common->serial_debug_en == SEG_ENABLE)
 				{
 					printf(" > SEG:UDP_MODE:SOCKOPEN\r\n");
 				}
@@ -266,28 +287,34 @@ void proc_SEG_udp(uint8_t sock)
 
 void proc_SEG_tcp_client(uint8_t sock)
 {
-	DevConfig *s2e = get_DevConfig_pointer();
-	struct __network_info *net = (struct __network_info *)get_DevConfig_pointer()->network_info;
-	struct __serial_info *serial = (struct __serial_info *)get_DevConfig_pointer()->serial_info;
-	struct __options *option = (struct __options *)&(get_DevConfig_pointer()->options);
+	//DevConfig *s2e = get_DevConfig_pointer();
+    struct __tcp_option *tcp_option = (struct __tcp_option *)get_DevConfig_pointer()->tcp_option;
+	struct __network_connection *network_connection = (struct __network_connection *)get_DevConfig_pointer()->network_connection;
+	struct __serial_command *serial_command = (struct __serial_command *)&get_DevConfig_pointer()->serial_command;
+    struct __serial_common *serial_common = (struct __serial_common *)&get_DevConfig_pointer()->serial_common;
+	struct __serial_data_packing *serial_data_packing = (struct __serial_data_packing *)(get_DevConfig_pointer()->serial_data_packing);
 	
 	uint16_t source_port;
 	uint8_t destip[4] = {0, };
 	uint16_t destport = 0;
 	
 	uint8_t state = getSn_SR(sock);
+    
 	switch(state)
 	{
 		case SOCK_INIT:
-			if(reconnection_time >= net->reconnection)
+			if(reconnection_time >= tcp_option[0].reconnection)
 			{
 				reconnection_time = 0; // reconnection time variable clear
 				
 				// TCP connect exception checker; e.g., dns failed / zero srcip ... and etc.
-				if(check_tcp_connect_exception() == ON) return;
+				if(check_tcp_connect_exception() == ON) 
+                {
+                    return;
+                }
 				
 				// TCP connect
-				connect(sock, net->remote_ip, net->remote_port);
+				connect(sock, network_connection[0].remote_ip, network_connection[0].remote_port);
 #ifdef _SEG_DEBUG_
 				printf(" > SEG:TCP_CLIENT_MODE:CLIENT_CONNECTION\r\n");
 #endif
@@ -303,8 +330,14 @@ void proc_SEG_tcp_client(uint8_t sock)
 				//net->state = ST_CONNECT;
 				set_device_status(ST_CONNECT);
 				
-				if(!inactivity_time && net->inactivity)		enable_inactivity_timer = SEG_ENABLE;
-				if(!keepalive_time && net->keepalive_en)	enable_keepalive_timer = SEG_ENABLE;
+				if(!inactivity_time && tcp_option[0].inactivity)		
+                {
+                    enable_inactivity_timer = SEG_ENABLE;
+                }
+				if(!keepalive_time && tcp_option[0].keepalive_en)	
+                {
+                    enable_keepalive_timer = SEG_ENABLE;
+                }
 				
 				// TCP server mode only, This flag have to be enabled always at TCP client mode
 				//if(option->pw_connect_en == SEG_ENABLE)		flag_connect_pw_auth = SEG_ENABLE;
@@ -318,7 +351,7 @@ void proc_SEG_tcp_client(uint8_t sock)
 				}
 				
 				// Serial debug message printout
-				if(serial->serial_debug_en == SEG_ENABLE)
+				if(serial_common->serial_debug_en == SEG_ENABLE)
 				{
 					getsockopt(sock, SO_DESTIP, &destip);
 					getsockopt(sock, SO_DESTPORT, &destport);
@@ -335,11 +368,17 @@ void proc_SEG_tcp_client(uint8_t sock)
 			}
 			
 			// Serial to Ethernet process
-			if(BUFFER_USED_SIZE(data_rx) || u2e_size)	uart_to_ether(sock);
-			if(getSn_RX_RSR(sock) 	|| e2u_size)		ether_to_uart(sock);
+			if(BUFFER_USED_SIZE(data_rx) || u2e_size)	
+            {
+                uart_to_ether(sock);
+            }
+			if(getSn_RX_RSR(sock) 	|| e2u_size)		
+            {
+                ether_to_uart(sock);
+            }
 			
 			// Check the inactivity timer
-			if((enable_inactivity_timer == SEG_ENABLE) && (inactivity_time >= net->inactivity))
+			if((enable_inactivity_timer == SEG_ENABLE) && (inactivity_time >= tcp_option[0].inactivity))
 			{
 				//disconnect(sock);
 				process_socket_termination(sock);
@@ -350,13 +389,15 @@ void proc_SEG_tcp_client(uint8_t sock)
 #ifdef _SEG_DEBUG_
 				printf(" > INACTIVITY TIMER: TIMEOUT\r\n");
 #endif
-			}
+			}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
 			
 			// Check the keee-alive timer
-			if((net->keepalive_en == SEG_ENABLE) && (enable_keepalive_timer == SEG_ENABLE))
+			if((tcp_option[0].keepalive_en == SEG_ENABLE) && (enable_keepalive_timer == SEG_ENABLE))
 			{
 				// Send the first keee-alive packet
-				if((flag_sent_first_keepalive == SEG_DISABLE) && (keepalive_time >= net->keepalive_wait_time) && (net->keepalive_wait_time != 0))
+				if((flag_sent_first_keepalive == SEG_DISABLE) 
+                    && (keepalive_time >= tcp_option[0].keepalive_wait_time) 
+                    && (tcp_option[0].keepalive_wait_time != 0))
 				{
 #ifdef _SEG_DEBUG_
 					printf(" >> send_keepalive_packet_first [%d]\r\n", keepalive_time);
@@ -367,7 +408,9 @@ void proc_SEG_tcp_client(uint8_t sock)
 					flag_sent_first_keepalive = SEG_ENABLE;
 				}
 				// Send the keee-alive packet periodically
-				if((flag_sent_first_keepalive == SEG_ENABLE) && (keepalive_time >= net->keepalive_retry_time) && (net->keepalive_retry_time != 0))
+				if((flag_sent_first_keepalive == SEG_ENABLE) 
+                    && (keepalive_time >= tcp_option[0].keepalive_retry_time) 
+                    && (tcp_option[0].keepalive_retry_time != 0))
 				{
 #ifdef _SEG_DEBUG_
 					printf(" >> send_keepalive_packet_manual [%d]\r\n", keepalive_time);
@@ -380,7 +423,10 @@ void proc_SEG_tcp_client(uint8_t sock)
 			break;
 		
 		case SOCK_CLOSE_WAIT:
-			while(getSn_RX_RSR(sock) || e2u_size) ether_to_uart(sock); // receive remaining packets
+			while(getSn_RX_RSR(sock) || e2u_size) 
+            {
+                ether_to_uart(sock); // receive remaining packets
+            }
 			disconnect(sock);
 			break;
 		
@@ -399,12 +445,18 @@ void proc_SEG_tcp_client(uint8_t sock)
 			if(socket(sock, Sn_MR_TCP, source_port, Sn_MR_ND) == sock)
 			{
 				// Replace the command mode switch code GAP time (default: 500ms)
-				if((option->serial_command == SEG_ENABLE) && net->packing_time) modeswitch_gap_time = net->packing_time;
+				if((serial_command->serial_command == SEG_ENABLE) && serial_data_packing[0].packing_time) 
+                {
+                    modeswitch_gap_time = serial_data_packing[0].packing_time;
+                }
 				
 				// Enable the reconnection Timer
-				if((enable_reconnection_timer == SEG_DISABLE) && net->reconnection) enable_reconnection_timer = SEG_ENABLE;
+				if((enable_reconnection_timer == SEG_DISABLE) && tcp_option[0].reconnection) 
+                {
+                    enable_reconnection_timer = SEG_ENABLE;
+                }
 				
-				if(serial->serial_debug_en == SEG_ENABLE)
+				if(serial_common->serial_debug_en == SEG_ENABLE)
 				{
 					if(isSocketOpen_TCPclient == OFF)
 					{
@@ -423,11 +475,13 @@ void proc_SEG_tcp_client(uint8_t sock)
 
 void proc_SEG_tcp_server(uint8_t sock)
 {
-	DevConfig *s2e = get_DevConfig_pointer();
-	struct __network_info *net = (struct __network_info *)get_DevConfig_pointer()->network_info;
-	struct __serial_info *serial = (struct __serial_info *)get_DevConfig_pointer()->serial_info;
-	struct __options *option = (struct __options *)&(get_DevConfig_pointer()->options);
-	
+	//DevConfig *s2e = get_DevConfig_pointer();
+	struct __tcp_option *tcp_option = (struct __tcp_option *)get_DevConfig_pointer()->tcp_option;
+	struct __serial_common *serial_common = (struct __serial_common *)&get_DevConfig_pointer()->serial_common;
+	struct __network_connection *network_connection = (struct __network_connection *)(get_DevConfig_pointer()->network_connection);
+	struct __serial_command *serial_command = (struct __serial_command *)&get_DevConfig_pointer()->serial_command;
+    struct __serial_data_packing *serial_data_packing = (struct __serial_data_packing *)get_DevConfig_pointer()->serial_data_packing;
+    
 	uint8_t destip[4] = {0, };
 	uint16_t destport = 0;
 	
@@ -450,10 +504,16 @@ void proc_SEG_tcp_server(uint8_t sock)
 				//net->state = ST_CONNECT;
 				set_device_status(ST_CONNECT);
 				
-				if(!inactivity_time && net->inactivity)		enable_inactivity_timer = SEG_ENABLE;
+				if(!inactivity_time && tcp_option[0].inactivity)		
+                {
+                    enable_inactivity_timer = SEG_ENABLE;
+                }
 				//if(!keepalive_time && net->keepalive_en)	enable_keepalive_timer = SEG_ENABLE;
 				
-				if(option->pw_connect_en == SEG_DISABLE)	flag_connect_pw_auth = SEG_ENABLE;		// TCP server mode only (+ mixed_server)
+				if(tcp_option[0].pw_connect_en == SEG_DISABLE)	
+                {
+                    flag_connect_pw_auth = SEG_ENABLE;		// TCP server mode only (+ mixed_server)
+                }
 				else
 				{
 					// Connection password auth timer initialize
@@ -462,7 +522,7 @@ void proc_SEG_tcp_server(uint8_t sock)
 				}
 				
 				// Serial debug message printout
-				if(serial->serial_debug_en == SEG_ENABLE)
+				if(serial_common->serial_debug_en == SEG_ENABLE)
 				{
 					getsockopt(sock, SO_DESTIP, &destip);
 					getsockopt(sock, SO_DESTPORT, &destport);
@@ -476,11 +536,17 @@ void proc_SEG_tcp_server(uint8_t sock)
 			}
 			
 			// Serial to Ethernet process
-			if(BUFFER_USED_SIZE(data_rx) || u2e_size)	uart_to_ether(sock);
-			if(getSn_RX_RSR(sock) || e2u_size)	ether_to_uart(sock);
+			if(BUFFER_USED_SIZE(data_rx) || u2e_size)	
+            {
+                uart_to_ether(sock);
+            }
+			if(getSn_RX_RSR(sock) || e2u_size)	
+            {
+                ether_to_uart(sock);
+            }
 			
 			// Check the inactivity timer
-			if((enable_inactivity_timer == SEG_ENABLE) && (inactivity_time >= net->inactivity))
+			if((enable_inactivity_timer == SEG_ENABLE) && (inactivity_time >= tcp_option[0].inactivity))
 			{
 				//disconnect(sock);
 				process_socket_termination(sock);
@@ -494,10 +560,12 @@ void proc_SEG_tcp_server(uint8_t sock)
 			}
 			
 			// Check the keee-alive timer
-			if((net->keepalive_en == SEG_ENABLE) && (enable_keepalive_timer == SEG_ENABLE))
+			if((tcp_option[0].keepalive_en == SEG_ENABLE) && (enable_keepalive_timer == SEG_ENABLE))
 			{
 				// Send the first keee-alive packet
-				if((flag_sent_first_keepalive == SEG_DISABLE) && (keepalive_time >= net->keepalive_wait_time) && (net->keepalive_wait_time != 0))
+				if((flag_sent_first_keepalive == SEG_DISABLE) 
+                    && (keepalive_time >= tcp_option[0].keepalive_wait_time) 
+                    && (tcp_option[0].keepalive_wait_time != 0))
 				{
 #ifdef _SEG_DEBUG_
 					printf(" >> send_keepalive_packet_first [%d]\r\n", keepalive_time);
@@ -508,7 +576,9 @@ void proc_SEG_tcp_server(uint8_t sock)
 					flag_sent_first_keepalive = SEG_ENABLE;
 				}
 				// Send the keee-alive packet periodically
-				if((flag_sent_first_keepalive == SEG_ENABLE) && (keepalive_time >= net->keepalive_retry_time) && (net->keepalive_retry_time != 0))
+				if((flag_sent_first_keepalive == SEG_ENABLE) 
+                    && (keepalive_time >= tcp_option[0].keepalive_retry_time) 
+                    && (tcp_option[0].keepalive_retry_time != 0))
 				{
 #ifdef _SEG_DEBUG_
 					printf(" >> send_keepalive_packet_manual [%d]\r\n", keepalive_time);
@@ -519,7 +589,7 @@ void proc_SEG_tcp_server(uint8_t sock)
 			}
 			
 			// Check the connection password auth timer
-			if(option->pw_connect_en == SEG_ENABLE)
+			if(tcp_option[0].pw_connect_en == SEG_ENABLE)
 			{
 				if((flag_connect_pw_auth == SEG_DISABLE) && (connection_auth_time >= MAX_CONNECTION_AUTH_TIME)) // timeout default: 5000ms (5 sec)
 				{
@@ -536,7 +606,10 @@ void proc_SEG_tcp_server(uint8_t sock)
 			break;
 		
 		case SOCK_CLOSE_WAIT:
-			while(getSn_RX_RSR(sock) || e2u_size) ether_to_uart(sock); // receive remaining packets
+			while(getSn_RX_RSR(sock) || e2u_size) 
+            {
+                ether_to_uart(sock); // receive remaining packets
+            }
 			disconnect(sock);
 			break;
 		
@@ -548,15 +621,18 @@ void proc_SEG_tcp_server(uint8_t sock)
 			u2e_size = 0;
 			e2u_size = 0;
 
-			if(socket(sock, Sn_MR_TCP, net->local_port, Sn_MR_ND) == sock)
+			if(socket(sock, Sn_MR_TCP, network_connection[0].local_port, Sn_MR_ND) == sock)
 			{
 				// Replace the command mode switch code GAP time (default: 500ms)
-				if((option->serial_command == SEG_ENABLE) && net->packing_time) modeswitch_gap_time = net->packing_time;
+				if((serial_command->serial_command == SEG_ENABLE) && serial_data_packing[0].packing_time) 
+                {
+                    modeswitch_gap_time = serial_data_packing[0].packing_time;
+                }
 				
 				// TCP Server listen
 				listen(sock);
 				
-				if(serial->serial_debug_en == SEG_ENABLE)
+				if(serial_common->serial_debug_en == SEG_ENABLE)
 				{
 					printf(" > SEG:TCP_SERVER_MODE:SOCKOPEN\r\n");
 				}
@@ -571,11 +647,13 @@ void proc_SEG_tcp_server(uint8_t sock)
 
 void proc_SEG_tcp_mixed(uint8_t sock)
 {
-	DevConfig *s2e = get_DevConfig_pointer();
-	struct __network_info *net = (struct __network_info *)get_DevConfig_pointer()->network_info;
-	struct __serial_info *serial = (struct __serial_info *)get_DevConfig_pointer()->serial_info;
-	struct __options *option = (struct __options *)&(get_DevConfig_pointer()->options);
-	
+	//DevConfig *s2e = get_DevConfig_pointer();
+	struct __tcp_option *tcp_option = (struct __tcp_option *)get_DevConfig_pointer()->tcp_option;
+    struct __network_connection *network_connection = (struct __network_connection *)get_DevConfig_pointer()->network_connection;
+    struct __serial_common *serial_common = (struct __serial_common *)&get_DevConfig_pointer()->serial_common;
+    struct __serial_command *serial_command = (struct __serial_command *)&get_DevConfig_pointer()->serial_command;
+    struct __serial_data_packing *serial_data_packing = (struct __serial_data_packing *)&get_DevConfig_pointer()->serial_data_packing;
+    
 	uint16_t source_port = 0;
 	uint8_t destip[4] = {0, };
 	uint16_t destport = 0;
@@ -590,7 +668,7 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 		case SOCK_INIT:
 			if(mixed_state == MIXED_CLIENT)
 			{
-				if(reconnection_time >= net->reconnection)
+				if(reconnection_time >= tcp_option[0].reconnection)
 				{
 					reconnection_time = 0; // reconnection time variable clear
 					
@@ -607,7 +685,7 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 					}
 					
 					// TCP connect
-					connect(sock, net->remote_ip, net->remote_port);
+					connect(sock, network_connection[0].remote_ip, network_connection[0].remote_port);
 					
 #ifdef MIXED_CLIENT_LIMITED_CONNECT
 					reconnection_count++;
@@ -619,8 +697,14 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 						mixed_state = MIXED_SERVER;
 					}
 	#ifdef _SEG_DEBUG_
-					if(reconnection_count != 0)	printf(" > SEG:TCP_MIXED_MODE:CLIENT_CONNECTION [%d]\r\n", reconnection_count);
-					else						printf(" > SEG:TCP_MIXED_MODE:CLIENT_CONNECTION_RETRY FAILED\r\n");
+					if(reconnection_count != 0)	
+                    {
+                        printf(" > SEG:TCP_MIXED_MODE:CLIENT_CONNECTION [%d]\r\n", reconnection_count);
+                    }
+					else						
+                    {
+                        printf(" > SEG:TCP_MIXED_MODE:CLIENT_CONNECTION_RETRY FAILED\r\n");
+                    }
 	#endif
 #endif
 				}
@@ -635,7 +719,7 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 				process_socket_termination(sock);
 				mixed_state = MIXED_CLIENT;
 				
-				reconnection_time = net->reconnection; // rapid initial connection
+				reconnection_time = tcp_option[0].reconnection; // rapid initial connection
 			}
 			break;
 		
@@ -648,11 +732,17 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 				//net->state = ST_CONNECT;
 				set_device_status(ST_CONNECT);
 				
-				if(!inactivity_time && net->inactivity)		enable_inactivity_timer = SEG_ENABLE;
-				if(!keepalive_time && net->keepalive_en)	enable_keepalive_timer = SEG_ENABLE;
+				if(!inactivity_time && tcp_option[0].inactivity)		
+                {
+                    enable_inactivity_timer = SEG_ENABLE;
+                }
+				if(!keepalive_time && tcp_option[0].keepalive_en)	
+                {
+                    enable_keepalive_timer = SEG_ENABLE;
+                }
 				
 				// Connection Password option: TCP server mode only (+ mixed_server)
-				if((option->pw_connect_en == SEG_DISABLE) || (mixed_state == MIXED_CLIENT))
+				if((tcp_option[0].pw_connect_en == SEG_DISABLE) || (mixed_state == MIXED_CLIENT))
 				{
 					flag_connect_pw_auth = SEG_ENABLE;
 				}
@@ -664,13 +754,19 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 				}
 				
 				// Serial debug message printout
-				if(serial->serial_debug_en == SEG_ENABLE)
+				if(serial_common->serial_debug_en == SEG_ENABLE)
 				{
 					getsockopt(sock, SO_DESTIP, &destip);
 					getsockopt(sock, SO_DESTPORT, &destport);
 					
-					if(mixed_state == MIXED_SERVER)		printf(" > SEG:CONNECTED FROM - %d.%d.%d.%d : %d\r\n",destip[0], destip[1], destip[2], destip[3], destport);
-					else								printf(" > SEG:CONNECTED TO - %d.%d.%d.%d : %d\r\n",destip[0], destip[1], destip[2], destip[3], destport);
+					if(mixed_state == MIXED_SERVER)		
+                    {
+                        printf(" > SEG:CONNECTED FROM - %d.%d.%d.%d : %d\r\n",destip[0], destip[1], destip[2], destip[3], destport);
+                    }
+					else								
+                    {
+                        printf(" > SEG:CONNECTED TO - %d.%d.%d.%d : %d\r\n",destip[0], destip[1], destip[2], destip[3], destport);
+                    }
 				}
 				
 				
@@ -694,11 +790,17 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 			}
 			
 			// Serial to Ethernet process
-			if(BUFFER_USED_SIZE(data_rx) || u2e_size)	uart_to_ether(sock);
-			if(getSn_RX_RSR(sock) 	|| e2u_size)		ether_to_uart(sock);
+			if(BUFFER_USED_SIZE(data_rx) || u2e_size)	
+            {
+                uart_to_ether(sock);
+            }
+			if(getSn_RX_RSR(sock) 	|| e2u_size)		
+            {
+                ether_to_uart(sock);
+            }
 			
 			// Check the inactivity timer
-			if((enable_inactivity_timer == SEG_ENABLE) && (inactivity_time >= net->inactivity))
+			if((enable_inactivity_timer == SEG_ENABLE) && (inactivity_time >= tcp_option[0].inactivity))
 			{
 				//disconnect(sock);
 				process_socket_termination(sock);
@@ -714,10 +816,12 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 			}
 			
 			// Check the keee-alive timer
-			if((net->keepalive_en == SEG_ENABLE) && (enable_keepalive_timer == SEG_ENABLE))
+			if((tcp_option[0].keepalive_en == SEG_ENABLE) && (enable_keepalive_timer == SEG_ENABLE))
 			{
 				// Send the first keee-alive packet
-				if((flag_sent_first_keepalive == SEG_DISABLE) && (keepalive_time >= net->keepalive_wait_time) && (net->keepalive_wait_time != 0))
+				if((flag_sent_first_keepalive == SEG_DISABLE) 
+                    && (keepalive_time >= tcp_option[0].keepalive_wait_time) 
+                    && (tcp_option[0].keepalive_wait_time != 0))
 				{
 #ifdef _SEG_DEBUG_
 					printf(" >> send_keepalive_packet_first [%d]\r\n", keepalive_time);
@@ -728,7 +832,9 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 					flag_sent_first_keepalive = SEG_ENABLE;
 				}
 				// Send the keee-alive packet periodically
-				if((flag_sent_first_keepalive == SEG_ENABLE) && (keepalive_time >= net->keepalive_retry_time) && (net->keepalive_retry_time != 0))
+				if((flag_sent_first_keepalive == SEG_ENABLE) 
+                    && (keepalive_time >= tcp_option[0].keepalive_retry_time) 
+                    && (tcp_option[0].keepalive_retry_time != 0))
 				{
 #ifdef _SEG_DEBUG_
 					printf(" >> send_keepalive_packet_manual [%d]\r\n", keepalive_time);
@@ -739,7 +845,7 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 			}
 			
 			// Check the connection password auth timer
-			if((mixed_state == MIXED_SERVER) && (option->pw_connect_en == SEG_ENABLE))
+			if((mixed_state == MIXED_SERVER) && (tcp_option[0].pw_connect_en == SEG_ENABLE))
 			{
 				if((flag_connect_pw_auth == SEG_DISABLE) && (connection_auth_time >= MAX_CONNECTION_AUTH_TIME)) // timeout default: 5000ms (5 sec)
 				{
@@ -756,7 +862,10 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 			break;
 		
 		case SOCK_CLOSE_WAIT:
-			while(getSn_RX_RSR(sock) || e2u_size) ether_to_uart(sock); // receive remaining packets
+			while(getSn_RX_RSR(sock) || e2u_size)
+            {
+                ether_to_uart(sock); // receive remaining packets
+            }
 			disconnect(sock);
 			break;
 		
@@ -771,15 +880,18 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 				u2e_size = 0;
 				e2u_size = 0;
 				
-				if(socket(sock, Sn_MR_TCP, net->local_port, Sn_MR_ND) == sock)
+				if(socket(sock, Sn_MR_TCP, network_connection[0].local_port, Sn_MR_ND) == sock)
 				{
 					// Replace the command mode switch code GAP time (default: 500ms)
-					if((option->serial_command == SEG_ENABLE) && net->packing_time) modeswitch_gap_time = net->packing_time;
+					if((serial_command->serial_command == SEG_ENABLE) && serial_data_packing[0].packing_time) 
+                    {
+                        modeswitch_gap_time = serial_data_packing[0].packing_time;
+                    }
 					
 					// TCP Server listen
 					listen(sock);
 					
-					if(serial->serial_debug_en == SEG_ENABLE)
+					if(serial_common->serial_debug_en == SEG_ENABLE)
 					{
 						printf(" > SEG:TCP_MIXED_MODE:SERVER_SOCKOPEN\r\n");
 					}
@@ -796,12 +908,18 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 				if(socket(sock, Sn_MR_TCP, source_port, Sn_MR_ND) == sock)
 				{
 					// Replace the command mode switch code GAP time (default: 500ms)
-					if((option->serial_command == SEG_ENABLE) && net->packing_time) modeswitch_gap_time = net->packing_time;
+					if((serial_command->serial_command == SEG_ENABLE) && serial_data_packing[0].packing_time) 
+                    {
+                        modeswitch_gap_time = serial_data_packing[0].packing_time;
+                    }
 					
 					// Enable the reconnection Timer
-					if((enable_reconnection_timer == SEG_DISABLE) && net->reconnection) enable_reconnection_timer = SEG_ENABLE;
+					if((enable_reconnection_timer == SEG_DISABLE) && tcp_option[0].reconnection) 
+                    {
+                        enable_reconnection_timer = SEG_ENABLE;
+                    }
 					
-					if(serial->serial_debug_en == SEG_ENABLE)
+					if(serial_common->serial_debug_en == SEG_ENABLE)
 					{
 						printf(" > SEG:TCP_MIXED_MODE:CLIENT_SOCKOPEN\r\n");
 					}
@@ -816,8 +934,10 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 
 void uart_to_ether(uint8_t sock)
 {
-	struct __network_info *netinfo = (struct __network_info *)&(get_DevConfig_pointer()->network_info);
-	struct __serial_info *serial = (struct __serial_info *)get_DevConfig_pointer()->serial_info;
+	struct __network_connection *network_connection = (struct __network_connection *)(get_DevConfig_pointer()->network_connection);
+	struct __serial_common *serial_common = (struct __serial_common *)&get_DevConfig_pointer()->serial_common;
+    struct __tcp_option *tcp_option = (struct __tcp_option *)get_DevConfig_pointer()->tcp_option;
+    
 	uint16_t len;
 	int16_t sent_len;
 	//uint16_t ret;
@@ -855,11 +975,20 @@ void uart_to_ether(uint8_t sock)
 		switch(getSn_SR(sock))
 		{
 			case SOCK_UDP: // UDP_MODE
-				if((netinfo->remote_ip[0] == 0x00) && (netinfo->remote_ip[1] == 0x00) && (netinfo->remote_ip[2] == 0x00) && (netinfo->remote_ip[3] == 0x00))
+				if((network_connection[0].remote_ip[0] == 0x00) 
+                    && (network_connection[0].remote_ip[1] == 0x00) 
+                    && (network_connection[0].remote_ip[2] == 0x00) 
+                    && (network_connection[0].remote_ip[3] == 0x00))
 				{
-					if((peerip[0] == 0x00) && (peerip[1] == 0x00) && (peerip[2] == 0x00) && (peerip[3] == 0x00))
+					if((peerip[0] == 0x00) 
+                        && (peerip[1] == 0x00) 
+                        && (peerip[2] == 0x00) 
+                        && (peerip[3] == 0x00))
 					{
-						if(serial->serial_debug_en == SEG_ENABLE) printf(" > SEG:UDP_MODE:DATA SEND FAILED - UDP Peer IP/Port required (0.0.0.0)\r\n");
+						if(serial_common->serial_debug_en == SEG_ENABLE) 
+                        {
+                            printf(" > SEG:UDP_MODE:DATA SEND FAILED - UDP Peer IP/Port required (0.0.0.0)\r\n");
+                        }
 					}
 					else
 					{
@@ -870,10 +999,13 @@ void uart_to_ether(uint8_t sock)
 				else
 				{
 					// UDP 1:1 mode
-					sent_len = (int16_t)sendto(sock, g_send_buf, len, netinfo->remote_ip, netinfo->remote_port);
+					sent_len = (int16_t)sendto(sock, g_send_buf, len, network_connection[0].remote_ip, network_connection[0].remote_port);
 				}
 				
-				if(sent_len > 0) u2e_size-=sent_len;
+				if(sent_len > 0) 
+                {
+                    u2e_size-=sent_len;
+                }
 				
 				break;
 			
@@ -898,14 +1030,17 @@ void uart_to_ether(uint8_t sock)
 					
 					// ## 3: 
 					sent_len = (int16_t)send(sock, g_send_buf, len);
-					if(sent_len > 0) u2e_size-=sent_len;
+					if(sent_len > 0) 
+                    {
+                        u2e_size-=sent_len;
+                    }
 					
 					add_data_transfer_bytecount(SEG_UART_TX, len);
 					//printf("sent len = %d\r\n", len); // ## for debugging
 					
 					//if(!keepalive_time && netinfo->keepalive_en)
 					//if((netinfo->keepalive_en == ENABLE) && (flag_sent_first_keepalive == DISABLE))
-					if(netinfo->keepalive_en == ENABLE)
+					if(tcp_option[0].keepalive_en == ENABLE)
 					{
 						if(flag_sent_first_keepalive == DISABLE)
 						{
@@ -935,7 +1070,8 @@ void uart_to_ether(uint8_t sock)
 
 uint16_t get_serial_data(void)
 {
-	struct __network_info *netinfo = (struct __network_info *)&(get_DevConfig_pointer()->network_info);
+	struct __serial_data_packing *serial_data_packing = (struct __serial_data_packing *)(get_DevConfig_pointer()->serial_data_packing);
+    
 	uint16_t i;
 	uint16_t len;
 	
@@ -944,10 +1080,10 @@ uint16_t get_serial_data(void)
 	if((len + u2e_size) >= DATA_BUF_SIZE) // Avoiding u2e buffer (g_send_buf) overflow	
 	{
 		/* Checking Data packing option: charactor delimiter */
-		if((netinfo->packing_delimiter[0] != 0x00) && (len == 1))
+		if((serial_data_packing[0].packing_delimiter[0] != 0x00) && (len == 1))
 		{
 			g_send_buf[u2e_size] = (uint8_t)uart_getc(SEG_DATA_UART);
-			if(netinfo->packing_delimiter[0] == g_send_buf[u2e_size])
+			if(serial_data_packing[0].packing_delimiter[0] == g_send_buf[u2e_size])
 			{
 				return u2e_size;
 			}
@@ -960,7 +1096,9 @@ uint16_t get_serial_data(void)
 		len = DATA_BUF_SIZE - u2e_size;
 	}
 	
-	if((!netinfo->packing_time) && (!netinfo->packing_size) && (!netinfo->packing_delimiter[0])) // No Packing delimiters.
+	if((!serial_data_packing[0].packing_time) 
+        && (!serial_data_packing[0].packing_size) 
+        && (!serial_data_packing[0].packing_delimiter[0])) // No Packing delimiters.
 	{
 		//ret = uart_gets(SEG_DATA_UART, g_send_buf, len);
 		//return (uint16_t)ret;
@@ -981,13 +1119,13 @@ uint16_t get_serial_data(void)
 			g_send_buf[u2e_size++] = (uint8_t)uart_getc(SEG_DATA_UART);
 			
 			// Packing delimiter: character option
-			if((netinfo->packing_delimiter[0] != 0x00) && (netinfo->packing_delimiter[0] == g_send_buf[u2e_size - 1]))
+			if((serial_data_packing[0].packing_delimiter[0] != 0x00) && (serial_data_packing[0].packing_delimiter[0] == g_send_buf[u2e_size - 1]))
 			{
 				return u2e_size;
 			}
 			
 			// Packing delimiter: size option
-			if((netinfo->packing_size != 0) && (netinfo->packing_size == u2e_size))
+			if((serial_data_packing[0].packing_size != 0) && (serial_data_packing[0].packing_size == u2e_size))
 			{
 				return u2e_size;
 			}
@@ -995,9 +1133,14 @@ uint16_t get_serial_data(void)
 	}
 	
 	// Packing delimiter: time option
-	if((netinfo->packing_time != 0) && (u2e_size != 0) && (flag_serial_input_time_elapse))
+	if((serial_data_packing[0].packing_time != 0) 
+        && (u2e_size != 0) 
+        && (flag_serial_input_time_elapse))
 	{
-		if(BUFFER_USED_SIZE(data_rx) == 0) flag_serial_input_time_elapse = SEG_DISABLE; // ##
+		if(BUFFER_USED_SIZE(data_rx) == 0) 
+        {
+            flag_serial_input_time_elapse = SEG_DISABLE; // ##
+        }
 		
 		return u2e_size;
 	}
@@ -1007,16 +1150,21 @@ uint16_t get_serial_data(void)
 
 void ether_to_uart(uint8_t sock)
 {
-	struct __network_info *netinfo = (struct __network_info *)&(get_DevConfig_pointer()->network_info);
-	struct __serial_info *serial = (struct __serial_info *)get_DevConfig_pointer()->serial_info;
-	struct __options *option = (struct __options *)&(get_DevConfig_pointer()->options);
+	struct __serial_option *serial_option = (struct __serial_option *)&(get_DevConfig_pointer()->serial_option);
+    struct __serial_common *serial_common = (struct __serial_common *)&(get_DevConfig_pointer()->serial_common);
+    struct __network_connection *network_connection = (struct __network_connection *)(get_DevConfig_pointer()->network_connection);
+    struct __tcp_option *tcp_option = (struct __tcp_option *)(get_DevConfig_pointer()->tcp_option);
+
 	uint16_t len;
 	uint16_t i;
 
-	if(serial->flow_control == flow_rts_cts)
+	if(serial_option->flow_control == flow_rts_cts)
 	{
 #ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
-		if(get_uart_cts_pin(SEG_DATA_UART) != UART_CTS_LOW) return;
+		if(get_uart_cts_pin(SEG_DATA_UART) != UART_CTS_LOW) 
+        {
+            return;
+        }
 #else
 		; // check the CTS reg
 #endif
@@ -1025,7 +1173,10 @@ void ether_to_uart(uint8_t sock)
 
 	// H/W Socket buffer -> User's buffer
 	len = getSn_RX_RSR(sock);
-	if(len > DATA_BUF_SIZE) len = DATA_BUF_SIZE; // avoiding buffer overflow
+	if(len > DATA_BUF_SIZE) 
+    {
+        len = DATA_BUF_SIZE; // avoiding buffer overflow
+    }
 	
 	//printf("ether_to_uart: %d\r\n", len); // ## for debugging
 	
@@ -1039,7 +1190,10 @@ void ether_to_uart(uint8_t sock)
 				if(memcmp(peerip_tmp, peerip, 4) !=  0)
 				{
 					memcpy(peerip_tmp, peerip, 4);
-					if(serial->serial_debug_en == SEG_ENABLE) printf(" > UDP Peer IP/Port: %d.%d.%d.%d : %d\r\n", peerip[0], peerip[1], peerip[2], peerip[3], peerport);
+					if(serial_common->serial_debug_en == SEG_ENABLE) 
+                    {
+                        printf(" > UDP Peer IP/Port: %d.%d.%d.%d : %d\r\n", peerip[0], peerip[1], peerip[2], peerip[3], peerport);
+                    }
 				}
 				break;
 			
@@ -1059,10 +1213,12 @@ void ether_to_uart(uint8_t sock)
 		add_data_transfer_bytecount(SEG_ETHER_RX, e2u_size);
 	}
 	
-	if((netinfo->state == TCP_SERVER_MODE) || ((netinfo->state == TCP_MIXED_MODE) && (mixed_state == MIXED_SERVER)))
+	if((network_connection[0].working_state == TCP_SERVER_MODE) 
+        || ((network_connection[0].working_state == TCP_MIXED_MODE) 
+        && (mixed_state == MIXED_SERVER)))
 	{
 		// Connection password authentication
-		if((option->pw_connect_en == SEG_ENABLE) && (flag_connect_pw_auth == SEG_DISABLE))
+		if((tcp_option[0].pw_connect_en == SEG_ENABLE) && (flag_connect_pw_auth == SEG_DISABLE))
 		{
 			if(check_connect_pw_auth(g_recv_buf, len) == SEG_ENABLE)
 			{
@@ -1086,28 +1242,37 @@ void ether_to_uart(uint8_t sock)
 	// Ethernet data transfer to DATA UART
 	if(e2u_size != 0)
 	{
-		if(serial->dsr_en == SEG_ENABLE) // DTR / DSR handshake (flowcontrol)
+		if(serial_option[0].dsr_en == SEG_ENABLE) // DTR / DSR handshake (flowcontrol)
 		{
-			if(get_flowcontrol_dsr_pin() == 0) return;
+			if(get_flowcontrol_dsr_pin() == 0) 
+            {
+                return;
+            }
 		}
 //////////////////////////////////////////////////////////////////////
-		if(serial->uart_interface == UART_IF_RS422_485)
+		if(serial_option[0].uart_interface == UART_IF_RS422_485)
 		{
 			uart_rs485_enable(SEG_DATA_UART);
 			//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
-			for(i = 0; i < e2u_size; i++) uart_putc(SEG_DATA_UART, g_recv_buf[i]);
+			for(i = 0; i < e2u_size; i++) 
+            {
+                uart_putc(SEG_DATA_UART, g_recv_buf[i]);
+            }
 			uart_rs485_disable(SEG_DATA_UART);
 			
 			add_data_transfer_bytecount(SEG_ETHER_TX, e2u_size);
 			e2u_size = 0;
 		}
 //////////////////////////////////////////////////////////////////////
-		else if(serial->flow_control == flow_xon_xoff) 
+		else if(serial_option[0].flow_control == flow_xon_xoff) 
 		{
 			if(isXON == SEG_ENABLE)
 			{
 				//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
-				for(i = 0; i < e2u_size; i++) uart_putc(SEG_DATA_UART, g_recv_buf[i]);
+				for(i = 0; i < e2u_size; i++) 
+                {  
+                    uart_putc(SEG_DATA_UART, g_recv_buf[i]);
+                }
 				add_data_transfer_bytecount(SEG_ETHER_TX, e2u_size);
 				e2u_size = 0;
 			}
@@ -1119,7 +1284,10 @@ void ether_to_uart(uint8_t sock)
 		else
 		{
 			//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
-			for(i = 0; i < e2u_size; i++) uart_putc(SEG_DATA_UART, g_recv_buf[i]);
+			for(i = 0; i < e2u_size; i++) 
+            {   
+                uart_putc(SEG_DATA_UART, g_recv_buf[i]);
+            }
 			
 			add_data_transfer_bytecount(SEG_ETHER_TX, e2u_size);
 			e2u_size = 0;
@@ -1158,12 +1326,13 @@ void send_keepalive_packet_manual(uint8_t sock)
 
 uint8_t process_socket_termination(uint8_t sock)
 {
-	struct __network_info *net = (struct __network_info *)get_DevConfig_pointer()->network_info;
+	struct __network_connection *network_connection = (struct __network_connection *)get_DevConfig_pointer()->network_connection;
+    
 	uint8_t sock_status = getSn_SR(sock);
 	
 	if(sock_status == SOCK_CLOSED) return sock;
 	
-	if(net->working_mode != UDP_MODE) // TCP_SERVER_MODE / TCP_CLIENT_MODE / TCP_MIXED_MODE
+	if(network_connection[0].working_mode != UDP_MODE) // TCP_SERVER_MODE / TCP_CLIENT_MODE / TCP_MIXED_MODE
 	{
 		if((sock_status == SOCK_ESTABLISHED) || (sock_status == SOCK_CLOSE_WAIT))
 		{
@@ -1179,14 +1348,17 @@ uint8_t process_socket_termination(uint8_t sock)
 
 uint8_t check_connect_pw_auth(uint8_t * buf, uint16_t len)
 {
-	struct __options *option = (struct __options *)&(get_DevConfig_pointer()->options);
+	struct __tcp_option *tcp_option = (struct __tcp_option *)(get_DevConfig_pointer()->tcp_option);
 	uint8_t ret = SEG_DISABLE;
 	uint8_t pwbuf[11] = {0,};
 	
-	if(len >= sizeof(pwbuf)) len = sizeof(pwbuf) - 1;
+	if(len >= sizeof(pwbuf)) 
+    {
+        len = sizeof(pwbuf) - 1;
+    }
 	
 	memcpy(pwbuf, buf, len);
-	if((len == strlen(option->pw_connect)) && (memcmp(option->pw_connect, pwbuf, len) == 0))
+	if((len == strlen(tcp_option[0].pw_connect)) && (memcmp(tcp_option[0].pw_connect, pwbuf, len) == 0))
 	{
 		ret = SEG_ENABLE; // Connection password auth success
 	}
@@ -1203,15 +1375,15 @@ uint8_t check_connect_pw_auth(uint8_t * buf, uint16_t len)
 
 void init_trigger_modeswitch(uint8_t mode)
 {
-	struct __network_info *netinfo = (struct __network_info *)&(get_DevConfig_pointer()->network_info);
-	struct __serial_info *serial = (struct __serial_info *)&(get_DevConfig_pointer()->serial_info);
+	struct __serial_common *serial_common = (struct __serial_common *)&(get_DevConfig_pointer()->serial_common);
+    struct __network_connection *network_connection = (struct __network_connection *)(get_DevConfig_pointer()->network_connection);
 	
 	if(mode == DEVICE_AT_MODE)
 	{
 		opmode = DEVICE_AT_MODE;
 		set_device_status(ST_ATMODE);
 		
-		if(serial->serial_debug_en)
+		if(serial_common->serial_debug_en)
 		{
 			printf(" > SEG:AT Mode\r\n");
 			uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:AT Mode\r\n", sizeof("SEG:AT Mode\r\n"));
@@ -1221,9 +1393,12 @@ void init_trigger_modeswitch(uint8_t mode)
 	{
 		opmode = DEVICE_GW_MODE;
 		set_device_status(ST_OPEN);
-		if(netinfo->working_mode == TCP_MIXED_MODE) mixed_state = MIXED_SERVER;
+		if(network_connection[0].working_mode == TCP_MIXED_MODE) 
+        {
+            mixed_state = MIXED_SERVER;
+        }
 				
-		if(serial->serial_debug_en)
+		if(serial_common->serial_debug_en)
 		{
 			printf(" > SEG:GW Mode\r\n");
 			uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:GW Mode\r\n", sizeof("SEG:GW Mode\r\n"));
@@ -1248,29 +1423,27 @@ void init_trigger_modeswitch(uint8_t mode)
 
 uint8_t check_modeswitch_trigger(uint8_t ch)
 {
-	struct __network_info *netinfo = (struct __network_info *)&(get_DevConfig_pointer()->network_info);
-	struct __options *option = (struct __options *)&(get_DevConfig_pointer()->options);
+	struct __serial_command *serial_command = (struct __serial_command *)&(get_DevConfig_pointer()->serial_command);
 	
 	uint8_t modeswitch_failed = SEG_DISABLE;
 	uint8_t ret = 0;
 	
 	if(opmode != DEVICE_GW_MODE) 				return 0;
-	if(option->serial_command == SEG_DISABLE) 	return 0;
+	if(serial_command->serial_command == SEG_DISABLE) 	return 0;
 	
 	switch(triggercode_idx)
 	{
 		case 0:
-			if((ch == option->serial_trigger[triggercode_idx]) && (modeswitch_time == modeswitch_gap_time)) // comparision succeed
+			if((ch == serial_command->serial_trigger[triggercode_idx]) && (modeswitch_time == modeswitch_gap_time)) // comparision succeed
 			{
 				ch_tmp[triggercode_idx] = ch;
 				triggercode_idx++;
 				enable_modeswitch_timer = SEG_ENABLE;
 			}
 			break;
-			
 		case 1:
 		case 2:
-			if((ch == option->serial_trigger[triggercode_idx]) && (modeswitch_time < modeswitch_gap_time)) // comparision succeed
+			if((ch == serial_command->serial_trigger[triggercode_idx]) && (modeswitch_time < modeswitch_gap_time)) // comparision succeed
 			{
 				ch_tmp[triggercode_idx] = ch;
 				triggercode_idx++;
@@ -1317,15 +1490,15 @@ void restore_serial_data(uint8_t idx)
 
 uint8_t check_serial_store_permitted(uint8_t ch)
 {
-	struct __network_info *net = (struct __network_info *)get_DevConfig_pointer()->network_info;
-	struct __serial_info *serial = (struct __serial_info *)get_DevConfig_pointer()->serial_info;
-	
+	struct __network_connection *network_connection = (struct __network_connection *)get_DevConfig_pointer()->network_connection;
+    struct __serial_option *serial_option = (struct __serial_option *)get_DevConfig_pointer()->serial_option;
+
 	uint8_t ret = SEG_DISABLE; // SEG_DISABLE: Doesn't put the serial data in a ring buffer
 	
-	switch(net->state)
+	switch(network_connection[0].working_state)
 	{
 		case ST_OPEN:
-			if(net->working_mode != TCP_MIXED_MODE) break;
+			if(network_connection[0].working_mode != TCP_MIXED_MODE) break;
 		case ST_CONNECT:
 		case ST_UDP:
 		case ST_ATMODE:
@@ -1337,7 +1510,7 @@ uint8_t check_serial_store_permitted(uint8_t ch)
 	
 	// Software flow control: Check the XON/XOFF start/stop commands
 	// [Peer] -> [WIZnet Device]
-	if((ret == SEG_ENABLE) && (serial->flow_control == flow_xon_xoff))
+	if((ret == SEG_ENABLE) && (serial_option[0].flow_control == flow_xon_xoff))
 	{
 		if(ch == UART_XON)
 		{
@@ -1377,15 +1550,19 @@ void reset_SEG_timeflags(void)
 
 void init_time_delimiter_timer(void)
 {
-	struct __network_info *netinfo = (struct __network_info *)&(get_DevConfig_pointer()->network_info);
-	struct __options *option = (struct __options *)&(get_DevConfig_pointer()->options);
+	struct __serial_command *serial_command = (struct __serial_command *)&(get_DevConfig_pointer()->serial_command);
+    struct __serial_data_packing *serial_data_packing = (struct __serial_data_packing *)(get_DevConfig_pointer()->serial_data_packing);
+
 	//DevConfig *s2e = get_DevConfig_pointer();
 	
-	if((option->serial_command == SEG_ENABLE) && (opmode == DEVICE_GW_MODE))
+	if((serial_command->serial_command == SEG_ENABLE) && (opmode == DEVICE_GW_MODE))
 	{
-		if(netinfo->packing_time != 0)
+		if(serial_data_packing[0].packing_time != 0)
 		{
-			if(enable_serial_input_timer == SEG_DISABLE) enable_serial_input_timer = SEG_ENABLE;
+			if(enable_serial_input_timer == SEG_DISABLE) 
+            {
+                enable_serial_input_timer = SEG_ENABLE;
+            }
 			serial_input_time = 0;
 		}
 	}
@@ -1393,9 +1570,9 @@ void init_time_delimiter_timer(void)
 
 uint8_t check_tcp_connect_exception(void)
 {
-	struct __network_info *net = (struct __network_info *)get_DevConfig_pointer()->network_info;
-	struct __serial_info *serial = (struct __serial_info *)get_DevConfig_pointer()->serial_info;
-	struct __options *option = (struct __options *)&(get_DevConfig_pointer()->options);
+	struct __network_option *network_option = (struct __network_option *)&get_DevConfig_pointer()->network_option;
+    struct __serial_common *serial_common = (struct __serial_common *)&get_DevConfig_pointer()->serial_common;
+     struct __network_connection *network_connection = (struct __network_connection *)get_DevConfig_pointer()->network_connection;
 	
 	uint8_t srcip[4] = {0, };
 	uint8_t ret = OFF;
@@ -1403,37 +1580,63 @@ uint8_t check_tcp_connect_exception(void)
 	getSIPR(srcip);
 	
 	// DNS failed
-	if((option->dns_use == SEG_ENABLE) && (flag_process_dns_success != ON))
+	if((network_option->dns_use == SEG_ENABLE) && (flag_process_dns_success != ON))
 	{
-		if(serial->serial_debug_en == SEG_ENABLE) printf(" > SEG:CONNECTION FAILED - DNS Failed\r\n");
+		if(serial_common->serial_debug_en == SEG_ENABLE) 
+        {
+            printf(" > SEG:CONNECTION FAILED - DNS Failed\r\n");
+        }
 		ret = ON;
 	}	
 	// if dhcp failed (0.0.0.0), this case do not connect to peer
-	else if((srcip[0] == 0x00) && (srcip[1] == 0x00) && (srcip[2] == 0x00) && (srcip[3] == 0x00))
+	else if((srcip[0] == 0x00) 
+                && (srcip[1] == 0x00) 
+                && (srcip[2] == 0x00) 
+                && (srcip[3] == 0x00))
 	{
-		if(serial->serial_debug_en == SEG_ENABLE) printf(" > SEG:CONNECTION FAILED - Invalid IP address: Zero IP\r\n");
+		if(serial_common->serial_debug_en == SEG_ENABLE) 
+        {
+            printf(" > SEG:CONNECTION FAILED - Invalid IP address: Zero IP\r\n");
+        }
 		ret = ON;
 	}
 	// Destination zero IP
-	else if((net->remote_ip[0] == 0x00) && (net->remote_ip[1] == 0x00) && (net->remote_ip[2] == 0x00) && (net->remote_ip[3] == 0x00))
+	else if((network_connection[0].remote_ip[0] == 0x00) 
+                && (network_connection[0].remote_ip[1] == 0x00) 
+                && (network_connection[0].remote_ip[2] == 0x00) 
+                && (network_connection[0].remote_ip[3] == 0x00))
 	{
-		if(serial->serial_debug_en == SEG_ENABLE) printf(" > SEG:CONNECTION FAILED - Invalid Destination IP address: Zero IP\r\n");
+		if(serial_common->serial_debug_en == SEG_ENABLE) 
+        {
+            printf(" > SEG:CONNECTION FAILED - Invalid Destination IP address: Zero IP\r\n");
+        }
 		ret = ON;
 	}
 	 // Duplicate IP address
-	else if((srcip[0] == net->remote_ip[0]) && (srcip[1] == net->remote_ip[1]) && (srcip[2] ==net->remote_ip[2]) && (srcip[3] == net->remote_ip[3]))
+	else if((srcip[0] == network_connection[0].remote_ip[0]) 
+                && (srcip[1] == network_connection[0].remote_ip[1]) 
+                && (srcip[2] ==network_connection[0].remote_ip[2]) 
+                && (srcip[3] == network_connection[0].remote_ip[3]))
 	{
-		if(serial->serial_debug_en == SEG_ENABLE) printf(" > SEG:CONNECTION FAILED - Duplicate IP address\r\n");
+		if(serial_common->serial_debug_en == SEG_ENABLE) 
+        {
+            printf(" > SEG:CONNECTION FAILED - Duplicate IP address\r\n");
+        }
 		ret = ON;
 	}
 	else if((srcip[0] == 192) && (srcip[1] == 168)) // local IP address == Class C private IP
 	{
 		// Static IP address obtained
-		if((option->dhcp_use == SEG_DISABLE) && ((net->remote_ip[0] == 192) && (net->remote_ip[1] == 168)))
+		if((network_option->dhcp_use == SEG_DISABLE) 
+            && ((network_connection[0].remote_ip[0] == 192) 
+            && (network_connection[0].remote_ip[1] == 168)))
 		{
-			if(srcip[2] != net->remote_ip[2]) // Class C Private IP network mismatch
+			if(srcip[2] != network_connection[0].remote_ip[2]) // Class C Private IP network mismatch
 			{
-				if(serial->serial_debug_en == SEG_ENABLE) printf(" > SEG:CONNECTION FAILED - Invalid IP address range (%d.%d.[%d].%d)\r\n", net->remote_ip[0], net->remote_ip[1], net->remote_ip[2], net->remote_ip[3]);
+				if(serial_common->serial_debug_en == SEG_ENABLE) 
+                {
+                    printf(" > SEG:CONNECTION FAILED - Invalid IP address range (%d.%d.[%d].%d)\r\n", network_connection[0].remote_ip[0], network_connection[0].remote_ip[1], network_connection[0].remote_ip[2], network_connection[0].remote_ip[3]);
+                }
 				ret = ON; 
 			}
 		}
@@ -1541,7 +1744,7 @@ uint32_t get_data_transfer_bytecount(teDATADIR dir)
 // This function have to call every 1 millisecond by Timer IRQ handler routine.
 void seg_timer_msec(void)
 {
-	struct __network_info *netinfo = (struct __network_info *)&(get_DevConfig_pointer()->network_info);
+	struct __serial_data_packing *serial_data_packing = (struct __serial_data_packing *)(get_DevConfig_pointer()->serial_data_packing);
 	
 	// Firmware update timer for timeout
 	// DHCP timer for timeout
@@ -1551,25 +1754,46 @@ void seg_timer_msec(void)
 	// Reconnection timer: Time count routine (msec)
 	if(enable_reconnection_timer)
 	{
-		if(reconnection_time < 0xFFFF) 	reconnection_time++;
-		else 							reconnection_time = 0;
+		if(reconnection_time < 0xFFFF) 	
+        {
+            reconnection_time++;
+        }
+		else 							
+        {
+            reconnection_time = 0;
+        }
 	}
 	
 	// Keep-alive timer: Time count routine (msec)
 	if(enable_keepalive_timer)
 	{
-		if(keepalive_time < 0xFFFF) 	keepalive_time++;
-		else							keepalive_time = 0;
+		if(keepalive_time < 0xFFFF) 	
+        {
+            keepalive_time++;
+        }
+		else							
+        {
+            keepalive_time = 0;
+        }
 	}
 	
 	// Mode switch timer: Time count routine (msec) (GW mode <-> Serial command mode, for s/w mode switch trigger code)
-	if(modeswitch_time < modeswitch_gap_time) modeswitch_time++;
+	if(modeswitch_time < modeswitch_gap_time) 
+    {
+        modeswitch_time++;
+    }
 	
 	if((enable_modeswitch_timer) && (modeswitch_time == modeswitch_gap_time))
 	{
 		// result of command mode trigger code comparision
-		if(triggercode_idx == 3) 	sw_modeswitch_at_mode_on = SEG_ENABLE; 	// success
-		else						restore_serial_data(triggercode_idx);	// failed
+		if(triggercode_idx == 3) 	
+        {
+            sw_modeswitch_at_mode_on = SEG_ENABLE; 	// success
+        }
+		else						
+        {
+            restore_serial_data(triggercode_idx);	// failed
+        }
 		
 		triggercode_idx = 0;
 		enable_modeswitch_timer = SEG_DISABLE;
@@ -1578,7 +1802,7 @@ void seg_timer_msec(void)
 	// Serial data packing time delimiter timer
 	if(enable_serial_input_timer)
 	{
-		if(serial_input_time < netinfo->packing_time)
+		if(serial_input_time < serial_data_packing[0].packing_time)
 		{
 			serial_input_time++;
 		}
@@ -1593,8 +1817,14 @@ void seg_timer_msec(void)
 	// Connection password auth timer
 	if(enable_connection_auth_timer)
 	{
-		if(connection_auth_time < 0xffff) 	connection_auth_time++;
-		else								connection_auth_time = 0;
+		if(connection_auth_time < 0xffff) 	
+        {
+            connection_auth_time++;
+        }
+		else								
+        {
+            connection_auth_time = 0;
+        }
 	}
 }
 
@@ -1604,7 +1834,10 @@ void seg_timer_sec(void)
 	// Inactivity timer: Time count routine (sec)
 	if(enable_inactivity_timer)
 	{
-		if(inactivity_time < 0xFFFF) inactivity_time++;
+		if(inactivity_time < 0xFFFF) 
+        {
+            inactivity_time++;
+        }
 	}
 
 	tmp_timeflag_for_debug = 1;

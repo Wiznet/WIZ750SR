@@ -126,7 +126,7 @@ void S2E_UART_Configuration(void);
 //void UART1_Configuration(void); // This function was incorporated into the function "S2E_UART_Configuration()"
 void UART2_Configuration(void);
 
-void serial_info_init(UART_TypeDef *pUART, struct __serial_info *serial);
+void serial_info_init(UART_TypeDef *pUART, struct __serial_option *serial);
 
 // #1 XON/XOFF Software flow control: Check the Buffer usage and Send the start/stop commands
 void check_uart_flow_control(uint8_t flow_ctrl);

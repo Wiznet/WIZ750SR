@@ -71,7 +71,7 @@ static uint8_t uart_if_mode = UART_IF_RS422;
 void S2E_UART_IRQ_Handler(UART_TypeDef * s2e_uart)
 {
 	uint8_t ch; // 1-byte character variable for UART Interrupt request handler
-	struct __serial_info *serial = (struct __serial_info *)get_DevConfig_pointer()->serial_info;
+	struct __serial_option *serial_option = (struct __serial_option *)get_DevConfig_pointer()->serial_option;
 	
 	if(UART_GetITStatus(s2e_uart,  UART_IT_FLAG_RXI))
 	{
@@ -88,7 +88,7 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * s2e_uart)
 		else
 		{
 #ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
-			if(serial->flow_control == flow_rts_cts)
+			if(serial_option[0].flow_control == flow_rts_cts)
 			{
 				;
 			}
@@ -154,7 +154,7 @@ void S2E_UART_Configuration(void)
 	DevConfig *value = get_DevConfig_pointer();
 	
 	/* Configure the UARTx */
-	serial_info_init(UART_data, &(value->serial_info[0])); // Load the UART_data Settings from Flash
+	serial_info_init(UART_data, &(value->serial_option[0])); // Load the UART_data Settings from Flash
 	
 	/* Configure UARTx Interrupt Enable */
 	//UART_ITConfig(UART_data, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
@@ -185,7 +185,7 @@ void UART2_Configuration(void)
 	S_UART_Init(115200);
 }
 
-void serial_info_init(UART_TypeDef *pUART, struct __serial_info *serial)
+void serial_info_init(UART_TypeDef *pUART, struct __serial_option *serial)
 {
 	UART_InitTypeDef UART_InitStructure;
 	uint32_t valid_arg = 0;

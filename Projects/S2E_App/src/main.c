@@ -119,7 +119,7 @@ int main(void)
 	/* GPIO Initialization*/
 	IO_Configuration();
 	
-	if(dev_config->serial_info[0].serial_debug_en)
+	if(dev_config->serial_common.serial_debug_en)
 	{
 		// Debug UART: Device information print out
 		display_Dev_Info_header();
@@ -132,7 +132,7 @@ int main(void)
 	
 	/* Network Configuration - DHCP client */
 	// Initialize Network Information: DHCP or Static IP allocation
-	if(dev_config->options.dhcp_use)
+	if(dev_config->network_option.dhcp_use)
 	{
 		if(process_dhcp() == DHCP_IP_LEASED) // DHCP success
 		{
@@ -149,7 +149,7 @@ int main(void)
 	}
 	
 	// Debug UART: Network information print out (includes DHCP IP allocation result)
-	if(dev_config->serial_info[0].serial_debug_en)
+	if(dev_config->serial_common.serial_debug_en)
 	{
 		display_Net_Info();
 		display_Dev_Info_dhcp();
@@ -157,9 +157,9 @@ int main(void)
 	
 	/* DNS client */
 	//if((value->network_info[0].working_mode == TCP_CLIENT_MODE) || (value->network_info[0].working_mode == TCP_MIXED_MODE))
-	if(dev_config->network_info[0].working_mode != TCP_SERVER_MODE)
+	if(dev_config->network_connection[0].working_mode != TCP_SERVER_MODE)
 	{
-		if(dev_config->options.dns_use) 
+		if(dev_config->network_option.dns_use) 
 		{
 			if(process_dns()) // DNS success
 			{
@@ -169,7 +169,7 @@ int main(void)
 	}
 	
 	// Debug UART: DNS results print out
-	if(dev_config->serial_info[0].serial_debug_en)
+	if(dev_config->serial_common.serial_debug_en)
 	{
 		display_Dev_Info_dns();
 	}
@@ -192,7 +192,7 @@ int main(void)
 		do_segcp();
 		do_seg(SOCK_DATA);
 		
-		if(dev_config->options.dhcp_use) DHCP_run(); // DHCP client handler for IP renewal
+		if(dev_config->network_option.dhcp_use) DHCP_run(); // DHCP client handler for IP renewal
 		
 		// ## debugging: Data echoback
 		//loopback_tcps(6, g_recv_buf, 5001); // Loopback
@@ -208,7 +208,7 @@ int main(void)
 		// ## debugging: Ring buffer full
 		if(flag_ringbuf_full)
 		{
-			if(dev_config->serial_info[0].serial_debug_en) printf(" > UART Rx Ring buffer Full\r\n");
+			if(dev_config->serial_common.serial_debug_en) printf(" > UART Rx Ring buffer Full\r\n");
 			flag_ringbuf_full = 0;
 		}
 	} // End of application main loop
@@ -361,16 +361,16 @@ int8_t process_dns(void)
 	
 	DNS_init(SOCK_DNS, g_send_buf);
 	
-	dns_server_ip[0] = dev_config->options.dns_server_ip[0];
-	dns_server_ip[1] = dev_config->options.dns_server_ip[1];
-	dns_server_ip[2] = dev_config->options.dns_server_ip[2];
-	dns_server_ip[3] = dev_config->options.dns_server_ip[3];
+	dns_server_ip[0] = dev_config->network_option.dns_server_ip[0];
+	dns_server_ip[1] = dev_config->network_option.dns_server_ip[1];
+	dns_server_ip[2] = dev_config->network_option.dns_server_ip[2];
+	dns_server_ip[3] = dev_config->network_option.dns_server_ip[3];
 	
 	set_device_status(ST_UPGRADE);
 	
 	while(1) 
 	{
-		if((ret = DNS_run(dns_server_ip, (uint8_t *)dev_config->options.dns_domain_name, dev_config->network_info[0].remote_ip)) == 1)
+		if((ret = DNS_run(dns_server_ip, (uint8_t *)dev_config->network_option.dns_domain_name, dev_config->network_connection[0].remote_ip)) == 1)
 		{
 #ifdef _MAIN_DEBUG_
 			printf(" - DNS Success\r\n");
@@ -394,7 +394,7 @@ int8_t process_dns(void)
 
 		do_segcp(); // Process the requests of configuration tool during the DNS client run.
 
-		if(dev_config->options.dhcp_use) DHCP_run();
+		if(dev_config->network_option.dhcp_use) DHCP_run();
 	}
 	
 	set_device_status(ST_OPEN);
@@ -419,7 +419,7 @@ void display_Dev_Info_header(void)
 	#endif
 #endif
 	
-	printf(" >> Firmware version: %d.%d.%d %s\r\n", dev_config->fw_ver[0], dev_config->fw_ver[1], dev_config->fw_ver[2], STR_VERSION_STATUS);
+	printf(" >> Firmware version: %d.%d.%d %s\r\n", dev_config->device_common.fw_ver[0], dev_config->device_common.fw_ver[1], dev_config->device_common.fw_ver[2], STR_VERSION_STATUS);
 	printf("%s\r\n", STR_BAR);
 }
 
@@ -430,45 +430,45 @@ void display_Dev_Info_main(void)
 	DevConfig *dev_config = get_DevConfig_pointer();
 	uint32_t baud_table[] = {300, 600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400};
 	
-	printf(" - Device name: %s\r\n", dev_config->module_name);
-	printf(" - Device mode: %s\r\n", str_working[dev_config->network_info[0].working_mode]);
+	printf(" - Device name: %s\r\n", dev_config->device_common.module_name);
+	printf(" - Device mode: %s\r\n", str_working[dev_config->network_connection[0].working_mode]);
 	
 	printf(" - Network settings: \r\n");
-		printf("\t- Obtaining IP settings: [%s]\r\n", (dev_config->options.dhcp_use == 1)?"Automatic - DHCP":"Static");
+		printf("\t- Obtaining IP settings: [%s]\r\n", (dev_config->network_option.dhcp_use == 1)?"Automatic - DHCP":"Static");
 		printf("\t- TCP/UDP ports\r\n");
-		printf("\t   + S2E data port: [%d]\r\n", dev_config->network_info[0].local_port);
+		printf("\t   + S2E data port: [%d]\r\n", dev_config->network_connection[0].local_port);
 		printf("\t   + TCP/UDP setting port: [%d]\r\n", DEVICE_SEGCP_PORT);
 		printf("\t   + Firmware update port: [%d]\r\n", DEVICE_FWUP_PORT);
 	
 	printf(" - Search ID code: \r\n");
-		printf("\t- %s: [%s]\r\n", (dev_config->options.pw_search[0] != 0)?"Enabled":"Disabled", (dev_config->options.pw_search[0] != 0)?dev_config->options.pw_search:"None");
+		printf("\t- %s: [%s]\r\n", (dev_config->config_common.pw_search[0] != 0)?"Enabled":"Disabled", (dev_config->config_common.pw_search[0] != 0)?dev_config->config_common.pw_search:"None");
 	
 	printf(" - Ethernet connection password: \r\n");
-		printf("\t- %s %s\r\n", (dev_config->options.pw_connect_en == 1)?"Enabled":"Disabled", "(TCP server / mixed mode only)");
+		printf("\t- %s %s\r\n", (dev_config->tcp_option[0].pw_connect_en == 1)?"Enabled":"Disabled", "(TCP server / mixed mode only)");
 	
 	printf(" - Connection timer settings: \r\n");
 		printf("\t- Inactivity timer: ");
-			if(dev_config->network_info[0].inactivity) printf("[%d] (sec)\r\n", dev_config->network_info[0].inactivity);
+			if(dev_config->tcp_option[0].inactivity) printf("[%d] (sec)\r\n", dev_config->tcp_option[0].inactivity);
 			else printf("%s\r\n", STR_DISABLED);
 		printf("\t- Reconnect interval: ");
-			if(dev_config->network_info[0].reconnection) printf("[%d] (msec)\r\n", dev_config->network_info[0].reconnection);
+			if(dev_config->tcp_option[0].reconnection) printf("[%d] (msec)\r\n", dev_config->tcp_option[0].reconnection);
 			else printf("%s\r\n", STR_DISABLED);
 	
 	printf(" - Serial settings: \r\n");
 		printf("\t- Data %s port:  [%s%d]\r\n", STR_UART, STR_UART, SEG_DATA_UART);
-		printf("\t   + UART IF: [%s]\r\n", uart_if_table[dev_config->serial_info[0].uart_interface]);
+		printf("\t   + UART IF: [%s]\r\n", uart_if_table[dev_config->serial_option[0].uart_interface]);
 		/*
 		printf("Debug: baud_rate = %d, baud_table = %d\r\n", dev_config->serial_info[0].baud_rate, baud_table[dev_config->serial_info[0].baud_rate]);
 		printf("Debug: ");
 		for(i = 0; i < 14; i++) printf("%d, ", baud_table[i]);
 		printf("\r\n");
 		*/
-		printf("\t   + %d-", baud_table[dev_config->serial_info[0].baud_rate]);
-		printf("%d-", word_len_table[dev_config->serial_info[0].data_bits]);
-		printf("%s-", parity_table[dev_config->serial_info[0].parity]);
-		printf("%d / ", stop_bit_table[dev_config->serial_info[0].stop_bits]);
-		if(dev_config->serial_info[0].uart_interface == UART_IF_RS232_TTL)
-			printf("Flow control: %s\r\n", flow_ctrl_table[dev_config->serial_info[0].flow_control]);
+		printf("\t   + %d-", baud_table[dev_config->serial_option[0].baud_rate]);
+		printf("%d-", word_len_table[dev_config->serial_option[0].data_bits]);
+		printf("%s-", parity_table[dev_config->serial_option[0].parity]);
+		printf("%d / ", stop_bit_table[dev_config->serial_option[0].stop_bits]);
+		if(dev_config->serial_option[0].uart_interface == UART_IF_RS232_TTL)
+			printf("Flow control: %s\r\n", flow_ctrl_table[dev_config->serial_option[0].flow_control]);
 		else
 			printf("Flow control: %s\r\n", flow_ctrl_table[0]); // RS-422/485; flow control - NONE only
 		
@@ -477,23 +477,23 @@ void display_Dev_Info_main(void)
 		
 	printf(" - Serial data packing options:\r\n");
 		printf("\t- Time: ");
-			if(dev_config->network_info[0].packing_time) printf("[%d] (msec)\r\n", dev_config->network_info[0].packing_time);
+			if(dev_config->serial_data_packing[0].packing_time) printf("[%d] (msec)\r\n", dev_config->serial_data_packing[0].packing_time);
 			else printf("%s\r\n", STR_DISABLED);
 		printf("\t- Size: ");
-			if(dev_config->network_info[0].packing_size) printf("[%d] (bytes)\r\n", dev_config->network_info[0].packing_size);
+			if(dev_config->serial_data_packing[0].packing_size) printf("[%d] (bytes)\r\n", dev_config->serial_data_packing[0].packing_size);
 			else printf("%s\r\n", STR_DISABLED);
 		printf("\t- Char: ");
-			if(dev_config->network_info[0].packing_delimiter_length == 1) printf("[%.2X] (hex only)\r\n", dev_config->network_info[0].packing_delimiter[0]);
+			if(dev_config->serial_data_packing[0].packing_delimiter_length == 1) printf("[%.2X] (hex only)\r\n", dev_config->serial_data_packing[0].packing_delimiter[0]);
 			else printf("%s\r\n", STR_DISABLED);
 		
 		printf(" - Serial command mode swtich code:\r\n");
-		printf("\t- %s\r\n", (dev_config->options.serial_command == 1)?STR_ENABLED:STR_DISABLED);
-		printf("\t- [%.2X][%.2X][%.2X] (Hex only)\r\n", dev_config->options.serial_trigger[0], dev_config->options.serial_trigger[1], dev_config->options.serial_trigger[2]);
+		printf("\t- %s\r\n", (dev_config->serial_command.serial_command == 1)?STR_ENABLED:STR_DISABLED);
+		printf("\t- [%.2X][%.2X][%.2X] (Hex only)\r\n", dev_config->serial_command.serial_trigger[0], dev_config->serial_command.serial_trigger[1], dev_config->serial_command.serial_trigger[2]);
 	
 #if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750MINI) || (DEVICE_BOARD_NAME == WIZ750JR))
 	printf(" - Hardware information: Status pins\r\n");
-		printf("\t- Status 1: [%s] - %s\r\n", "PA_10", dev_config->serial_info[0].dtr_en?"DTR":"PHY link");
-		printf("\t- Status 2: [%s] - %s\r\n", "PA_01", dev_config->serial_info[0].dsr_en?"DSR":"TCP connection"); // shared pin; HW_TRIG (input) / TCP connection indicator (output)
+		printf("\t- Status 1: [%s] - %s\r\n", "PA_10", dev_config->serial_option[0].dtr_en?"DTR":"PHY link");
+		printf("\t- Status 2: [%s] - %s\r\n", "PA_01", dev_config->serial_option[0].dsr_en?"DSR":"TCP connection"); // shared pin; HW_TRIG (input) / TCP connection indicator (output)
 
 #ifdef __USE_USERS_GPIO__
 	printf(" - Hardware information: User I/O pins\r\n");
@@ -513,7 +513,7 @@ void display_Dev_Info_dhcp(void)
 {
 	DevConfig *dev_config = get_DevConfig_pointer();
 	
-	if(dev_config->options.dhcp_use) 
+	if(dev_config->network_option.dhcp_use) 
 	{
 		if(flag_process_dhcp_success == ON) printf(" # DHCP IP Leased time : %u seconds\r\n", getDHCPLeasetime());
 		else printf(" # DHCP Failed\r\n");
@@ -525,16 +525,16 @@ void display_Dev_Info_dns(void)
 {
 	DevConfig *dev_config = get_DevConfig_pointer();
 	
-	if(dev_config->options.dns_use) 
+	if(dev_config->network_option.dns_use) 
 	{
 		if(flag_process_dns_success == ON)
 		{
-			printf(" # DNS: %s => %d.%d.%d.%d : %d\r\n", dev_config->options.dns_domain_name, 
-														dev_config->network_info[0].remote_ip[0],
-														dev_config->network_info[0].remote_ip[1],
-														dev_config->network_info[0].remote_ip[2],
-														dev_config->network_info[0].remote_ip[3],
-														dev_config->network_info[0].remote_port);
+			printf(" # DNS: %s => %d.%d.%d.%d : %d\r\n", dev_config->network_option.dns_domain_name, 
+														dev_config->network_connection[0].remote_ip[0],
+														dev_config->network_connection[0].remote_ip[1],
+														dev_config->network_connection[0].remote_ip[2],
+														dev_config->network_connection[0].remote_ip[3],
+														dev_config->network_connection[0].remote_port);
 		}
 		else printf(" # DNS Failed\r\n");
 	}

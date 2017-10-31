@@ -61,9 +61,13 @@ void device_socket_termination(void)
 
 void device_reboot(void)
 {
+	uint8_t i;
 	device_socket_termination();
 	
-	clear_data_transfer_bytecount(SEG_ALL);
+	for(i=0; i<2; i++)
+	{
+		clear_data_transfer_bytecount(i, SEG_ALL);
+	}
 	
 	NVIC_SystemReset();
 	while(1);
@@ -79,7 +83,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 {
 	struct __firmware_update *firmware_update = (struct __firmware_update *)&(get_DevConfig_pointer()->firmware_update);
 	struct __serial_option *serial_option = (struct __serial_option *)(get_DevConfig_pointer()->serial_option);
-    struct __serial_common *serial_common = (struct __serial_common *)&(get_DevConfig_pointer()->serial_common);
+	struct __serial_common *serial_common = (struct __serial_common *)&(get_DevConfig_pointer()->serial_common);
 	
 	uint8_t server_ip[4] = {0, };
 	

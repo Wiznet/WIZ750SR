@@ -110,7 +110,7 @@ enum flow_ctrl {
 };
 */
 
-extern uint8_t flag_ringbuf_full;
+extern uint8_t flag_ringbuf_full[1];
 
 //extern uint32_t baud_table[]; // 14
 extern uint8_t word_len_table[];
@@ -129,7 +129,7 @@ void UART2_Configuration(void);
 void serial_info_init(UART_TypeDef *pUART, struct __serial_option *serial);
 
 // #1 XON/XOFF Software flow control: Check the Buffer usage and Send the start/stop commands
-void check_uart_flow_control(uint8_t flow_ctrl);
+void check_uart_flow_control(uint8_t socket, uint8_t flow_ctrl);
 
 // Hardware flow control by GPIOs (RTS/CTS)
 #ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
@@ -191,5 +191,9 @@ void uart_rs485_enable(uint8_t uartNum);
 #define BUFFER_OUT_1ST_SIZE(_name) (_name##_sz - _name##_rd)
 #define BUFFER_OUT_2ND_SIZE(_name) (_name##_wr)
 #define IS_BUFFER_OUT_SEPARATED(_name) (_name##_rd > _name##_wr)
+
+#define M_BUFFER_USED_SIZE(sock)    (sock==0)?BUFFER_USED_SIZE(data_rx_0):BUFFER_USED_SIZE(data_rx_1)
+#define M_BUFFER_FREE_SIZE(sock)    (sock==0)?BUFFER_FREE_SIZE(data_rx_0):BUFFER_FREE_SIZE(data_rx_1)
+
 
 #endif /* UARTHANDLER_H_ */

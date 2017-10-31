@@ -78,8 +78,8 @@ static __IO uint32_t TimingDelay;
 
 /* Public variables ---------------------------------------------------------*/
 // Shared buffer declaration
-uint8_t g_send_buf[DATA_BUF_SIZE];
-uint8_t g_recv_buf[DATA_BUF_SIZE];
+uint8_t g_send_buf[1][DATA_BUF_SIZE];
+uint8_t g_recv_buf[1][DATA_BUF_SIZE];
 
 /**
   * @brief  Main program
@@ -88,6 +88,7 @@ uint8_t g_recv_buf[DATA_BUF_SIZE];
   */
 int main(void)
 {
+	uint8_t i;
 	DevConfig *dev_config = get_DevConfig_pointer();
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -187,10 +188,18 @@ int main(void)
 		flag_hw_trig_enable = 0;
 	}
 	
+	
+	printf("PHY Link status: %x\r\n", GPIO_ReadInputDataBit(PHYLINK_IN_PORT, PHYLINK_IN_PIN));
+	
+	
 	while(1) // main loop
 	{
 		do_segcp();
-		do_seg(SOCK_DATA);
+		
+		for(i=0; i<2; i++)
+		{
+			do_seg(i);
+		}
 		
 		if(dev_config->network_option.dhcp_use) DHCP_run(); // DHCP client handler for IP renewal
 		
@@ -205,11 +214,14 @@ int main(void)
 			flag_check_phylink = 0;	// flag clear
 		}
 		
-		// ## debugging: Ring buffer full
-		if(flag_ringbuf_full)
+		for(i=0; i<2; i++)
 		{
-			if(dev_config->serial_common.serial_debug_en) printf(" > UART Rx Ring buffer Full\r\n");
-			flag_ringbuf_full = 0;
+			// ## debugging: Ring buffer full
+			if(flag_ringbuf_full[i])
+			{
+				if(dev_config->serial_common.serial_debug_en) printf(" > UART Rx Ring buffer Full\r\n");
+				flag_ringbuf_full[i] = 0;
+			}
 		}
 	} // End of application main loop
 } // End of main
@@ -255,8 +267,8 @@ static void W7500x_WZTOE_Init(void)
 	////////////////////////////////////////////////////
 	
 	/* Set Network Configuration: HW Socket Tx/Rx buffer size */
-	uint8_t tx_size[8] = { 4, 2, 2, 2, 2, 2, 2, 0 }; // default: { 2, 2, 2, 2, 2, 2, 2, 2 }
-	uint8_t rx_size[8] = { 4, 2, 2, 2, 2, 2, 2, 0 }; // default: { 2, 2, 2, 2, 2, 2, 2, 2 }
+	uint8_t tx_size[8] = { 4, 4, 2, 2, 2, 2, 0, 0 }; // default: { 2, 2, 2, 2, 2, 2, 2, 2 }
+	uint8_t rx_size[8] = { 4, 4, 2, 2, 2, 2, 0, 0 }; // default: { 2, 2, 2, 2, 2, 2, 2, 2 }
 	
 	/* Structure for TCP timeout control: RTR, RCR */
 	wiz_NetTimeout * net_timeout;
@@ -306,10 +318,10 @@ int8_t process_dhcp(void)
 #ifdef _MAIN_DEBUG_
 	printf(" - DHCP Client running\r\n");
 #endif
-	DHCP_init(SOCK_DHCP, g_send_buf);
+	DHCP_init(SOCK_DHCP, g_send_buf[0]);
 	reg_dhcp_cbfunc(w7500x_dhcp_assign, w7500x_dhcp_assign, w7500x_dhcp_conflict);
 	
-	set_device_status(ST_UPGRADE);
+	set_device_status(0, ST_UPGRADE);
 	
 	while(1)
 	{
@@ -342,7 +354,7 @@ int8_t process_dhcp(void)
 		do_segcp(); // Process the requests of configuration tool during the DHCP client run.
 	}
 	
-	set_device_status(ST_OPEN);
+	set_device_status(0, ST_OPEN);
 	
 	return ret;
 }
@@ -359,14 +371,14 @@ int8_t process_dns(void)
 	printf(" - DNS Client running\r\n");
 #endif
 	
-	DNS_init(SOCK_DNS, g_send_buf);
+	DNS_init(SOCK_DNS, g_send_buf[0]);
 	
 	dns_server_ip[0] = dev_config->network_option.dns_server_ip[0];
 	dns_server_ip[1] = dev_config->network_option.dns_server_ip[1];
 	dns_server_ip[2] = dev_config->network_option.dns_server_ip[2];
 	dns_server_ip[3] = dev_config->network_option.dns_server_ip[3];
 	
-	set_device_status(ST_UPGRADE);
+	set_device_status(0, ST_UPGRADE);
 	
 	while(1) 
 	{
@@ -397,7 +409,7 @@ int8_t process_dns(void)
 		if(dev_config->network_option.dhcp_use) DHCP_run();
 	}
 	
-	set_device_status(ST_OPEN);
+	set_device_status(0, ST_OPEN);
 	return ret;
 }
 

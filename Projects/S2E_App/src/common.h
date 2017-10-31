@@ -9,10 +9,10 @@
 /* Application Firmware Version */
 #define MAJOR_VER			1
 #define MINOR_VER			1
-#define MAINTENANCE_VER		1
+#define MAINTENANCE_VER		3
 
-//#define STR_VERSION_STATUS	"Develop" // or "Stable"
-#define STR_VERSION_STATUS	"Stable"
+#define STR_VERSION_STATUS	"Develop" // or "Stable"
+//#define STR_VERSION_STATUS	"Stable"
 
 ////////////////////////////////
 // W7500x HW Socket Definition//
@@ -20,17 +20,19 @@
 // 0 ~ 6, Changed the S2E data socket(0)'s buffer to double
 #define SOCK_MAX_USED		7
 
-#define SOCK_DATA			0
-#define SOCK_CONFIG_UDP		1
-#define SOCK_CONFIG_TCP		2
+//#define SOCK_DATA1			0
+//#define SOCK_DATA2			1
+#define SOCK_CONFIG_UDP		2
+#define SOCK_CONFIG_TCP		3
 
-#define SEG_SOCK			SOCK_DATA
+//#define SEG_SOCK1			SOCK_DATA1
+//#define SEG_SOCK2			SOCK_DATA2
 #define SEGCP_UDP_SOCK		SOCK_CONFIG_UDP
 #define SEGCP_TCP_SOCK		SOCK_CONFIG_TCP
 
-#define SOCK_DHCP			3
-#define SOCK_DNS			4
-#define SOCK_FWUPDATE		4
+#define SOCK_DHCP			4
+#define SOCK_DNS			5
+#define SOCK_FWUPDATE		5
 
 ////////////////////////////////
 // In/External Clock Setting  //

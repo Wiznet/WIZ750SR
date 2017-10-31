@@ -22,6 +22,8 @@ DevConfig* get_DevConfig_pointer(void)
 
 void set_DevConfig_to_factory_value(void)
 {
+	uint8_t i;
+	
 	dev_config.config_common.packet_size = sizeof(DevConfig);
 	
 	/* Product code */
@@ -52,47 +54,55 @@ void set_DevConfig_to_factory_value(void)
 	dev_config.network_common.subnet[2] = 255;
 	dev_config.network_common.subnet[3] = 0;
 
-	dev_config.network_connection[0].working_mode = TCP_SERVER_MODE; //UDP_MODE; //TCP_MIXED_MODE; 
-	dev_config.network_connection[0].working_state = ST_OPEN;
-	dev_config.network_connection[0].remote_ip[0] = 192;
-	dev_config.network_connection[0].remote_ip[1] = 168;
-	dev_config.network_connection[0].remote_ip[2] = 11;
-	dev_config.network_connection[0].remote_ip[3] = 3;
-	dev_config.network_connection[0].local_port = 5000;
-	dev_config.network_connection[0].remote_port = 5000;
-	dev_config.tcp_option[0].inactivity = 0;		// sec, default: NONE
-	dev_config.tcp_option[0].reconnection = 3000;	// msec, default: 3 sec
-	dev_config.serial_data_packing[0].packing_time = 0;
-	dev_config.serial_data_packing[0].packing_size = 0;
-	dev_config.serial_data_packing[0].packing_delimiter[0] = 0; // packing_delimiter used only one-byte (for WIZ107SR compatibility)
-	dev_config.serial_data_packing[0].packing_delimiter[1] = 0;
-	dev_config.serial_data_packing[0].packing_delimiter[2] = 0;
-	dev_config.serial_data_packing[0].packing_delimiter[3] = 0;
-	dev_config.serial_data_packing[0].packing_delimiter_length = 0;
-	dev_config.serial_data_packing[0].packing_data_appendix = 0;
-	
-	dev_config.tcp_option[0].keepalive_en = 1;
-	dev_config.tcp_option[0].keepalive_wait_time = 7000;
-	dev_config.tcp_option[0].keepalive_retry_time = 5000;
+	for(i=0; i<2; i++)
+	{
+		dev_config.network_connection[i].working_mode = TCP_SERVER_MODE; //UDP_MODE; //TCP_MIXED_MODE; 
+		dev_config.network_connection[i].working_state = ST_OPEN;
+		dev_config.network_connection[i].remote_ip[0] = 192;
+		dev_config.network_connection[i].remote_ip[1] = 168;
+		dev_config.network_connection[i].remote_ip[2] = 11;
+		dev_config.network_connection[i].remote_ip[3] = 3;
+		dev_config.network_connection[i].local_port = 5000+i;
+		dev_config.network_connection[i].remote_port = 5000+i;
+		
+		dev_config.tcp_option[i].inactivity = 0;		// sec, default: NONE
+		dev_config.tcp_option[i].reconnection = 3000;	// msec, default: 3 sec
+		
+		dev_config.serial_data_packing[i].packing_time = 0;
+		dev_config.serial_data_packing[i].packing_size = 0;
+		dev_config.serial_data_packing[i].packing_delimiter[0] = 0; // packing_delimiter used only one-byte (for WIZ107SR compatibility)
+		dev_config.serial_data_packing[i].packing_delimiter[1] = 0;
+		dev_config.serial_data_packing[i].packing_delimiter[2] = 0;
+		dev_config.serial_data_packing[i].packing_delimiter[3] = 0;
+		dev_config.serial_data_packing[i].packing_delimiter_length = 0;
+		dev_config.serial_data_packing[i].packing_data_appendix = 0;
+		
+		dev_config.tcp_option[i].keepalive_en = 1;
+		dev_config.tcp_option[i].keepalive_wait_time = 7000;
+		dev_config.tcp_option[i].keepalive_retry_time = 5000;
+		
+		// Default Settings for Data UART: 115200-8-N-1, No flowctrl
+		dev_config.serial_option[i].uart_interface = UART_IF_RS232_TTL;
+		dev_config.serial_option[i].baud_rate = baud_115200;
+		dev_config.serial_option[i].data_bits = word_len8;
+		dev_config.serial_option[i].parity = parity_none;
+		dev_config.serial_option[i].stop_bits = stop_bit1;
+		dev_config.serial_option[i].flow_control = flow_none;
 
-	// Default Settings for Data UART: 115200-8-N-1, No flowctrl
-	dev_config.serial_option[0].uart_interface = UART_IF_RS232_TTL;
-	dev_config.serial_option[0].baud_rate = baud_115200;
-	dev_config.serial_option[0].data_bits = word_len8;
-	dev_config.serial_option[0].parity = parity_none;
-	dev_config.serial_option[0].stop_bits = stop_bit1;
-	dev_config.serial_option[0].flow_control = flow_none;
-	
-	dev_config.serial_option[0].dtr_en = SEGCP_DISABLE;
-	dev_config.serial_option[0].dsr_en = SEGCP_DISABLE;
+		dev_config.serial_option[i].dtr_en = SEGCP_DISABLE;
+		dev_config.serial_option[i].dsr_en = SEGCP_DISABLE;
+	}
 	
 	//dev_config.serial_info[0].serial_debug_en = SEGCP_DISABLE;
 	dev_config.serial_common.serial_debug_en = SEGCP_ENABLE;
 	
 	//memset(dev_config.options.pw_setting, 0x00, sizeof(dev_config.options.pw_setting));		// Added for WIZ107SR compatibility;
 	memset(dev_config.config_common.pw_search, 0x00, sizeof(dev_config.config_common.pw_search));		// Added for WIZ107SR compatibility;
-	memset(dev_config.tcp_option[0].pw_connect, 0x00, sizeof(dev_config.tcp_option[0].pw_connect));
-	dev_config.tcp_option[0].pw_connect_en = SEGCP_DISABLE;
+	for(i=0; i<2; i++)
+	{
+		memset(dev_config.tcp_option[i].pw_connect, 0x00, sizeof(dev_config.tcp_option[i].pw_connect));
+		dev_config.tcp_option[i].pw_connect_en = SEGCP_DISABLE;
+	}
 	
 	dev_config.network_option.dhcp_use = SEGCP_DISABLE;
 	dev_config.network_option.dns_use = SEGCP_DISABLE;
@@ -149,6 +159,7 @@ void load_DevConfig_from_storage(void)
 	}
 	
 	dev_config.network_connection[0].working_state = ST_OPEN;
+	dev_config.network_connection[1].working_state = ST_OPEN;
 	
 	dev_config.device_common.fw_ver[0] = MAJOR_VER;
 	dev_config.device_common.fw_ver[1] = MINOR_VER;
@@ -202,36 +213,50 @@ void display_Net_Info(void)
 {
 	DevConfig *value = get_DevConfig_pointer();
 	wiz_NetInfo gWIZNETINFO;
+	
+	uint8_t i;
 
 	ctlnetwork(CN_GET_NETINFO, (void*) &gWIZNETINFO);
 	printf(" # MAC: %02X:%02X:%02X:%02X:%02X:%02X\r\n", gWIZNETINFO.mac[0], gWIZNETINFO.mac[1], gWIZNETINFO.mac[2], gWIZNETINFO.mac[3], gWIZNETINFO.mac[4], gWIZNETINFO.mac[5]);
-	printf(" # IP : %d.%d.%d.%d / Port: %d\r\n", gWIZNETINFO.ip[0], gWIZNETINFO.ip[1], gWIZNETINFO.ip[2], gWIZNETINFO.ip[3], value->network_connection[0].local_port);
+	printf(" # IP : %d.%d.%d.%d / Port1: %d, Port2: %d\r\n", gWIZNETINFO.ip[0], gWIZNETINFO.ip[1], gWIZNETINFO.ip[2], gWIZNETINFO.ip[3], value->network_connection[0].local_port, value->network_connection[1].local_port);
 	printf(" # GW : %d.%d.%d.%d\r\n", gWIZNETINFO.gw[0], gWIZNETINFO.gw[1], gWIZNETINFO.gw[2], gWIZNETINFO.gw[3]);
 	printf(" # SN : %d.%d.%d.%d\r\n", gWIZNETINFO.sn[0], gWIZNETINFO.sn[1], gWIZNETINFO.sn[2], gWIZNETINFO.sn[3]);
 	printf(" # DNS: %d.%d.%d.%d\r\n", gWIZNETINFO.dns[0], gWIZNETINFO.dns[1], gWIZNETINFO.dns[2], gWIZNETINFO.dns[3]);
 	
-	if(value->network_connection[0].working_mode != TCP_SERVER_MODE)
+	for(i=0; i<2; i++)
 	{
-		if(value->network_option.dns_use == SEGCP_ENABLE)
+		if(value->network_connection[i].working_mode != TCP_SERVER_MODE)
 		{
-			printf(" # Destination Domain: %s / Port: %d\r\n", value->network_option.dns_domain_name, value->network_connection[0].remote_port);
-		}
-		else
-		{
-			printf(" # Destination IP: %d.%d.%d.%d / Port: %d\r\n", value->network_connection[0].remote_ip[0], value->network_connection[0].remote_ip[1], 
-															value->network_connection[0].remote_ip[2], value->network_connection[0].remote_ip[3], value->network_connection[0].remote_port);
-			if(value->network_connection[0].working_mode == UDP_MODE)
+			if(value->network_option.dns_use == SEGCP_ENABLE)
 			{
-				if((value->network_connection[0].remote_ip[0] == 0) && (value->network_connection[0].remote_ip[1] == 0) && (value->network_connection[0].remote_ip[2] == 0) && (value->network_connection[0].remote_ip[3] == 0))
+				if(i==0)
 				{
-					printf(" ## UDP 1:N Mode\r\n");
-				}
-				else
-				{
-					printf(" ## UDP 1:1 Mode\r\n");
+					printf(" # Destination Domain: %s / Port: %d\r\n", value->network_option.dns_domain_name, value->network_connection[i].remote_port);
 				}
 			}
-		}
+			else
+			{
+				printf(" # Destination IP: %d.%d.%d.%d / Port: %d\r\n", value->network_connection[i].remote_ip[0], 
+																																																		value->network_connection[i].remote_ip[1], 
+																																																		value->network_connection[i].remote_ip[2], 
+																																																		value->network_connection[i].remote_ip[3], 
+																																																		value->network_connection[i].remote_port);
+				if(value->network_connection[i].working_mode == UDP_MODE)
+				{
+					if((value->network_connection[i].remote_ip[0] == 0) 
+						&& (value->network_connection[i].remote_ip[1] == 0) 
+						&& (value->network_connection[i].remote_ip[2] == 0) 
+						&& (value->network_connection[i].remote_ip[3] == 0))
+					{
+						printf(" ## UDP 1:N Mode\r\n");
+					}
+					else
+					{
+						printf(" ## UDP 1:1 Mode\r\n");
+					}
+				}
+			}
+		}	
 	}
 	printf("\r\n");
 }

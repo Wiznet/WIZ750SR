@@ -9,11 +9,12 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #define SEG_DATA_UART		0	// S2E Data UART selector, [0] UART0 or [1] UART1
+//#define SEG_DATA_UART		1	// S2E Data UART selector, [0] UART0 or [1] UART1
 #define SEG_DEBUG_UART		2	// S2E Debug UART, fixed
 
-//#define SEG_DATA_BUF_SIZE	2048	// UART Ring buffer size
+#define SEG_DATA_BUF_SIZE	2048	// UART Ring buffer size
 //#define SEG_DATA_BUF_SIZE	3072	// UART Ring buffer size
-#define SEG_DATA_BUF_SIZE	4096	// UART Ring buffer size
+//#define SEG_DATA_BUF_SIZE	4096	// UART Ring buffer size
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 #define DEFAULT_MODESWITCH_INTER_GAP	500 // 500ms (0.5sec)
@@ -52,7 +53,7 @@ void seg_timer_msec(void);
 
 void init_trigger_modeswitch(uint8_t mode);
 
-void set_device_status(teDEVSTATUS status);
+void set_device_status(uint8_t socket, teDEVSTATUS status);
 uint8_t get_device_status(void);
 
 uint8_t process_socket_termination(uint8_t socket);
@@ -61,13 +62,13 @@ uint8_t process_socket_termination(uint8_t socket);
 void send_keepalive_packet_manual(uint8_t sock);
 
 //These functions must be located in UART Rx IRQ Handler.
-uint8_t check_serial_store_permitted(uint8_t ch);
+uint8_t check_serial_store_permitted(uint8_t socket, uint8_t ch);
 uint8_t check_modeswitch_trigger(uint8_t ch);	// Serial command mode switch trigger code (3-bytes) checker
-void init_time_delimiter_timer(void); 			// Serial data packing option [Time]: Timer enalble function for Time delimiter
+void init_time_delimiter_timer(uint8_t socket); 			// Serial data packing option [Time]: Timer enalble function for Time delimiter
 
 // UART tx/rx and Ethernet tx/rx data transfer bytes counter
-void clear_data_transfer_bytecount(teDATADIR dir);
-uint32_t get_data_transfer_bytecount(teDATADIR dir);
+void clear_data_transfer_bytecount(uint8_t socket, teDATADIR dir);
+uint32_t get_data_transfer_bytecount(uint8_t socket, teDATADIR dir);
 
 #endif /* SEG_H_ */
 

@@ -21,8 +21,8 @@
 
 /* Private define ------------------------------------------------------------*/
 // Ring Buffer declaration
-BUFFER_DECLARATION(data_rx);
-
+BUFFER_DECLARATION(data_rx_0);
+BUFFER_DECLARATION(data_rx_1);
 /* Private functions ---------------------------------------------------------*/
 uint16_t uart_get_commandline(uint8_t uartNum, uint8_t* buf, uint16_t maxSize);
 
@@ -58,6 +58,7 @@ void do_segcp(void)
 	DevConfig *dev_config = get_DevConfig_pointer();
 
 	uint8_t ret = 0;
+    uint8_t i;
 	uint16_t segcp_ret = 0;
 	//uint8_t ConfigErasePW[10];
 	teDEVSTATUS status_bak;
@@ -138,7 +139,11 @@ void do_segcp(void)
 			//printf(" - GetSystemClock: %d (Hz) \r\n", GetSystemClock());
 			
 			status_bak = (teDEVSTATUS)get_device_status();
-			set_device_status(ST_UPGRADE);
+            
+            for(i=0; i<2; i++)
+            {
+                set_device_status(i, ST_UPGRADE);
+            }
 			
 			if((segcp_ret & SEGCP_RET_FWUP) == segcp_ret)				ret = device_firmware_update(NETWORK_APP_BACKUP); // Firmware update by Configuration tool
 #ifdef __USE_APPBACKUP_AREA__
@@ -157,7 +162,10 @@ void do_segcp(void)
 					uart_puts(SEG_DATA_UART, "REBOOT\r\n", 8);
 				}
 				*/
-				set_device_status(ST_OPEN);
+                for(i=0; i<2; i++)
+                {
+                    set_device_status(i, ST_OPEN);
+                }
 				save_DevConfig_to_storage();
 				
 				device_reboot();
@@ -174,8 +182,10 @@ void do_segcp(void)
 					uart_puts(SEG_DATA_UART, "FS:UPDATE_FAILED\r\n", 18);
 				}
 				*/
-				set_device_status(status_bak);
-				
+                for(i=0; i<2; i++)
+                {
+                    set_device_status(i, status_bak);
+				}
 #ifdef __USE_APPBACKUP_AREA__
 				/* System Core Clock Update - Restore */
 				{
@@ -287,7 +297,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 {
 	DevConfig *dev_config = get_DevConfig_pointer();
 	
-	//uint8_t  i = 0;
+	uint8_t  i = 0;
 	uint16_t ret = 0;
 	uint8_t  cmdnum = 0;
 	uint8_t* treq;
@@ -515,7 +525,10 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 					case SEGCP_FS: // Firmware update by HTTP Server
 						dev_config->firmware_update.fwup_flag = SEGCP_ENABLE;
 						dev_config->firmware_update.fwup_server_flag = SEGCP_ENABLE;
-						process_socket_termination(SEG_SOCK);
+                        for(i=0; i<2; i++)
+                        {
+                            process_socket_termination(i);
+                        }
 						
 						sprintf(trep, "%s%s", FWUP_SERVER_DOMAIN, FWUP_SERVER_BINPATH);
 						ret |= SEGCP_RET_FWUP_SERVER;
@@ -648,8 +661,11 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						}
 						else
 						{
-							process_socket_termination(SEG_SOCK);
-							dev_config->network_connection[0].working_mode = tmp_byte;
+                            for(i=0; i<2; i++)
+                            {
+                                process_socket_termination(i);
+                                dev_config->network_connection[0].working_mode = tmp_byte;
+                            }
 						}
 						break;
 				   case SEGCP_DD: // ## Does nothing
@@ -954,7 +970,10 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 							sprintf(trep,"FW%d.%d.%d.%d:%d:%d\r\n", dev_config->network_common.local_ip[0], dev_config->network_common.local_ip[1]
 							,dev_config->network_common.local_ip[2] , dev_config->network_common.local_ip[3], (uint16_t)DEVICE_FWUP_PORT);
 							
-							process_socket_termination(SEG_SOCK);
+                            for(i=0; i<2; i++)
+                            {
+                                process_socket_termination(i);
+                            }
 #ifdef _SEGCP_DEBUG_
 							printf("SEGCP_FW:OK\r\n");
 #endif
@@ -1337,7 +1356,7 @@ uint16_t proc_SEGCP_uart(uint8_t * segcp_rep)
 	uint16_t ret = 0;
 	uint8_t segcp_req[SEGCP_PARAM_MAX*2];
 	
-	if(BUFFER_USED_SIZE(data_rx))
+	if(BUFFER_USED_SIZE(data_rx_0))
 	{
 		len = uart_get_commandline(SEG_DATA_UART, segcp_req, (sizeof(segcp_req) - 1));
 		
@@ -1366,7 +1385,7 @@ uint16_t uart_get_commandline(uint8_t uartNum, uint8_t* buf, uint16_t maxSize)
 	
 	uint16_t i;
 	//uint16_t j;
-	uint16_t len = BUFFER_USED_SIZE(data_rx);
+	uint16_t len = BUFFER_USED_SIZE(data_rx_0);
 	
 	if(len >= 4) // Minimum of command: 4-bytes, e.g., MC\r\n (MC$0d$0a)
 	{

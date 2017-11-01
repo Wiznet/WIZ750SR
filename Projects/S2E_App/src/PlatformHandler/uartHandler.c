@@ -35,13 +35,13 @@ BUFFER_DEFINITION(data_rx_1, SEG_DATA_BUF_SIZE);
 // UART structure declaration for switching between UART0 and UART1 
 // UART selector [SEG_DATA_UART] and [SEG_DEBUG_UART] Defines are located at common.h file.
 
-#if (SEG_DATA_UART == 0)
-	UART_TypeDef * 		UART_data = UART0;
-	IRQn_Type 			UART_data_irq = UART0_IRQn;
-#elif (SEG_DATA_UART == 1)
-	UART_TypeDef * 		UART_data = UART1;
-	IRQn_Type 			UART_data_irq = UART1_IRQn;
-#endif
+//#if (SEG_DATA_UART == 0)
+	UART_TypeDef * 		UART0_data = UART0;
+	IRQn_Type 			UART0_data_irq = UART0_IRQn;
+//#elif (SEG_DATA_UART == 1)
+	UART_TypeDef * 		UART1_data = UART1;
+	IRQn_Type 			UART1_data_irq = UART1_IRQn;
+//#endif
 
 //uint32_t baud_table[] = {300, 600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400};
 uint8_t word_len_table[] = {7, 8, 9};
@@ -155,16 +155,16 @@ void S2E_UART_Configuration(void)
 	DevConfig *value = get_DevConfig_pointer();
 	
 	/* Configure the UARTx */
-	serial_info_init(UART_data, &(value->serial_option[0])); // Load the UART_data Settings from Flash
+	serial_info_init(UART0_data, &(value->serial_option[0])); // Load the UART_data Settings from Flash
 	
 	/* Configure UARTx Interrupt Enable */
 	//UART_ITConfig(UART_data, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
-	UART_ITConfig(UART_data, UART_IT_FLAG_RXI, ENABLE);
+	UART_ITConfig(UART0_data, UART_IT_FLAG_RXI, ENABLE);
 	
 	/* NVIC configuration */
-	NVIC_ClearPendingIRQ(UART_data_irq);
-	NVIC_SetPriority(UART_data_irq, 1);
-	NVIC_EnableIRQ(UART_data_irq);
+	NVIC_ClearPendingIRQ(UART0_data_irq);
+	NVIC_SetPriority(UART0_data_irq, 1);
+	NVIC_EnableIRQ(UART0_data_irq);
 }
 
 /*
@@ -288,8 +288,8 @@ void serial_info_init(UART_TypeDef *pUART, struct __serial_option *serial)
 		UART_InitStructure.UART_HardwareFlowControl = UART_HardwareFlowControl_None;
 		
 		// GPIO configration (RTS pin -> GPIO: 485SEL)
-		get_uart_rs485_sel(SEG_DATA_UART);
-		uart_rs485_rs422_init(SEG_DATA_UART);
+		get_uart_rs485_sel(SEG_DATA_UART0);
+		uart_rs485_rs422_init(SEG_DATA_UART0);
 		//printf("UART Interface: %s mode\r\n", uart_if_mode?"RS-485":"RS-422");
 	}
 	
@@ -305,7 +305,7 @@ void check_uart_flow_control(uint8_t socket, uint8_t flow_ctrl)
 	{
 		if((xonoff_status[socket] == UART_XON) && (M_BUFFER_USED_SIZE(socket) > UART_OFF_THRESHOLD)) // Send the transmit stop command to peer - go XOFF
 		{
-			UartPutc(UART_data, UART_XOFF);
+			UartPutc(UART0_data, UART_XOFF);
 			xonoff_status[socket] = UART_XOFF;
 #ifdef _UART_DEBUG_
 			printf(" >> SEND XOFF [%d / %d]\r\n", M_BUFFER_USED_SIZE(socket), SEG_DATA_BUF_SIZE);
@@ -313,7 +313,7 @@ void check_uart_flow_control(uint8_t socket, uint8_t flow_ctrl)
 		}
 		else if((xonoff_status[socket] == UART_XOFF) && (M_BUFFER_USED_SIZE(socket) < UART_ON_THRESHOLD)) // Send the transmit start command to peer. -go XON
 		{
-			UartPutc(UART_data, UART_XON);
+			UartPutc(UART0_data, UART_XON);
 			xonoff_status[socket] = UART_XON;
 #ifdef _UART_DEBUG_
 			printf(" >> SEND XON [%d / %d]\r\n", M_BUFFER_USED_SIZE(socket), SEG_DATA_BUF_SIZE);
@@ -325,7 +325,7 @@ void check_uart_flow_control(uint8_t socket, uint8_t flow_ctrl)
 		// Buffer full occurred
 		if((rts_status[socket] == UART_RTS_LOW) && (M_BUFFER_USED_SIZE(socket) > UART_OFF_THRESHOLD))
 		{
-			set_uart_rts_pin_high(SEG_DATA_UART);
+			set_uart_rts_pin_high(socket);
 			rts_status[socket] = UART_RTS_HIGH;
 #ifdef _UART_DEBUG_
 			printf(" >> UART_RTS_HIGH [%d / %d]\r\n", M_BUFFER_USED_SIZE(socket), SEG_DATA_BUF_SIZE);
@@ -335,7 +335,7 @@ void check_uart_flow_control(uint8_t socket, uint8_t flow_ctrl)
 		// Clear the buffer full event
 		if((rts_status[socket] == UART_RTS_HIGH) && (M_BUFFER_USED_SIZE(socket) <= UART_OFF_THRESHOLD))
 		{
-			set_uart_rts_pin_low(SEG_DATA_UART);
+			set_uart_rts_pin_low(socket);
 			rts_status[socket] = UART_RTS_LOW;
 #ifdef _UART_DEBUG_
 			printf(" >> UART_RTS_LOW [%d / %d]\r\n", M_BUFFER_USED_SIZE(socket), SEG_DATA_BUF_SIZE);
@@ -348,9 +348,13 @@ int32_t uart_putc(uint8_t uartNum, uint8_t ch)
 {
 	DevConfig *value = get_DevConfig_pointer();
 	
-	if(uartNum == SEG_DATA_UART)
+	if(uartNum == SEG_DATA_UART0)
 	{
-		UartPutc(UART_data, ch); 
+		UartPutc(UART0_data, ch); 
+	}
+    else if(uartNum == SEG_DATA_UART1)
+	{
+		UartPutc(UART1_data, ch); 
 	}
 	else if(uartNum == SEG_DEBUG_UART)
 	{
@@ -365,7 +369,7 @@ int32_t uart_puts(uint8_t uartNum, uint8_t* buf, uint16_t reqSize)
 
 	while(*buf != '\0' && lentot < reqSize)
 	{
-		if(uartNum == SEG_DATA_UART)
+		if((uartNum == SEG_DATA_UART0)||(uartNum == SEG_DATA_UART1))
 		{
 			uart_putc(uartNum, *buf);
 		}
@@ -387,11 +391,17 @@ int32_t uart_getc(uint8_t uartNum)
 {
 	int32_t ch;
 
-	if(uartNum == SEG_DATA_UART)
+	if(uartNum == SEG_DATA_UART0)
 	{
 		while(IS_BUFFER_EMPTY(data_rx_0));
 		ch = (int32_t)BUFFER_OUT(data_rx_0);
 		BUFFER_OUT_MOVE(data_rx_0, 1);
+	}
+    else if(uartNum == SEG_DATA_UART1)
+	{
+		while(IS_BUFFER_EMPTY(data_rx_1));
+		ch = (int32_t)BUFFER_OUT(data_rx_1);
+		BUFFER_OUT_MOVE(data_rx_1, 1);
 	}
 	else if(uartNum == SEG_DEBUG_UART)
 	{
@@ -407,11 +417,17 @@ int32_t uart_getc_nonblk(uint8_t uartNum)
 {
 	int32_t ch;
 
-	if(uartNum == SEG_DATA_UART)
+	if(uartNum == SEG_DATA_UART0)
 	{
 		if(IS_BUFFER_EMPTY(data_rx_0)) return RET_NOK;
 		ch = (int32_t)BUFFER_OUT(data_rx_0);
 		BUFFER_OUT_MOVE(data_rx_0,1);
+	}
+    else if(uartNum == SEG_DATA_UART1)
+	{
+		if(IS_BUFFER_EMPTY(data_rx_1)) return RET_NOK;
+		ch = (int32_t)BUFFER_OUT(data_rx_1);
+		BUFFER_OUT_MOVE(data_rx_1,1);
 	}
 	else if(uartNum == SEG_DEBUG_UART)
 	{
@@ -427,7 +443,7 @@ int32_t uart_gets(uint8_t uartNum, uint8_t* buf, uint16_t reqSize)
 {
 	uint16_t lentot = 0, len1st = 0;
 
-	if(uartNum == SEG_DATA_UART)
+	if(uartNum == SEG_DATA_UART0)
 	{
 		lentot = reqSize = MIN(BUFFER_USED_SIZE(data_rx_0), reqSize);
 		if(IS_BUFFER_OUT_SEPARATED(data_rx_0) && (len1st = BUFFER_OUT_1ST_SIZE(data_rx_0)) < reqSize) {
@@ -437,6 +453,17 @@ int32_t uart_gets(uint8_t uartNum, uint8_t* buf, uint16_t reqSize)
 		}
 		memcpy(buf+len1st, &BUFFER_OUT(data_rx_0), reqSize);
 		BUFFER_OUT_MOVE(data_rx_0,reqSize);
+	}
+    else if(uartNum == SEG_DATA_UART1)
+	{
+		lentot = reqSize = MIN(BUFFER_USED_SIZE(data_rx_1), reqSize);
+		if(IS_BUFFER_OUT_SEPARATED(data_rx_1) && (len1st = BUFFER_OUT_1ST_SIZE(data_rx_1)) < reqSize) {
+			memcpy(buf, &BUFFER_OUT(data_rx_1), len1st);
+			BUFFER_OUT_MOVE(data_rx_1, len1st);
+			reqSize -= len1st;
+		}
+		memcpy(buf+len1st, &BUFFER_OUT(data_rx_1), reqSize);
+		BUFFER_OUT_MOVE(data_rx_1,reqSize);
 	}
 	else if(uartNum == SEG_DEBUG_UART)
 	{
@@ -450,7 +477,7 @@ int32_t uart_gets(uint8_t uartNum, uint8_t* buf, uint16_t reqSize)
 
 void uart_rx_flush(uint8_t uartNum)
 {
-	if(uartNum == SEG_DATA_UART)
+	if(uartNum == SEG_DATA_UART0)
 	{
 		BUFFER_CLEAR(data_rx_0);
 	}

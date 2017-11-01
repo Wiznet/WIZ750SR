@@ -8,8 +8,8 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define SEG_DATA_UART		0	// S2E Data UART selector, [0] UART0 or [1] UART1
-//#define SEG_DATA_UART		1	// S2E Data UART selector, [0] UART0 or [1] UART1
+#define SEG_DATA_UART0		0	// S2E Data UART selector, [0] UART0 or [1] UART1
+#define SEG_DATA_UART1		1	// S2E Data UART selector, [0] UART0 or [1] UART1
 #define SEG_DEBUG_UART		2	// S2E Debug UART, fixed
 
 #define SEG_DATA_BUF_SIZE	2048	// UART Ring buffer size

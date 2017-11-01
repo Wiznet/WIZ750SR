@@ -1258,9 +1258,9 @@ void ether_to_uart(uint8_t sock)
 			//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
 			for(i = 0; i < e2u_size[sock]; i++) 
             {
-                uart_putc(SEG_DATA_UART, g_recv_buf[sock][i]);
+                uart_putc(sock, g_recv_buf[sock][i]);
             }
-			uart_rs485_disable(SEG_DATA_UART);
+			uart_rs485_disable(sock);
 			
 			add_data_transfer_bytecount(sock, SEG_ETHER_TX, e2u_size[sock]);
 			e2u_size[sock] = 0;
@@ -1273,7 +1273,7 @@ void ether_to_uart(uint8_t sock)
 				//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
 				for(i = 0; i < e2u_size[sock]; i++) 
                 {  
-                    uart_putc(SEG_DATA_UART, g_recv_buf[sock][i]);
+                    uart_putc(sock, g_recv_buf[sock][i]);
                 }
 				add_data_transfer_bytecount(sock, SEG_ETHER_TX, e2u_size[sock]);
 				e2u_size[sock] = 0;
@@ -1288,7 +1288,7 @@ void ether_to_uart(uint8_t sock)
 			//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
 			for(i = 0; i < e2u_size[sock]; i++) 
             {   
-                uart_putc(SEG_DATA_UART, g_recv_buf[sock][i]);
+                uart_putc(sock, g_recv_buf[sock][i]);
             }
 			
 			add_data_transfer_bytecount(sock, SEG_ETHER_TX, e2u_size[sock]);
@@ -1399,7 +1399,7 @@ void init_trigger_modeswitch(uint8_t mode)
 		if(serial_common->serial_debug_en)
 		{
 			printf(" > SEG:AT Mode\r\n");
-			uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:AT Mode\r\n", sizeof("SEG:AT Mode\r\n"));
+			uart_puts(SEG_DATA_UART0, (uint8_t *)"SEG:AT Mode\r\n", sizeof("SEG:AT Mode\r\n"));
 		}
 	}
 	else // DEVICE_GW_MODE
@@ -1416,7 +1416,7 @@ void init_trigger_modeswitch(uint8_t mode)
 		if(serial_common->serial_debug_en)
 		{
 			printf(" > SEG:GW Mode\r\n");
-			uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:GW Mode\r\n", sizeof("SEG:GW Mode\r\n"));
+			uart_puts(SEG_DATA_UART0, (uint8_t *)"SEG:GW Mode\r\n", sizeof("SEG:GW Mode\r\n"));
 		}
 	}
 	

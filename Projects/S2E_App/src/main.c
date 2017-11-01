@@ -66,7 +66,7 @@ int8_t process_dns(void);
 
 // Debug messages
 void display_Dev_Info_header(void);
-void display_Dev_Info_main(void);
+void display_Dev_Info_main(uint8_t channel);
 void display_Dev_Info_dhcp(void);
 void display_Dev_Info_dns(void);
 
@@ -124,7 +124,8 @@ int main(void)
 	{
 		// Debug UART: Device information print out
 		display_Dev_Info_header();
-		display_Dev_Info_main();
+		display_Dev_Info_main(0);
+        display_Dev_Info_main(1);
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -436,19 +437,19 @@ void display_Dev_Info_header(void)
 }
 
 
-void display_Dev_Info_main(void)
+void display_Dev_Info_main(uint8_t channel)
 {
 	//uint8_t i;
 	DevConfig *dev_config = get_DevConfig_pointer();
 	uint32_t baud_table[] = {300, 600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400};
 	
 	printf(" - Device name: %s\r\n", dev_config->device_common.module_name);
-	printf(" - Device mode: %s\r\n", str_working[dev_config->network_connection[0].working_mode]);
+	printf(" - Device mode: %s\r\n", str_working[dev_config->network_connection[channel].working_mode]);
 	
 	printf(" - Network settings: \r\n");
 		printf("\t- Obtaining IP settings: [%s]\r\n", (dev_config->network_option.dhcp_use == 1)?"Automatic - DHCP":"Static");
 		printf("\t- TCP/UDP ports\r\n");
-		printf("\t   + S2E data port: [%d]\r\n", dev_config->network_connection[0].local_port);
+		printf("\t   + S2E data port: [%d]\r\n", dev_config->network_connection[channel].local_port);
 		printf("\t   + TCP/UDP setting port: [%d]\r\n", DEVICE_SEGCP_PORT);
 		printf("\t   + Firmware update port: [%d]\r\n", DEVICE_FWUP_PORT);
 	
@@ -456,31 +457,31 @@ void display_Dev_Info_main(void)
 		printf("\t- %s: [%s]\r\n", (dev_config->config_common.pw_search[0] != 0)?"Enabled":"Disabled", (dev_config->config_common.pw_search[0] != 0)?dev_config->config_common.pw_search:"None");
 	
 	printf(" - Ethernet connection password: \r\n");
-		printf("\t- %s %s\r\n", (dev_config->tcp_option[0].pw_connect_en == 1)?"Enabled":"Disabled", "(TCP server / mixed mode only)");
+		printf("\t- %s %s\r\n", (dev_config->tcp_option[channel].pw_connect_en == 1)?"Enabled":"Disabled", "(TCP server / mixed mode only)");
 	
 	printf(" - Connection timer settings: \r\n");
 		printf("\t- Inactivity timer: ");
-			if(dev_config->tcp_option[0].inactivity) printf("[%d] (sec)\r\n", dev_config->tcp_option[0].inactivity);
+			if(dev_config->tcp_option[channel].inactivity) printf("[%d] (sec)\r\n", dev_config->tcp_option[channel].inactivity);
 			else printf("%s\r\n", STR_DISABLED);
 		printf("\t- Reconnect interval: ");
-			if(dev_config->tcp_option[0].reconnection) printf("[%d] (msec)\r\n", dev_config->tcp_option[0].reconnection);
+			if(dev_config->tcp_option[channel].reconnection) printf("[%d] (msec)\r\n", dev_config->tcp_option[channel].reconnection);
 			else printf("%s\r\n", STR_DISABLED);
 	
 	printf(" - Serial settings: \r\n");
-		printf("\t- Data %s port:  [%s%d]\r\n", STR_UART, STR_UART, SEG_DATA_UART);
-		printf("\t   + UART IF: [%s]\r\n", uart_if_table[dev_config->serial_option[0].uart_interface]);
+		printf("\t- Data %s port:  [%s%d]\r\n", STR_UART, STR_UART, channel);
+		printf("\t   + UART IF: [%s]\r\n", uart_if_table[dev_config->serial_option[channel].uart_interface]);
 		/*
 		printf("Debug: baud_rate = %d, baud_table = %d\r\n", dev_config->serial_info[0].baud_rate, baud_table[dev_config->serial_info[0].baud_rate]);
 		printf("Debug: ");
 		for(i = 0; i < 14; i++) printf("%d, ", baud_table[i]);
 		printf("\r\n");
 		*/
-		printf("\t   + %d-", baud_table[dev_config->serial_option[0].baud_rate]);
-		printf("%d-", word_len_table[dev_config->serial_option[0].data_bits]);
-		printf("%s-", parity_table[dev_config->serial_option[0].parity]);
-		printf("%d / ", stop_bit_table[dev_config->serial_option[0].stop_bits]);
-		if(dev_config->serial_option[0].uart_interface == UART_IF_RS232_TTL)
-			printf("Flow control: %s\r\n", flow_ctrl_table[dev_config->serial_option[0].flow_control]);
+		printf("\t   + %d-", baud_table[dev_config->serial_option[channel].baud_rate]);
+		printf("%d-", word_len_table[dev_config->serial_option[channel].data_bits]);
+		printf("%s-", parity_table[dev_config->serial_option[channel].parity]);
+		printf("%d / ", stop_bit_table[dev_config->serial_option[channel].stop_bits]);
+		if(dev_config->serial_option[channel].uart_interface == UART_IF_RS232_TTL)
+			printf("Flow control: %s\r\n", flow_ctrl_table[dev_config->serial_option[channel].flow_control]);
 		else
 			printf("Flow control: %s\r\n", flow_ctrl_table[0]); // RS-422/485; flow control - NONE only
 		
@@ -489,13 +490,13 @@ void display_Dev_Info_main(void)
 		
 	printf(" - Serial data packing options:\r\n");
 		printf("\t- Time: ");
-			if(dev_config->serial_data_packing[0].packing_time) printf("[%d] (msec)\r\n", dev_config->serial_data_packing[0].packing_time);
+			if(dev_config->serial_data_packing[channel].packing_time) printf("[%d] (msec)\r\n", dev_config->serial_data_packing[channel].packing_time);
 			else printf("%s\r\n", STR_DISABLED);
 		printf("\t- Size: ");
-			if(dev_config->serial_data_packing[0].packing_size) printf("[%d] (bytes)\r\n", dev_config->serial_data_packing[0].packing_size);
+			if(dev_config->serial_data_packing[channel].packing_size) printf("[%d] (bytes)\r\n", dev_config->serial_data_packing[channel].packing_size);
 			else printf("%s\r\n", STR_DISABLED);
 		printf("\t- Char: ");
-			if(dev_config->serial_data_packing[0].packing_delimiter_length == 1) printf("[%.2X] (hex only)\r\n", dev_config->serial_data_packing[0].packing_delimiter[0]);
+			if(dev_config->serial_data_packing[channel].packing_delimiter_length == 1) printf("[%.2X] (hex only)\r\n", dev_config->serial_data_packing[channel].packing_delimiter[0]);
 			else printf("%s\r\n", STR_DISABLED);
 		
 		printf(" - Serial command mode swtich code:\r\n");
@@ -504,8 +505,8 @@ void display_Dev_Info_main(void)
 	
 #if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750MINI) || (DEVICE_BOARD_NAME == WIZ750JR))
 	printf(" - Hardware information: Status pins\r\n");
-		printf("\t- Status 1: [%s] - %s\r\n", "PA_10", dev_config->serial_option[0].dtr_en?"DTR":"PHY link");
-		printf("\t- Status 2: [%s] - %s\r\n", "PA_01", dev_config->serial_option[0].dsr_en?"DSR":"TCP connection"); // shared pin; HW_TRIG (input) / TCP connection indicator (output)
+		printf("\t- Status 1: [%s] - %s\r\n", "PA_10", dev_config->serial_option[channel].dtr_en?"DTR":"PHY link");
+		printf("\t- Status 2: [%s] - %s\r\n", "PA_01", dev_config->serial_option[channel].dsr_en?"DSR":"TCP connection"); // shared pin; HW_TRIG (input) / TCP connection indicator (output)
 
 #ifdef __USE_USERS_GPIO__
 	printf(" - Hardware information: User I/O pins\r\n");

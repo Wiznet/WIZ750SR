@@ -213,7 +213,7 @@ void do_segcp(void)
 		{
 			if(opmode == DEVICE_AT_MODE) 
 			{
-				if(dev_config->serial_common.serial_debug_en == SEGCP_ENABLE) uart_puts(SEG_DATA_UART, "REBOOT\r\n", 8);
+				if(dev_config->serial_common.serial_debug_en == SEGCP_ENABLE) uart_puts(SEG_DATA_UART0, "REBOOT\r\n", 8);
 			}
 			
 			device_reboot();
@@ -516,7 +516,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // UART Rx flush
 					case SEGCP_RX:
-						uart_rx_flush(SEG_DATA_UART);
+						uart_rx_flush(SEG_DATA_UART0);
 						sprintf(trep, "%s", "FLUSH");
 						//ret |= SEGCP_RET_ERR_NOTAVAIL;
 						break;
@@ -1139,7 +1139,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 #ifdef _SEGCP_DEBUG_
 			printf("ERROR : %s\r\n",trep);
 #endif
-			uart_rx_flush(SEG_DATA_UART);
+			uart_rx_flush(SEG_DATA_UART0);
 			return ret;
 		}
 		
@@ -1358,7 +1358,7 @@ uint16_t proc_SEGCP_uart(uint8_t * segcp_rep)
 	
 	if(BUFFER_USED_SIZE(data_rx_0))
 	{
-		len = uart_get_commandline(SEG_DATA_UART, segcp_req, (sizeof(segcp_req) - 1));
+		len = uart_get_commandline(SEG_DATA_UART0, segcp_req, (sizeof(segcp_req) - 1));
 		
 		if(len != 0)
 		{
@@ -1371,7 +1371,7 @@ uint16_t proc_SEGCP_uart(uint8_t * segcp_rep)
 					printf("%s",segcp_rep);
 				}
 				
-				uart_puts(SEG_DATA_UART, segcp_rep, strlen(segcp_rep));
+				uart_puts(SEG_DATA_UART0, segcp_rep, strlen(segcp_rep));
 				
 			}
 		}

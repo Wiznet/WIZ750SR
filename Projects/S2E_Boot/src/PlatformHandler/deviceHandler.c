@@ -65,7 +65,7 @@ void device_reboot(void)
 uint8_t device_firmware_update(teDATASTORAGE stype)
 {
 	struct __firmware_update *fwupdate = (struct __firmware_update *)&(get_DevConfig_pointer()->firmware_update);
-	struct __serial_common *serial_common = (struct __serial_common *)&(get_DevConfig_pointer()->serial_common);
+	struct __serial_info *serial = (struct __serial_info *)&(get_DevConfig_pointer()->serial_info);
 	
 	uint8_t ret = DEVICE_FWUP_RET_PROGRESS; // No Meaning, [Firmware update process] have to work as blocking function.
 	uint16_t len = 0;
@@ -81,7 +81,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 	if(fwupdate->fwup_flag == SEGCP_DISABLE)	return DEVICE_FWUP_RET_FAILED;
 	if((fwupdate->fwup_size == 0) || (fwupdate->fwup_size > DEVICE_FWUP_SIZE))
 	{
-		if(serial_common->serial_debug_en == SEGCP_ENABLE)
+		if(serial->serial_debug_en == SEGCP_ENABLE)
 		{
 			printf(" > SEGCP:FW_UPDATE:FAILED - Invalid firmware size: %d bytes (Firmware size must be within %d bytes)\r\n", fwupdate->fwup_size, DEVICE_FWUP_SIZE);
 		}
@@ -92,7 +92,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 	// App, FW update from Network (ethernet) to Flash memory (backup area)
 	if(stype == NETWORK_APP_BACKUP)
 	{
-		if(serial_common->serial_debug_en == SEGCP_ENABLE)
+		if(serial->serial_debug_en == SEGCP_ENABLE)
 		{
 			printf(" > SEGCP:FW_UPDATE:NETWORK - Firmware size: [%d] bytes\r\n", fwupdate->fwup_size);
 		}
@@ -119,7 +119,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 			// Firmware update failed: Timeout occurred
 			if(flag_fw_update_timeout == SEGCP_ENABLE)
 			{
-				if(serial_common->serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:FW_UPDATE:FAILED - Firmware update timeout\r\n");
+				if(serial->serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:FW_UPDATE:FAILED - Firmware update timeout\r\n");
 				ret = DEVICE_FWUP_RET_FAILED;
 				break;
 			}
@@ -127,7 +127,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 			// Firmware update failed: timeout occurred at get_firmware_from_network() function
 			if(flag_fw_from_network_timeout == SEGCP_ENABLE)
 			{
-				if(serial_common->serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:FW_UPDATE:FAILED - Network download timeout\r\n");
+				if(serial->serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:FW_UPDATE:FAILED - Network download timeout\r\n");
 				ret = DEVICE_FWUP_RET_FAILED;
 				break;
 			}
@@ -152,7 +152,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 			target_storage_addr = DEVICE_APP_BACKUP_ADDR;
 		}
 		
-		if(serial_common->serial_debug_en == SEGCP_ENABLE)
+		if(serial->serial_debug_en == SEGCP_ENABLE)
 		{
 			printf(" > SEGCP:FW_UPDATE:FLASH-to-FLASH - Firmware size: [%d] bytes\r\n", fwupdate->fwup_size);
 		}
@@ -168,7 +168,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 			// Timeout occurred
 			if(flag_fw_update_timeout == SEGCP_ENABLE)
 			{
-				if(serial_common->serial_debug_en == SEGCP_ENABLE)
+				if(serial->serial_debug_en == SEGCP_ENABLE)
 				{
 					printf(" > SEGCP:FW_UPDATE:FAILED - Firmware update timeout\r\n");
 				}
@@ -208,7 +208,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 	// shared code
 	if(write_fw_len == fwupdate->fwup_size)
 	{
-		if(serial_common->serial_debug_en == SEGCP_ENABLE)
+		if(serial->serial_debug_en == SEGCP_ENABLE)
 		{
 			printf(" > SEGCP:FW_UPDATE:SUCCESS - %d / %d bytes\r\n", write_fw_len, fwupdate->fwup_size);
 		}
@@ -225,7 +225,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 uint8_t device_firmware_update(teDATASTORAGE stype)
 {
 	struct __firmware_update *fwupdate = (struct __firmware_update *)&(get_DevConfig_pointer()->firmware_update);
-	struct __serial_common *serial_common = (struct __serial_common *)&(get_DevConfig_pointer()->serial_common);
+	struct __serial_info *serial = (struct __serial_info *)&(get_DevConfig_pointer()->serial_info);
 	
 	uint8_t ret = DEVICE_FWUP_RET_PROGRESS; // No Meaning, [Firmware update process] have to work as blocking function.
 	//uint16_t len = 0;
@@ -241,7 +241,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 	if(fwupdate->fwup_flag == SEGCP_DISABLE)	return DEVICE_FWUP_RET_FAILED;
 	if((fwupdate->fwup_size == 0) || (fwupdate->fwup_size > DEVICE_FWUP_SIZE))
 	{
-		if(serial_common->serial_debug_en == SEGCP_ENABLE)
+		if(serial->serial_debug_en == SEGCP_ENABLE)
 		{
 			printf(" > SEGCP:FW_UPDATE:FAILED - Invalid firmware size: %d bytes (Firmware size must be within %d bytes)\r\n", fwupdate->fwup_size, DEVICE_FWUP_SIZE);
 		}
@@ -252,7 +252,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 	// App, FW update from Network (ethernet) to Flash memory (backup area)
 	if(stype == STORAGE_APP_MAIN)
 	{
-		if(serial_common->serial_debug_en == SEGCP_ENABLE)
+		if(serial->serial_debug_en == SEGCP_ENABLE)
 		{
 			printf(" > SEGCP:FW_UPDATE:NETWORK - Firmware size: [%d] bytes\r\n", fwupdate->fwup_size);
 		}
@@ -279,7 +279,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 			// Firmware update failed: Timeout occurred
 			if(flag_fw_update_timeout == SEGCP_ENABLE)
 			{
-				if(serial_common->serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:FW_UPDATE:FAILED - Firmware update timeout\r\n");
+				if(serial->serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:FW_UPDATE:FAILED - Firmware update timeout\r\n");
 				ret = DEVICE_FWUP_RET_FAILED;
 				break;
 			}
@@ -287,7 +287,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 			// Firmware update failed: timeout occurred at get_firmware_from_network() function
 			if(flag_fw_from_network_timeout == SEGCP_ENABLE)
 			{
-				if(serial_common->serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:FW_UPDATE:FAILED - Network download timeout\r\n");
+				if(serial->serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:FW_UPDATE:FAILED - Network download timeout\r\n");
 				ret = DEVICE_FWUP_RET_FAILED;
 				break;
 			}
@@ -308,7 +308,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 	// shared code
 	if(write_fw_len == fwupdate->fwup_size)
 	{
-		if(serial_common->serial_debug_en == SEGCP_ENABLE)
+		if(serial->serial_debug_en == SEGCP_ENABLE)
 		{
 			printf(" > SEGCP:FW_UPDATE:SUCCESS - %d / %d bytes\r\n", write_fw_len, fwupdate->fwup_size);
 		}

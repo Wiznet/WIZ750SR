@@ -59,7 +59,7 @@ void do_segcp(void)
 	
 	if(segcp_ret & SEGCP_RET_ERR)
 	{
-		if(dev_config->serial_common.serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:ERROR:%04X\r\n", segcp_ret);
+		if(dev_config->serial_info[0].serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:ERROR:%04X\r\n", segcp_ret);
 	}
 	else if(segcp_ret) // Command parsing success
 	{
@@ -241,16 +241,16 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 				switch((teSEGCPCMDNUM)cmdnum)
 				{
 					case SEGCP_MC: sprintf(trep,"%02X:%02X:%02X:%02X:%02X:%02X", 
-											dev_config->network_common.mac[0], dev_config->network_common.mac[1], dev_config->network_common.mac[2],
-											dev_config->network_common.mac[3], dev_config->network_common.mac[4], dev_config->network_common.mac[5]);
+											dev_config->network_info_common.mac[0], dev_config->network_info_common.mac[1], dev_config->network_info_common.mac[2],
+											dev_config->network_info_common.mac[3], dev_config->network_info_common.mac[4], dev_config->network_info_common.mac[5]);
 						break;
-					case SEGCP_VR: sprintf(trep,"%x.%x.%x", dev_config->device_common.fw_ver[0], dev_config->device_common.fw_ver[1], dev_config->device_common.fw_ver[2]);
+					case SEGCP_VR: sprintf(trep,"%x.%x.%x", dev_config->fw_ver[0], dev_config->fw_ver[1], dev_config->fw_ver[2]);
 						break;
-					case SEGCP_MN: sprintf(trep,"%s", dev_config->device_common.module_name);
+					case SEGCP_MN: sprintf(trep,"%s", dev_config->module_name);
 						break;
-					case SEGCP_IM: sprintf(trep,"%d", dev_config->network_option.dhcp_use);	// 0:STATIC, 1:DHCP (PPPoE X)
+					case SEGCP_IM: sprintf(trep,"%d", dev_config->options.dhcp_use);	// 0:STATIC, 1:DHCP (PPPoE X)
 						break;
-					case SEGCP_OP: sprintf(trep,"%d", dev_config->network_connection[0].working_mode); // opmode
+					case SEGCP_OP: sprintf(trep,"%d", dev_config->network_info[0].working_mode); // opmode
 						break;
 					//case SEGCP_DD: sprintf(trep,"%d", tsvDEVCONFnew.ddns_en);
 					case SEGCP_DD: sprintf(trep,"%d", 0);
@@ -258,33 +258,33 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 					//case SEGCP_PO: sprintf(trep,"%d", tsvDEVCONFnew.telnet_en[0]);
 					case SEGCP_PO: sprintf(trep,"%d", 0);
 						break;
-					case SEGCP_CP: sprintf(trep,"%d", dev_config->tcp_option[0].pw_connect_en);
+					case SEGCP_CP: sprintf(trep,"%d", dev_config->options.pw_connect_en);
 						break;
-					case SEGCP_DG: sprintf(trep,"%d", dev_config->serial_common.serial_debug_en);
+					case SEGCP_DG: sprintf(trep,"%d", dev_config->serial_info[0].serial_debug_en);
 						break;
-					case SEGCP_KA: sprintf(trep,"%d", dev_config->tcp_option[0].keepalive_en);
+					case SEGCP_KA: sprintf(trep,"%d", dev_config->network_info[0].keepalive_en);
 						break;
-					case SEGCP_KI: sprintf(trep,"%d", dev_config->tcp_option[0].keepalive_wait_time);
+					case SEGCP_KI: sprintf(trep,"%d", dev_config->network_info[0].keepalive_wait_time);
 						break;
-					case SEGCP_KE: sprintf(trep,"%d", dev_config->tcp_option[0].keepalive_retry_time);
+					case SEGCP_KE: sprintf(trep,"%d", dev_config->network_info[0].keepalive_retry_time);
 						break;
-					case SEGCP_RI: sprintf(trep,"%d", dev_config->tcp_option[0].reconnection);
+					case SEGCP_RI: sprintf(trep,"%d", dev_config->network_info[0].reconnection);
 						break;
 					case SEGCP_LI:
-						sprintf(trep,"%d.%d.%d.%d", dev_config->network_common.local_ip[0], dev_config->network_common.local_ip[1],
-													dev_config->network_common.local_ip[2], dev_config->network_common.local_ip[3]);
+						sprintf(trep,"%d.%d.%d.%d", dev_config->network_info_common.local_ip[0], dev_config->network_info_common.local_ip[1],
+													dev_config->network_info_common.local_ip[2], dev_config->network_info_common.local_ip[3]);
 						break;
 					case SEGCP_SM: 
-						sprintf(trep,"%d.%d.%d.%d", dev_config->network_common.subnet[0], dev_config->network_common.subnet[1],
-													dev_config->network_common.subnet[2], dev_config->network_common.subnet[3]);
+						sprintf(trep,"%d.%d.%d.%d", dev_config->network_info_common.subnet[0], dev_config->network_info_common.subnet[1],
+													dev_config->network_info_common.subnet[2], dev_config->network_info_common.subnet[3]);
 						break;
 					case SEGCP_GW: 
-						sprintf(trep,"%d.%d.%d.%d", dev_config->network_common.gateway[0], dev_config->network_common.gateway[1],
-													dev_config->network_common.gateway[2], dev_config->network_common.gateway[3]);
+						sprintf(trep,"%d.%d.%d.%d", dev_config->network_info_common.gateway[0], dev_config->network_info_common.gateway[1],
+													dev_config->network_info_common.gateway[2], dev_config->network_info_common.gateway[3]);
 						break;
 					case SEGCP_DS:
-						sprintf(trep,"%d.%d.%d.%d", dev_config->network_option.dns_server_ip[0], dev_config->network_option.dns_server_ip[1],
-													dev_config->network_option.dns_server_ip[2], dev_config->network_option.dns_server_ip[3]);
+						sprintf(trep,"%d.%d.%d.%d", dev_config->options.dns_server_ip[0], dev_config->options.dns_server_ip[1],
+													dev_config->options.dns_server_ip[2], dev_config->options.dns_server_ip[3]);
 						break;
 					case SEGCP_PI:
 						//if(tsvDEVCONFnew.pppoe_id[0] == 0) sprintf(trep,"%c",SEGCP_NULL);
@@ -311,54 +311,54 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						sprintf(trep, "%c", SEGCP_NULL);
 						break;
 					case SEGCP_DH:
-						if(dev_config->device_common.module_name[0] == 0) sprintf(trep,"%c",SEGCP_NULL);
-						else sprintf(trep, "%s-%02x%02x%02x", dev_config->device_common.module_name, dev_config->network_common.mac[3], dev_config->network_common.mac[4], dev_config->network_common.mac[5]);
+						if(dev_config->module_name[0] == 0) sprintf(trep,"%c",SEGCP_NULL);
+						else sprintf(trep, "%s-%02x%02x%02x", dev_config->module_name, dev_config->network_info_common.mac[3], dev_config->network_info_common.mac[4], dev_config->network_info_common.mac[5]);
 						break;
-					case SEGCP_LP: sprintf(trep, "%d", dev_config->network_connection[0].local_port);
+					case SEGCP_LP: sprintf(trep, "%d", dev_config->network_info[0].local_port);
 						break;
-					case SEGCP_RP: sprintf(trep, "%d", dev_config->network_connection[0].remote_port);
+					case SEGCP_RP: sprintf(trep, "%d", dev_config->network_info[0].remote_port);
 						break;
 					case SEGCP_RH: 
-						if(dev_config->network_option.dns_use == SEGCP_DISABLE)
+						if(dev_config->options.dns_use == SEGCP_DISABLE)
 						{
-							sprintf(trep, "%d.%d.%d.%d", dev_config->network_connection[0].remote_ip[0], dev_config->network_connection[0].remote_ip[1],
-														dev_config->network_connection[0].remote_ip[2], dev_config->network_connection[0].remote_ip[3]);
+							sprintf(trep, "%d.%d.%d.%d", dev_config->network_info[0].remote_ip[0], dev_config->network_info[0].remote_ip[1],
+														dev_config->network_info[0].remote_ip[2], dev_config->network_info[0].remote_ip[3]);
 						}
 						else
 						{
-							if(dev_config->network_option.dns_domain_name[0] == 0) sprintf(trep, "%c", SEGCP_NULL);
-							else sprintf(trep, "%s", dev_config->network_option.dns_domain_name);
+							if(dev_config->options.dns_domain_name[0] == 0) sprintf(trep, "%c", SEGCP_NULL);
+							else sprintf(trep, "%s", dev_config->options.dns_domain_name);
 						}
 						break;
-					case SEGCP_BR: sprintf(trep, "%d", dev_config->serial_option[0].baud_rate);
+					case SEGCP_BR: sprintf(trep, "%d", dev_config->serial_info[0].baud_rate);
 						break;
-					case SEGCP_DB: sprintf(trep, "%d", dev_config->serial_option[0].data_bits);
+					case SEGCP_DB: sprintf(trep, "%d", dev_config->serial_info[0].data_bits);
 						break;
-					case SEGCP_PR: sprintf(trep, "%d", dev_config->serial_option[0].parity);
+					case SEGCP_PR: sprintf(trep, "%d", dev_config->serial_info[0].parity);
 						break;
-					case SEGCP_SB: sprintf(trep, "%d", dev_config->serial_option[0].stop_bits);
+					case SEGCP_SB: sprintf(trep, "%d", dev_config->serial_info[0].stop_bits);
 						break;
-					case SEGCP_FL: sprintf(trep, "%d", dev_config->serial_option[0].flow_control);
+					case SEGCP_FL: sprintf(trep, "%d", dev_config->serial_info[0].flow_control);
 						break;
-					case SEGCP_IT: sprintf(trep, "%d", dev_config->tcp_option[0].inactivity);
+					case SEGCP_IT: sprintf(trep, "%d", dev_config->network_info[0].inactivity);
 						break;
-					case SEGCP_PT: sprintf(trep, "%d", dev_config->serial_data_packing[0].packing_time);
+					case SEGCP_PT: sprintf(trep, "%d", dev_config->network_info[0].packing_time);
 						break;
-					case SEGCP_PS: sprintf(trep, "%d", dev_config->serial_data_packing[0].packing_size);
+					case SEGCP_PS: sprintf(trep, "%d", dev_config->network_info[0].packing_size);
 						break;
-					case SEGCP_PD: sprintf(trep, "%02X", dev_config->serial_data_packing[0].packing_delimiter[0]);
+					case SEGCP_PD: sprintf(trep, "%02X", dev_config->network_info[0].packing_delimiter[0]);
 						break;
-					case SEGCP_TE: sprintf(trep, "%d", dev_config->serial_command.serial_command);
+					case SEGCP_TE: sprintf(trep, "%d", dev_config->options.serial_command);
 						break;
-					case SEGCP_SS: sprintf(trep, "%02X%02X%02X", dev_config->serial_command.serial_trigger[0], dev_config->serial_command.serial_trigger[1], dev_config->serial_command.serial_trigger[2]);
+					case SEGCP_SS: sprintf(trep, "%02X%02X%02X", dev_config->options.serial_trigger[0], dev_config->options.serial_trigger[1], dev_config->options.serial_trigger[2]);
 						break;
 					case SEGCP_NP: 
-						if(dev_config->tcp_option[0].pw_connect[0] == 0) sprintf(trep,"%c",SEGCP_NULL);
-						else sprintf(trep, "%s", dev_config->tcp_option[0].pw_connect);
+						if(dev_config->options.pw_connect[0] == 0) sprintf(trep,"%c",SEGCP_NULL);
+						else sprintf(trep, "%s", dev_config->options.pw_connect);
 						break;
 					case SEGCP_SP:
-						if(dev_config->config_common.pw_search[0] == 0) sprintf(trep,"%c",SEGCP_NULL);
-						else sprintf(trep, "%s", dev_config->config_common.pw_search);
+						if(dev_config->options.pw_search[0] == 0) sprintf(trep,"%c",SEGCP_NULL);
+						else sprintf(trep, "%s", dev_config->options.pw_search);
 						break;
 					case SEGCP_LG: 
 					case SEGCP_ER: 
@@ -381,16 +381,16 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						break;
 					case SEGCP_UN:
 						// NEW: UART Interface - TTL/RS-232 or RS-422/485
-						sprintf(trep, "%s", uart_if_table[dev_config->serial_option[0].uart_interface]); 
+						sprintf(trep, "%s", uart_if_table[dev_config->serial_info[0].uart_interface]); 
 						//sprintf(trep, "%d", DEVICE_UART_CNT); // OLD: UART COUNT
 						break;
-					case SEGCP_ST: sprintf(trep, "%s", strDEVSTATUS[dev_config->network_connection[0].working_state]);
+					case SEGCP_ST: sprintf(trep, "%s", strDEVSTATUS[dev_config->network_info[0].state]);
 						break;
 					case SEGCP_FR: 
 						if(gSEGCPPRIVILEGE & (SEGCP_PRIVILEGE_SET|SEGCP_PRIVILEGE_WRITE)) 
 						{
 							// #20161110 Hidden option, Local port number [1] + FR cmd => K! (EEPROM Erase)
-							if(dev_config->network_connection[0].local_port == 1)
+							if(dev_config->network_info[0].local_port == 1)
 							{
 								ret |= SEGCP_RET_ERASE_EEPROM | SEGCP_RET_REBOOT; // EEPROM Erase
 							}
@@ -402,7 +402,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						else ret |= SEGCP_RET_ERR_NOPRIVILEGE;
 						break;
 					case SEGCP_EC:
-						sprintf(trep,"%d",dev_config->serial_command.serial_command_echo);
+						sprintf(trep,"%d",dev_config->options.serial_command_echo);
 						break;
 					case SEGCP_K1:
 						ret |= SEGCP_RET_ERASE_EEPROM | SEGCP_RET_REBOOT;
@@ -412,7 +412,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						break;
 					default:
 						ret |= SEGCP_RET_ERR_NOCOMMAND;
-						sprintf(trep,"%s", strDEVSTATUS[dev_config->network_connection[0].working_state]);
+						sprintf(trep,"%s", strDEVSTATUS[dev_config->network_info[0].state]);
 						break;
 				}
 				
@@ -432,8 +432,8 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 				switch((teSEGCPCMDNUM)cmdnum)
 				{
 					case SEGCP_MC:
-						if((dev_config->network_common.mac[0] == 0x00) && (dev_config->network_common.mac[1] == 0x08) && (dev_config->network_common.mac[2] == 0xDC)) ret |= SEGCP_RET_ERR_IGNORED;
-						else if(!is_macaddr(param, ".:-", dev_config->network_common.mac)) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						if((dev_config->network_info_common.mac[0] == 0x00) && (dev_config->network_info_common.mac[1] == 0x08) && (dev_config->network_info_common.mac[2] == 0xDC)) ret |= SEGCP_RET_ERR_IGNORED;
+						else if(!is_macaddr(param, ".:-", dev_config->network_info_common.mac)) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						break;
 					case SEGCP_VR: 
 					case SEGCP_MN:
@@ -442,7 +442,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 					case SEGCP_IM:
 						tmp_byte = is_hex(*param);
 						if(param_len != 1 || tmp_byte > SEGCP_DHCP) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->network_option.dhcp_use = tmp_byte;
+						else dev_config->options.dhcp_use = tmp_byte;
 						break;
 					case SEGCP_OP: 
 						tmp_byte = is_hex(*param);
@@ -453,7 +453,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						else
 						{
 							//close(SEG_SOCK);
-							dev_config->network_connection[0].working_mode = tmp_byte;
+							dev_config->network_info[0].working_mode = tmp_byte;
 						}
 						break;
 				   case SEGCP_DD: // ## Does nothing
@@ -471,40 +471,40 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 					case SEGCP_CP:
 						tmp_byte = is_hex(*param);
 						if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->tcp_option[0].pw_connect_en = tmp_byte;
+						else dev_config->options.pw_connect_en = tmp_byte;
 						break;
 					case SEGCP_DG:
 						tmp_byte = is_hex(*param);
 						if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->serial_common.serial_debug_en = tmp_byte;
+						else dev_config->serial_info[0].serial_debug_en = tmp_byte;
 						break;
 					case SEGCP_KA:
 						tmp_byte = is_hex(*param);
 						if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->tcp_option[0].keepalive_en = tmp_byte;
+						else dev_config->network_info[0].keepalive_en = tmp_byte;
 						break;
 					case SEGCP_KI:
 						sscanf(param,"%ld", &tmp_long);
 						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->tcp_option[0].keepalive_wait_time = (uint16_t) tmp_long;
+						else dev_config->network_info[0].keepalive_wait_time = (uint16_t) tmp_long;
 						break;
 					case SEGCP_KE:
 						sscanf(param,"%ld", &tmp_long);
 						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->tcp_option[0].keepalive_retry_time = (uint16_t) tmp_long;
+						else dev_config->network_info[0].keepalive_retry_time = (uint16_t) tmp_long;
 						break;
 					case SEGCP_RI:
 						sscanf(param,"%ld", &tmp_long);
 						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->tcp_option[0].reconnection = (uint16_t) tmp_long;
+						else dev_config->network_info[0].reconnection = (uint16_t) tmp_long;
 						break;
 					case SEGCP_LI:
 						if(is_ipaddr(param, tmp_ip))
 						{
-							dev_config->network_common.local_ip[0] = tmp_ip[0];
-							dev_config->network_common.local_ip[1] = tmp_ip[1];
-							dev_config->network_common.local_ip[2] = tmp_ip[2];
-							dev_config->network_common.local_ip[3] = tmp_ip[3];
+							dev_config->network_info_common.local_ip[0] = tmp_ip[0];
+							dev_config->network_info_common.local_ip[1] = tmp_ip[1];
+							dev_config->network_info_common.local_ip[2] = tmp_ip[2];
+							dev_config->network_info_common.local_ip[3] = tmp_ip[3];
 						}
 						else
 						{
@@ -514,30 +514,30 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 					case SEGCP_SM:
 						if(is_ipaddr(param, tmp_ip))
 						{
-							dev_config->network_common.subnet[0] = tmp_ip[0];
-							dev_config->network_common.subnet[1] = tmp_ip[1];
-							dev_config->network_common.subnet[2] = tmp_ip[2];
-							dev_config->network_common.subnet[3] = tmp_ip[3];
+							dev_config->network_info_common.subnet[0] = tmp_ip[0];
+							dev_config->network_info_common.subnet[1] = tmp_ip[1];
+							dev_config->network_info_common.subnet[2] = tmp_ip[2];
+							dev_config->network_info_common.subnet[3] = tmp_ip[3];
 						}
 						else ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						break;
 					case SEGCP_GW:
 						if(is_ipaddr(param, tmp_ip))
 						{
-							dev_config->network_common.gateway[0] = tmp_ip[0];
-							dev_config->network_common.gateway[1] = tmp_ip[1];
-							dev_config->network_common.gateway[2] = tmp_ip[2];
-							dev_config->network_common.gateway[3] = tmp_ip[3];
+							dev_config->network_info_common.gateway[0] = tmp_ip[0];
+							dev_config->network_info_common.gateway[1] = tmp_ip[1];
+							dev_config->network_info_common.gateway[2] = tmp_ip[2];
+							dev_config->network_info_common.gateway[3] = tmp_ip[3];
 						}
 						else ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						break;
 					case SEGCP_DS:
 						if(is_ipaddr(param, tmp_ip))
 						{
-							dev_config->network_option.dns_server_ip[0] = tmp_ip[0];
-							dev_config->network_option.dns_server_ip[1] = tmp_ip[1];
-							dev_config->network_option.dns_server_ip[2] = tmp_ip[2];
-							dev_config->network_option.dns_server_ip[3] = tmp_ip[3];
+							dev_config->options.dns_server_ip[0] = tmp_ip[0];
+							dev_config->options.dns_server_ip[1] = tmp_ip[1];
+							dev_config->options.dns_server_ip[2] = tmp_ip[2];
+							dev_config->options.dns_server_ip[3] = tmp_ip[3];
 						}
 						else ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						break;
@@ -588,65 +588,65 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						;
 						break;
 					case SEGCP_DH:
-						if(param_len > sizeof(dev_config->device_common.module_name)-1) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						if(param_len > sizeof(dev_config->module_name)-1) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else 
 						{
 							if(param[0] == SEGCP_NULL)
 							{
-								dev_config->device_common.module_name[0] = 0;
+								dev_config->module_name[0] = 0;
 							}
 							else
 							{
-								sscanf(param, "%s", &dev_config->device_common.module_name);
+								sscanf(param, "%s", &dev_config->module_name);
 							}
 						}
 						break;
 					case SEGCP_LP:
 						sscanf(param,"%ld", &tmp_long);
 						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->network_connection[0].local_port = (uint16_t)tmp_long;
+						else dev_config->network_info[0].local_port = (uint16_t)tmp_long;
 						break;
 					case SEGCP_RP:
 						sscanf(param,"%ld", &tmp_long);
 						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;                  
-						else dev_config->network_connection[0].remote_port = (uint16_t)tmp_long;
+						else dev_config->network_info[0].remote_port = (uint16_t)tmp_long;
 						break;
 					case SEGCP_RH:
 						if(is_ipaddr(param, tmp_ip))
 						{
-							dev_config->network_option.dns_use = SEGCP_DISABLE;
-							dev_config->network_connection[0].remote_ip[0] = tmp_ip[0];
-							dev_config->network_connection[0].remote_ip[1] = tmp_ip[1];
-							dev_config->network_connection[0].remote_ip[2] = tmp_ip[2];
-							dev_config->network_connection[0].remote_ip[3] = tmp_ip[3];
+							dev_config->options.dns_use = SEGCP_DISABLE;
+							dev_config->network_info[0].remote_ip[0] = tmp_ip[0];
+							dev_config->network_info[0].remote_ip[1] = tmp_ip[1];
+							dev_config->network_info[0].remote_ip[2] = tmp_ip[2];
+							dev_config->network_info[0].remote_ip[3] = tmp_ip[3];
 						}
 						else
 						{
-							dev_config->network_option.dns_use = SEGCP_ENABLE;
-							if(param[0] == SEGCP_NULL) dev_config->network_option.dns_domain_name[0] = 0;
-							else strcpy(dev_config->network_option.dns_domain_name, param);
+							dev_config->options.dns_use = SEGCP_ENABLE;
+							if(param[0] == SEGCP_NULL) dev_config->options.dns_domain_name[0] = 0;
+							else strcpy(dev_config->options.dns_domain_name, param);
 						}
 						
 						break;
 					case SEGCP_BR:
 						sscanf(param, "%d", &tmp_int);
 						if(param_len > 2 || tmp_int > baud_230400) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->serial_option[0].baud_rate = (uint8_t)tmp_int;
+						else dev_config->serial_info[0].baud_rate = (uint8_t)tmp_int;
 						break;
 					case SEGCP_DB:
 						tmp_byte = is_hex(*param);
 						if(param_len != 1 || tmp_byte > word_len8) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->serial_option[0].data_bits = tmp_byte;
+						else dev_config->serial_info[0].data_bits = tmp_byte;
 						break;
 					case SEGCP_PR:
 						tmp_byte = is_hex(*param);
 						if(param_len != 1 || tmp_byte > parity_even) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->serial_option[0].parity = tmp_byte;
+						else dev_config->serial_info[0].parity = tmp_byte;
 						break;
 					case SEGCP_SB:
 						tmp_byte = is_hex(*param);
 						if(param_len != 1 || tmp_byte > stop_bit2) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->serial_option[0].stop_bits = tmp_byte;
+						else dev_config->serial_info[0].stop_bits = tmp_byte;
 						break;
 					case SEGCP_FL:
 						tmp_byte = is_hex(*param);
@@ -656,30 +656,30 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						}
 						else
 						{
-							if(dev_config->serial_option[0].uart_interface == UART_IF_RS422_485)
+							if(dev_config->serial_info[0].uart_interface == UART_IF_RS422_485)
 							{
-								dev_config->serial_option[0].flow_control = flow_none;
+								dev_config->serial_info[0].flow_control = flow_none;
 							}
 							else
 							{
-								dev_config->serial_option[0].flow_control = tmp_byte;
+								dev_config->serial_info[0].flow_control = tmp_byte;
 							}
 						}
 						break;
 					case SEGCP_IT:
 						sscanf(param, "%ld", &tmp_long);
 						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->tcp_option[0].inactivity = (uint16_t)tmp_long;
+						else dev_config->network_info[0].inactivity = (uint16_t)tmp_long;
 						break;
 					case SEGCP_PT:
 						sscanf(param, "%ld", &tmp_long);
 						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->serial_data_packing[0].packing_time = (uint16_t)tmp_long;
+						else dev_config->network_info[0].packing_time = (uint16_t)tmp_long;
 						break;
 					case SEGCP_PS:
 						sscanf(param, "%d", &tmp_int);
 						if(param_len > 3 || tmp_int > 0xFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->serial_data_packing[0].packing_size = (uint8_t)tmp_int;
+						else dev_config->network_info[0].packing_size = (uint8_t)tmp_int;
 						break;
 					case SEGCP_PD:
 						if(param_len != 2 || !is_hexstr(param))
@@ -689,47 +689,47 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						else
 						{
 							sscanf(param,"%x", &tmp_int);
-							dev_config->serial_data_packing[0].packing_delimiter[0] = (uint8_t)tmp_int;
+							dev_config->network_info[0].packing_delimiter[0] = (uint8_t)tmp_int;
 							
-							if(dev_config->serial_data_packing[0].packing_delimiter[0] == 0x00) 
-								dev_config->serial_data_packing[0].packing_delimiter_length = 0;
+							if(dev_config->network_info[0].packing_delimiter[0] == 0x00) 
+								dev_config->network_info[0].packing_delimiter_length = 0;
 							else 
-								dev_config->serial_data_packing[0].packing_delimiter_length = 1;
+								dev_config->network_info[0].packing_delimiter_length = 1;
 						}
 						
 						break;
 					case SEGCP_TE:
 						tmp_byte = is_hex(*param);
 						if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->serial_command.serial_command = tmp_byte;
+						else dev_config->options.serial_command = tmp_byte;
 						break;
 					case SEGCP_SS:
-						if(param_len != 6 || !is_hexstr(param) || !str_to_hex(param, dev_config->serial_command.serial_trigger))
+						if(param_len != 6 || !is_hexstr(param) || !str_to_hex(param, dev_config->options.serial_trigger))
 						{
 							//printf(">> SEGCP_SS = %.2X %.2X %.2X", dev_config->options.serial_trigger[0], dev_config->options.serial_trigger[1], dev_config->options.serial_trigger[2]);
 							ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						}
 						break;
 					case SEGCP_NP:
-						if(param_len > sizeof(dev_config->tcp_option[0].pw_connect)-1)
+						if(param_len > sizeof(dev_config->options.pw_connect)-1)
 						{
 							ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						}
 						else
 						{
-							if(param[0] == SEGCP_NULL) dev_config->tcp_option[0].pw_connect[0] = 0;
-							else sscanf(param,"%s", &dev_config->tcp_option[0].pw_connect[0]);
+							if(param[0] == SEGCP_NULL) dev_config->options.pw_connect[0] = 0;
+							else sscanf(param,"%s", &dev_config->options.pw_connect[0]);
 						}
 						break;
 					case SEGCP_SP:
-						if(param_len > sizeof(dev_config->config_common.pw_search)-1)
+						if(param_len > sizeof(dev_config->options.pw_search)-1)
 						{
 							ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						}
 						else
 						{
-							if(param[0] == SEGCP_NULL) dev_config->config_common.pw_search[0] = 0;
-							else sscanf(param,"%s", &dev_config->config_common.pw_search);
+							if(param[0] == SEGCP_NULL) dev_config->options.pw_search[0] = 0;
+							else sscanf(param,"%s", &dev_config->options.pw_search);
 						}
 						break;
 					case SEGCP_FW:
@@ -755,8 +755,8 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 #endif
 							dev_config->firmware_update.fwup_flag = SEGCP_ENABLE;
 							ret |= SEGCP_RET_FWUP;
-							sprintf(trep,"FW%d.%d.%d.%d:%d:%d\r\n", dev_config->network_common.local_ip[0], dev_config->network_common.local_ip[1]
-							,dev_config->network_common.local_ip[2] , dev_config->network_common.local_ip[3], (uint16_t)DEVICE_FWUP_PORT);
+							sprintf(trep,"FW%d.%d.%d.%d:%d:%d\r\n", dev_config->network_info_common.local_ip[0], dev_config->network_info_common.local_ip[1]
+							,dev_config->network_info_common.local_ip[2] , dev_config->network_info_common.local_ip[3], (uint16_t)DEVICE_FWUP_PORT);
 							
 							//close(SEG_SOCK);
 #ifdef _SEGCP_DEBUG_
@@ -767,7 +767,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 					case SEGCP_EC:
 						tmp_byte = is_hex(*param);
 						if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->serial_command.serial_command_echo = tmp_byte;
+						else dev_config->options.serial_command_echo = tmp_byte;
 						break;
 					case SEGCP_UE: // User echo, Not used
 						tmp_byte = is_hex(*param);
@@ -854,21 +854,21 @@ uint16_t proc_SEGCP_udp(uint8_t* segcp_req, uint8_t* segcp_rep)
 				if(SEGCP_MA == parse_SEGCP(treq, tpar))
 				{
 					if(!memcmp(tpar,"\xFF\xFF\xFF\xFF\xFF\xFF", 6)) gSEGCPPRIVILEGE |= (SEGCP_PRIVILEGE_SET | SEGCP_PRIVILEGE_READ);
-					else if(!memcmp(tpar, dev_config->network_common.mac, sizeof(dev_config->network_common.mac))) gSEGCPPRIVILEGE |= (SEGCP_PRIVILEGE_SET | SEGCP_PRIVILEGE_WRITE);
+					else if(!memcmp(tpar, dev_config->network_info_common.mac, sizeof(dev_config->network_info_common.mac))) gSEGCPPRIVILEGE |= (SEGCP_PRIVILEGE_SET | SEGCP_PRIVILEGE_WRITE);
 					else break;
 
 					if(gSEGCPPRIVILEGE & SEGCP_PRIVILEGE_SET)
 					{
 						sprintf(trep,"%s%c%c%c%c%c%c\r\n",tbSEGCPCMD[SEGCP_MA],
-							dev_config->network_common.mac[0], dev_config->network_common.mac[1], dev_config->network_common.mac[2],
-							dev_config->network_common.mac[3], dev_config->network_common.mac[4], dev_config->network_common.mac[5]);
+							dev_config->network_info_common.mac[0], dev_config->network_info_common.mac[1], dev_config->network_info_common.mac[2],
+							dev_config->network_info_common.mac[3], dev_config->network_info_common.mac[4], dev_config->network_info_common.mac[5]);
 						
 						treq += 10;
 						trep += 10;
 						
 						if(SEGCP_PW == parse_SEGCP(treq, tpar))
 						{
-							if((tpar[0] == SEGCP_NULL && dev_config->config_common.pw_search[0] == 0) || !strcmp(tpar, dev_config->config_common.pw_search))
+							if((tpar[0] == SEGCP_NULL && dev_config->options.pw_search[0] == 0) || !strcmp(tpar, dev_config->options.pw_search))
 							{
 								memcpy(trep,treq, strlen(tpar)+4);  // "PWxxxx\r\n"
 								treq += (strlen(tpar) + 4);

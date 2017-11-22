@@ -18,52 +18,52 @@ BUFFER_DECLARATION(data_rx_1);
 uint8_t flag_s2e_application_running = 0;
 
 uint8_t opmode = DEVICE_GW_MODE;
-static uint8_t mixed_state[1] = {MIXED_SERVER,};
+static uint8_t mixed_state[CHANNEL_USED] = {MIXED_SERVER,};
 static uint8_t sw_modeswitch_at_mode_on = SEG_DISABLE;
-static uint16_t client_any_port[1] = {0,};
+static uint16_t client_any_port[CHANNEL_USED] = {0,};
 
 // Timer Enable flags / Time
-uint8_t enable_inactivity_timer[1] = {SEG_DISABLE,};
-volatile uint16_t inactivity_time[1] = {0,};
+uint8_t enable_inactivity_timer[CHANNEL_USED] = {SEG_DISABLE,};
+volatile uint16_t inactivity_time[CHANNEL_USED] = {0,};
 
-uint8_t enable_keepalive_timer[1] = {SEG_DISABLE,};
-volatile uint16_t keepalive_time[1] = {0,};
+uint8_t enable_keepalive_timer[CHANNEL_USED] = {SEG_DISABLE,};
+volatile uint16_t keepalive_time[CHANNEL_USED] = {0,};
 
 uint8_t enable_modeswitch_timer = SEG_DISABLE;
 volatile uint16_t modeswitch_time = 0;
 volatile uint16_t modeswitch_gap_time = DEFAULT_MODESWITCH_INTER_GAP;
 
-uint8_t enable_reconnection_timer[1] = {SEG_DISABLE,};
-volatile uint16_t reconnection_time[1] = {0,};
+uint8_t enable_reconnection_timer[CHANNEL_USED] = {SEG_DISABLE,};
+volatile uint16_t reconnection_time[CHANNEL_USED] = {0,};
 
-uint8_t enable_serial_input_timer[1] = {SEG_DISABLE,};
-volatile uint16_t serial_input_time[1] = {0,};
-uint8_t flag_serial_input_time_elapse[1] = {SEG_DISABLE,}; // for Time delimiter
+uint8_t enable_serial_input_timer[CHANNEL_USED] = {SEG_DISABLE,};
+volatile uint16_t serial_input_time[CHANNEL_USED] = {0,};
+uint8_t flag_serial_input_time_elapse[CHANNEL_USED] = {SEG_DISABLE,}; // for Time delimiter
 
 // added for auth timeout
-uint8_t enable_connection_auth_timer[1] = {SEG_DISABLE,};
-volatile uint16_t connection_auth_time[1] = {0,};
+uint8_t enable_connection_auth_timer[CHANNEL_USED] = {SEG_DISABLE,};
+volatile uint16_t connection_auth_time[CHANNEL_USED] = {0,};
 
 // flags
-uint8_t flag_connect_pw_auth[1] = {SEG_DISABLE,}; // TCP_SERVER_MODE only
-uint8_t flag_sent_keepalive[1] = {SEG_DISABLE,};
-uint8_t flag_sent_first_keepalive[1] = {SEG_DISABLE,};
+uint8_t flag_connect_pw_auth[CHANNEL_USED] = {SEG_DISABLE,}; // TCP_SERVER_MODE only
+uint8_t flag_sent_keepalive[CHANNEL_USED] = {SEG_DISABLE,};
+uint8_t flag_sent_first_keepalive[CHANNEL_USED] = {SEG_DISABLE,};
 
 // static variables for function: check_modeswitch_trigger()
 static uint8_t triggercode_idx;
 static uint8_t ch_tmp[3];
 
 // User's buffer / size idx
-extern uint8_t g_send_buf[1][DATA_BUF_SIZE];
-extern uint8_t g_recv_buf[1][DATA_BUF_SIZE];
-uint16_t u2e_size[1] = {0,};
-uint16_t e2u_size[1] = {0,};
+extern uint8_t g_send_buf[CHANNEL_USED][DATA_BUF_SIZE];
+extern uint8_t g_recv_buf[CHANNEL_USED][DATA_BUF_SIZE];
+uint16_t u2e_size[CHANNEL_USED] = {0,};
+uint16_t e2u_size[CHANNEL_USED] = {0,};
 
 // S2E Data byte count variables
-volatile uint32_t s2e_uart_rx_bytecount[1] = {0,};
-volatile uint32_t s2e_uart_tx_bytecount[1] = {0,};
-volatile uint32_t s2e_ether_rx_bytecount[1] = {0,};
-volatile uint32_t s2e_ether_tx_bytecount[1] = {0,};
+volatile uint32_t s2e_uart_rx_bytecount[CHANNEL_USED] = {0,};
+volatile uint32_t s2e_uart_tx_bytecount[CHANNEL_USED] = {0,};
+volatile uint32_t s2e_ether_rx_bytecount[CHANNEL_USED] = {0,};
+volatile uint32_t s2e_ether_tx_bytecount[CHANNEL_USED] = {0,};
 
 // UDP: Peer netinfo
 uint8_t peerip[4] = {0, };
@@ -78,35 +78,35 @@ char * str_working[] = {"TCP_CLIENT_MODE", "TCP_SERVER_MODE", "TCP_MIXED_MODE", 
 uint8_t flag_process_dhcp_success = OFF;
 uint8_t flag_process_dns_success = OFF;
 
-uint8_t isSocketOpen_TCPclient[1] = {OFF,};
+uint8_t isSocketOpen_TCPclient[CHANNEL_USED] = {OFF,};
 
 // ## timeflag for debugging
 uint8_t tmp_timeflag_for_debug = 0;
 
 /* Private functions prototypes ----------------------------------------------*/
-void proc_SEG_tcp_client(uint8_t sock);
-void proc_SEG_tcp_server(uint8_t sock);
-void proc_SEG_tcp_mixed(uint8_t sock);
-void proc_SEG_udp(uint8_t sock);
+void proc_SEG_tcp_client(uint8_t channel);
+void proc_SEG_tcp_server(uint8_t channel);
+void proc_SEG_tcp_mixed(uint8_t channel);
+void proc_SEG_udp(uint8_t channel);
 
-void uart_to_ether(uint8_t sock);
-void ether_to_uart(uint8_t sock);
-uint16_t get_serial_data(uint8_t socket);
-void reset_SEG_timeflags(uint8_t socket);
+void uart_to_ether(uint8_t channel);
+void ether_to_uart(uint8_t channel);
+uint16_t get_serial_data(uint8_t channel);
+void reset_SEG_timeflags(void);
 uint8_t check_connect_pw_auth(uint8_t * buf, uint16_t len);
 void restore_serial_data(uint8_t idx);
 
-uint8_t check_tcp_connect_exception(uint8_t socket);
+uint8_t check_tcp_connect_exception(uint8_t channel);
 
 void set_device_status(uint8_t socket, teDEVSTATUS);
-uint16_t get_tcp_any_port(uint8_t sock);
+uint16_t get_tcp_any_port(uint8_t channel);
 
 // UART tx/rx and Ethernet tx/rx data transfer bytes counter
-void add_data_transfer_bytecount(uint8_t socket, teDATADIR dir, uint16_t len);
+void add_data_transfer_bytecount(uint8_t channel, teDATADIR dir, uint16_t len);
 
 /* Public & Private functions ------------------------------------------------*/
 
-void do_seg(uint8_t sock)
+void do_seg(void)
 {
 	//DevConfig *s2e = get_DevConfig_pointer();
 	struct __network_connection *network_connection = (struct __network_connection *)get_DevConfig_pointer()->network_connection;
@@ -148,7 +148,7 @@ void do_seg(uint8_t sock)
 	// Serial AT command mode enabled, initial settings
 	if((opmode == DEVICE_GW_MODE) && (sw_modeswitch_at_mode_on == SEG_ENABLE))
 	{
-		for(i=0; i<2; i++)
+		for(i=0; i<CHANNEL_USED; i++)
 		{
 			// Socket disconnect (TCP only) / clos
 			process_socket_termination(i);
@@ -161,125 +161,136 @@ void do_seg(uint8_t sock)
 	
 	if(opmode == DEVICE_GW_MODE) 
 	{
-		switch(network_connection[sock].working_mode)
-		{
-			case TCP_CLIENT_MODE:
-				proc_SEG_tcp_client(sock);
-				break;
-			
-			case TCP_SERVER_MODE:
-				proc_SEG_tcp_server(sock);
-				break;
-			
-			case TCP_MIXED_MODE:
-				proc_SEG_tcp_mixed(sock);
-				break;
-			
-			case UDP_MODE:
-				proc_SEG_udp(sock);
-				break;
-			
-			default:
-				break;
-		}
-		
-		// XON/XOFF Software flow control: Check the Buffer usage and Send the start/stop commands
-		// [WIZnet Device] -> [Peer]
-		if((serial_option[sock].flow_control == flow_xon_xoff) || serial_option[sock].flow_control == flow_rts_cts) 
+        for(i=0; i<CHANNEL_USED; i++)
         {
-            check_uart_flow_control(sock, serial_option[sock].flow_control);
+            switch(network_connection[i].working_mode)
+            {
+                case TCP_CLIENT_MODE:
+                    proc_SEG_tcp_client(i);
+                    break;
+                
+                case TCP_SERVER_MODE:
+                    proc_SEG_tcp_server(i);
+                    break;
+                
+                case TCP_MIXED_MODE:
+                    proc_SEG_tcp_mixed(i);
+                    break;
+                
+                case UDP_MODE:
+                    proc_SEG_udp(i);
+                    break;
+                
+                default:
+                    break;
+            }
+        
+		
+            // XON/XOFF Software flow control: Check the Buffer usage and Send the start/stop commands
+            // [WIZnet Device] -> [Peer]
+            if((serial_option[i].flow_control == flow_xon_xoff) || serial_option[i].flow_control == flow_rts_cts) 
+            {
+                check_uart_flow_control(i, serial_option[i].flow_control);
+            }
         }
 	}
 }
 
-void set_device_status(uint8_t socket, teDEVSTATUS status)
+void set_device_status(uint8_t channel, teDEVSTATUS status)
 {
 	struct __network_connection *network_connection = (struct __network_connection *)get_DevConfig_pointer()->network_connection;
 	
 	switch(status)
 	{
 		case ST_OPEN:		// TCP connection: disconnected (or UDP mode)
-			network_connection[socket].working_state = ST_OPEN;
+			network_connection[channel].working_state = ST_OPEN;
 			break;
 		
 		case ST_CONNECT:	// TCP connection: connected
-			network_connection[socket].working_state = ST_CONNECT;
+			network_connection[channel].working_state = ST_CONNECT;
 			break;
 		
 		case ST_UPGRADE:	// TCP connection: disconnected
-			network_connection[socket].working_state = ST_UPGRADE;
+			network_connection[channel].working_state = ST_UPGRADE;
 			break;
 		
 		case ST_ATMODE:		// TCP connection: disconnected
-			network_connection[socket].working_state = ST_ATMODE;
+			network_connection[channel].working_state = ST_ATMODE;
 			break;
 		
 		case ST_UDP:		// UDP mode
-			network_connection[socket].working_state = ST_UDP;
+			network_connection[channel].working_state = ST_UDP;
 		default:
 			break;
 	}
 	
 	// Status indicator pins
-	if(network_connection[socket].working_state == ST_CONNECT)
+	if(network_connection[channel].working_state == ST_CONNECT)
 	{
-		set_connection_status_io(STATUS_TCPCONNECT_PIN, ON); // Status I/O pin to low
+		set_connection_status_io(STATUS_TCPCONNECT_PIN, channel, ON); // Status I/O pin to low
 	}
 	else
 	{
-		set_connection_status_io(STATUS_TCPCONNECT_PIN, OFF); // Status I/O pin to high
+		set_connection_status_io(STATUS_TCPCONNECT_PIN, channel, OFF); // Status I/O pin to high
 	}
 }
 
-uint8_t get_device_status(void)
+uint8_t get_device_status(uint8_t channel)
 {
 	struct __network_connection *network_connection = (struct __network_connection *)get_DevConfig_pointer()->network_connection;
     
-	return network_connection[0].working_state;
+	return network_connection[channel].working_state;
 }
 
 
-void proc_SEG_udp(uint8_t sock)
+void proc_SEG_udp(uint8_t channel)
 {
 	//DevConfig *s2e = get_DevConfig_pointer();
 	struct __network_connection *network_connection = (struct __network_connection *)get_DevConfig_pointer()->network_connection;
 	struct __serial_common *serial_common = (struct __serial_common *)&get_DevConfig_pointer()->serial_common;
     struct __serial_data_packing *serial_data_packing = (struct __serial_data_packing *)get_DevConfig_pointer()->serial_data_packing;
 	
-	uint8_t state = getSn_SR(sock);
+	uint8_t state = getSn_SR(channel);
     
 	switch(state)
 	{
 		case SOCK_UDP:
-			if(M_BUFFER_USED_SIZE(sock) || u2e_size[sock])	
+			if(M_BUFFER_USED_SIZE(channel) || u2e_size[channel])	
             {
-                uart_to_ether(sock);
+                uart_to_ether(channel);
             }
-			if(getSn_RX_RSR(sock) 	|| e2u_size[sock])		
+			if(getSn_RX_RSR(channel) 	|| e2u_size[channel])		
             {
-                ether_to_uart(sock);
+                ether_to_uart(channel);
             }
 			break;
 			
 		case SOCK_CLOSED:
-			//reset_SEG_timeflags(sock);
-			BUFFER_CLEAR(data_rx_0);
-		
-			u2e_size[sock] = 0;
-			e2u_size[sock] = 0;
+			//reset_SEG_timeflags();
+            if(channel)
+            {
+                BUFFER_CLEAR(data_rx_1);
+            }
+            else
+            {
+                BUFFER_CLEAR(data_rx_0);
+            }
 			
-			if(socket(sock, Sn_MR_UDP, network_connection[sock].local_port, 0) == sock)
+			u2e_size[channel] = 0;
+			e2u_size[channel] = 0;
+			
+			if(socket(channel, Sn_MR_UDP, network_connection[channel].local_port, 0x00) == channel)
 			{
-				set_device_status(sock, ST_UDP);
+				set_device_status(channel, ST_UDP);
 				
-				if(serial_data_packing[sock].packing_time) 
+				if(serial_data_packing[0].packing_time) 
                 {
-                    modeswitch_gap_time = serial_data_packing[sock].packing_time; // replace the GAP time (default: 500ms)
+                    modeswitch_gap_time = serial_data_packing[0].packing_time; // replace the GAP time (default: 500ms)
                 }
 				
 				if(serial_common->serial_debug_en == SEG_ENABLE)
 				{
-					printf(" > SEG:UDP_MODE:SOCKOPEN\r\n");
+					printf(" > SEG[%d]:UDP_MODE:SOCKOPEN\r\n", channel);
 				}
 			}
 			break;
@@ -288,7 +299,7 @@ void proc_SEG_udp(uint8_t sock)
 	}
 }
 
-void proc_SEG_tcp_client(uint8_t sock)
+void proc_SEG_tcp_client(uint8_t channel)
 {
 	//DevConfig *s2e = get_DevConfig_pointer();
 	struct __tcp_option *tcp_option = (struct __tcp_option *)get_DevConfig_pointer()->tcp_option;
@@ -301,151 +312,159 @@ void proc_SEG_tcp_client(uint8_t sock)
 	uint8_t destip[4] = {0, };
 	uint16_t destport = 0;
 	
-	uint8_t state = getSn_SR(sock);
+	uint8_t state = getSn_SR(channel);
     
 	switch(state)
 	{
 		case SOCK_INIT:
-			if(reconnection_time[sock] >= tcp_option[sock].reconnection)
+			if(reconnection_time[channel] >= tcp_option[channel].reconnection)
 			{
-				reconnection_time[sock] = 0; // reconnection time variable clear
+				reconnection_time[channel] = 0; // reconnection time variable clear
 				
 				// TCP connect exception checker; e.g., dns failed / zero srcip ... and etc.
-				if(check_tcp_connect_exception(sock) == ON) 
+				if(check_tcp_connect_exception(channel) == ON) 
                 {
                     return;
                 }
 				
 				// TCP connect
-				connect(sock, network_connection[sock].remote_ip, network_connection[sock].remote_port);
+				connect(channel, network_connection[channel].remote_ip, network_connection[channel].remote_port);
 #ifdef _SEG_DEBUG_
-				printf(" > SEG:TCP_CLIENT_MODE:CLIENT_CONNECTION\r\n");
+				printf(" > SEG[%d]:TCP_CLIENT_MODE:CLIENT_CONNECTION\r\n", channel);
 #endif
 			}
 			break;
 		
 		case SOCK_ESTABLISHED:
-			if(getSn_IR(sock) & Sn_IR_CON)
+			if(getSn_IR(channel) & Sn_IR_CON)
 			{
 				///////////////////////////////////////////////////////////////////////////////////////////////////
 				// S2E: TCP client mode initialize after connection established (only once)
 				///////////////////////////////////////////////////////////////////////////////////////////////////
 				//net->state = ST_CONNECT;
-				set_device_status(sock, ST_CONNECT);
+				set_device_status(channel, ST_CONNECT);
 				
-				if(!inactivity_time[sock] && tcp_option[sock].inactivity)		
+				if(!inactivity_time[channel] && tcp_option[channel].inactivity)		
                 {
-                    enable_inactivity_timer[sock] = SEG_ENABLE;
+                    enable_inactivity_timer[channel] = SEG_ENABLE;
                 }
-				if(!keepalive_time[sock] && tcp_option[sock].keepalive_en)	
+				if(!keepalive_time[channel] && tcp_option[channel].keepalive_en)	
                 {
-                    enable_keepalive_timer[sock] = SEG_ENABLE;
+                    enable_keepalive_timer[channel] = SEG_ENABLE;
                 }
 				
 				// TCP server mode only, This flag have to be enabled always at TCP client mode
 				//if(option->pw_connect_en == SEG_ENABLE)		flag_connect_pw_auth = SEG_ENABLE;
-				flag_connect_pw_auth[sock] = SEG_ENABLE;
+				flag_connect_pw_auth[channel] = SEG_ENABLE;
 				
 				// Reconnection timer disable
-				if(enable_reconnection_timer[sock] == SEG_ENABLE)
+				if(enable_reconnection_timer[channel] == SEG_ENABLE)
 				{
-					enable_reconnection_timer[sock] = SEG_DISABLE;
-					reconnection_time[sock] = 0;
+					enable_reconnection_timer[channel] = SEG_DISABLE;
+					reconnection_time[channel] = 0;
 				}
 				
 				// Serial debug message printout
 				if(serial_common->serial_debug_en == SEG_ENABLE)
 				{
-					getsockopt(sock, SO_DESTIP, &destip);
-					getsockopt(sock, SO_DESTPORT, &destport);
-					printf(" > SEG:CONNECTED TO - %d.%d.%d.%d : %d\r\n",destip[0], destip[1], destip[2], destip[3], destport);
+					getsockopt(channel, SO_DESTIP, &destip);
+					getsockopt(channel, SO_DESTPORT, &destport);
+					printf(" > SEG[%d]:CONNECTED TO - %d.%d.%d.%d : %d\r\n", channel, destip[0], destip[1], destip[2], destip[3], destport);
 				}
 				
 				// UART Ring buffer clear
-				BUFFER_CLEAR(data_rx_0);
+                if(channel==1)
+                {
+                    BUFFER_CLEAR(data_rx_1);
+                }
+                else
+                {
+                    BUFFER_CLEAR(data_rx_0);
+                }
+				
 				
 				// Debug message enable flag: TCP client sokect open 
-				isSocketOpen_TCPclient[sock] = OFF;
+				isSocketOpen_TCPclient[channel] = OFF;
 				
-				setSn_IR(sock, Sn_IR_CON);
+				setSn_IR(channel, Sn_IR_CON);
 			}
 			
 			// Serial to Ethernet process
-			if(M_BUFFER_USED_SIZE(sock) || u2e_size[sock])	
+			if(M_BUFFER_USED_SIZE(channel) || u2e_size[channel])	
 			{
-					uart_to_ether(sock);
+					uart_to_ether(channel);
 			}
-			if(getSn_RX_RSR(sock) 	|| e2u_size)		
+			if(getSn_RX_RSR(channel) 	|| e2u_size[channel])		
 			{
-					ether_to_uart(sock);
+					ether_to_uart(channel);
 			}
 			
 			// Check the inactivity timer
-			if((enable_inactivity_timer[sock] == SEG_ENABLE) && (inactivity_time[sock] >= tcp_option[sock].inactivity))
+			if((enable_inactivity_timer[channel] == SEG_ENABLE) && (inactivity_time[channel] >= tcp_option[channel].inactivity))
 			{
 				//disconnect(sock);
-				process_socket_termination(sock);
+				process_socket_termination(channel);
 				
 				// Keep-alive timer disabled
-				enable_keepalive_timer[sock] = DISABLE;
-				keepalive_time[sock] = 0;
+				enable_keepalive_timer[channel] = DISABLE;
+				keepalive_time[channel] = 0;
 #ifdef _SEG_DEBUG_
-				printf(" > INACTIVITY TIMER: TIMEOUT\r\n");
+				printf(" > [%d]INACTIVITY TIMER: TIMEOUT\r\n", channel);
 #endif
 			}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
 			
 			// Check the keee-alive timer
-			if((tcp_option[sock].keepalive_en == SEG_ENABLE) && (enable_keepalive_timer[sock] == SEG_ENABLE))
+			if((tcp_option[channel].keepalive_en == SEG_ENABLE) && (enable_keepalive_timer[channel] == SEG_ENABLE))
 			{
 				// Send the first keee-alive packet
-				if((flag_sent_first_keepalive[sock] == SEG_DISABLE) 
-                    && (keepalive_time[sock] >= tcp_option[sock].keepalive_wait_time) 
-                    && (tcp_option[sock].keepalive_wait_time != 0))
+				if((flag_sent_first_keepalive[channel] == SEG_DISABLE) 
+                    && (keepalive_time[channel] >= tcp_option[channel].keepalive_wait_time) 
+                    && (tcp_option[channel].keepalive_wait_time != 0))
 				{
 #ifdef _SEG_DEBUG_
-					printf(" >> send_keepalive_packet_first [%d]\r\n", keepalive_time);
+					printf(" >> [%d]send_keepalive_packet_first [%d]\r\n", channel, keepalive_time);
 #endif
-					send_keepalive_packet_manual(sock); // <-> send_keepalive_packet_auto()
-					keepalive_time[sock] = 0;
+					send_keepalive_packet_manual(channel); // <-> send_keepalive_packet_auto()
+					keepalive_time[channel] = 0;
 					
-					flag_sent_first_keepalive[sock] = SEG_ENABLE;
+					flag_sent_first_keepalive[channel] = SEG_ENABLE;
 				}
 				// Send the keee-alive packet periodically
-				if((flag_sent_first_keepalive[sock] == SEG_ENABLE) 
-                    && (keepalive_time[sock] >= tcp_option[sock].keepalive_retry_time) 
-                    && (tcp_option[sock].keepalive_retry_time != 0))
+				if((flag_sent_first_keepalive[channel] == SEG_ENABLE) 
+                    && (keepalive_time[channel] >= tcp_option[channel].keepalive_retry_time) 
+                    && (tcp_option[channel].keepalive_retry_time != 0))
 				{
 #ifdef _SEG_DEBUG_
-					printf(" >> send_keepalive_packet_manual [%d]\r\n", keepalive_time[sock]);
+					printf(" >> [%d]send_keepalive_packet_manual [%d]\r\n", channel, keepalive_time[sock]);
 #endif
-					send_keepalive_packet_manual(sock);
-					keepalive_time[sock] = 0;
+					send_keepalive_packet_manual(channel);
+					keepalive_time[channel] = 0;
 				}
 			}
 			
 			break;
 		
 		case SOCK_CLOSE_WAIT:
-			while(getSn_RX_RSR(sock) || e2u_size) 
+			while(getSn_RX_RSR(channel) || e2u_size[channel]) 
             {
-                ether_to_uart(sock); // receive remaining packets
+                ether_to_uart(channel); // receive remaining packets
             }
-			disconnect(sock);
+			disconnect(channel);
 			break;
 		
 		case SOCK_FIN_WAIT:
 		case SOCK_CLOSED:
-			set_device_status(sock, ST_OPEN);
-			reset_SEG_timeflags(sock);
+			set_device_status(channel, ST_OPEN);
+			reset_SEG_timeflags();
 			
-			u2e_size[sock] = 0;
-			e2u_size[sock] = 0;
+			u2e_size[channel] = 0;
+			e2u_size[channel] = 0;
 			
-			source_port = get_tcp_any_port(sock);
+			source_port = get_tcp_any_port(channel);
 #ifdef _SEG_DEBUG_
-			printf(" > TCP CLIENT: client_any_port = %d\r\n", client_any_port[sock]);
+			printf(" > [%d]TCP CLIENT: client_any_port = %d\r\n", channel, client_any_port[sock]);
 #endif		
-			if(socket(sock, Sn_MR_TCP, source_port, Sn_MR_ND) == sock)
+			if(socket(channel, Sn_MR_TCP, source_port, Sn_MR_ND) == channel)
 			{
 				// Replace the command mode switch code GAP time (default: 500ms)
 				if((serial_command->serial_command == SEG_ENABLE) && serial_data_packing[0].packing_time) 
@@ -454,17 +473,17 @@ void proc_SEG_tcp_client(uint8_t sock)
                 }
 				
 				// Enable the reconnection Timer
-				if((enable_reconnection_timer[sock] == SEG_DISABLE) && tcp_option[sock].reconnection) 
+				if((enable_reconnection_timer[channel] == SEG_DISABLE) && tcp_option[channel].reconnection) 
                 {
-                    enable_reconnection_timer[sock] = SEG_ENABLE;
+                    enable_reconnection_timer[channel] = SEG_ENABLE;
                 }
 				
 				if(serial_common->serial_debug_en == SEG_ENABLE)
 				{
-					if(isSocketOpen_TCPclient[sock] == OFF)
+					if(isSocketOpen_TCPclient[channel] == OFF)
 					{
-						printf(" > SEG:TCP_CLIENT_MODE:SOCKOPEN\r\n");
-						isSocketOpen_TCPclient[sock] = ON;
+						printf(" > SEG[%d]:TCP_CLIENT_MODE:SOCKOPEN\r\n", channel);
+						isSocketOpen_TCPclient[channel] = ON;
 					}
 				}
 			}
@@ -476,7 +495,7 @@ void proc_SEG_tcp_client(uint8_t sock)
 	}
 }
 
-void proc_SEG_tcp_server(uint8_t sock)
+void proc_SEG_tcp_server(uint8_t channel)
 {
 	//DevConfig *s2e = get_DevConfig_pointer();
 	struct __tcp_option *tcp_option = (struct __tcp_option *)get_DevConfig_pointer()->tcp_option;
@@ -488,7 +507,7 @@ void proc_SEG_tcp_server(uint8_t sock)
 	uint8_t destip[4] = {0, };
 	uint16_t destport = 0;
 	
-	uint8_t state = getSn_SR(sock);
+	uint8_t state = getSn_SR(channel);
 	switch(state)
 	{
 		case SOCK_INIT:
@@ -499,145 +518,154 @@ void proc_SEG_tcp_server(uint8_t sock)
 			break;
 		
 		case SOCK_ESTABLISHED:
-			if(getSn_IR(sock) & Sn_IR_CON)
+			if(getSn_IR(channel) & Sn_IR_CON)
 			{
 				///////////////////////////////////////////////////////////////////////////////////////////////////
 				// S2E: TCP server mode initialize after connection established (only once)
 				///////////////////////////////////////////////////////////////////////////////////////////////////
 				//net->state = ST_CONNECT;
-				set_device_status(sock, ST_CONNECT);
+				set_device_status(channel, ST_CONNECT);
 				
-				if(!inactivity_time[sock] && tcp_option[0].inactivity)		
+				if(!inactivity_time[channel] && tcp_option[channel].inactivity)		
                 {
-                    enable_inactivity_timer[sock] = SEG_ENABLE;
+                    enable_inactivity_timer[channel] = SEG_ENABLE;
                 }
 				//if(!keepalive_time && net->keepalive_en)	enable_keepalive_timer = SEG_ENABLE;
 				
-				if(tcp_option[0].pw_connect_en == SEG_DISABLE)	
+				if(tcp_option[channel].pw_connect_en == SEG_DISABLE)	
                 {
-                    flag_connect_pw_auth[sock] = SEG_ENABLE;		// TCP server mode only (+ mixed_server)
+                    flag_connect_pw_auth[channel] = SEG_ENABLE;		// TCP server mode only (+ mixed_server)
                 }
 				else
 				{
 					// Connection password auth timer initialize
-					enable_connection_auth_timer[sock] = SEG_ENABLE;
-					connection_auth_time[sock]  = 0;
+					enable_connection_auth_timer[channel] = SEG_ENABLE;
+					connection_auth_time[channel]  = 0;
 				}
 				
 				// Serial debug message printout
 				if(serial_common->serial_debug_en == SEG_ENABLE)
 				{
-					getsockopt(sock, SO_DESTIP, &destip);
-					getsockopt(sock, SO_DESTPORT, &destport);
-					printf(" > SEG:CONNECTED FROM - %d.%d.%d.%d : %d\r\n",destip[0], destip[1], destip[2], destip[3], destport);
+					getsockopt(channel, SO_DESTIP, &destip);
+					getsockopt(channel, SO_DESTPORT, &destport);
+					printf(" > SEG[%d]:CONNECTED FROM - %d.%d.%d.%d : %d\r\n", channel, destip[0], destip[1], destip[2], destip[3], destport);
 				}
 				
 				// UART Ring buffer clear
-				BUFFER_CLEAR(data_rx_0);
+                //(channel==0)?BUFFER_CLEAR(data_rx_0):BUFFER_CLEAR(data_rx_1);
+                if(channel)
+                {
+                    BUFFER_CLEAR(data_rx_1);
+                }
+                else
+                {
+                    BUFFER_CLEAR(data_rx_0);
+                }
 				
-				setSn_IR(sock, Sn_IR_CON);
+				
+				setSn_IR(channel, Sn_IR_CON);
 			}
 			
 			// Serial to Ethernet process
-			if(M_BUFFER_USED_SIZE(sock) || u2e_size[sock])	
+			if(M_BUFFER_USED_SIZE(channel) || u2e_size[channel])	
             {
-                uart_to_ether(sock);
+                uart_to_ether(channel);
             }
-			if(getSn_RX_RSR(sock) || e2u_size[sock])	
+			if(getSn_RX_RSR(channel) || e2u_size[channel])	
             {
-                ether_to_uart(sock);
+                ether_to_uart(channel);
             }
 			
 			// Check the inactivity timer
-			if((enable_inactivity_timer[sock] == SEG_ENABLE) && (inactivity_time[sock] >= tcp_option[0].inactivity))
+			if((enable_inactivity_timer[channel] == SEG_ENABLE) && (inactivity_time[channel] >= tcp_option[channel].inactivity))
 			{
 				//disconnect(sock);
-				process_socket_termination(sock);
+				process_socket_termination(channel);
 				
 				// Keep-alive timer disabled
-				enable_keepalive_timer[sock] = DISABLE;
-				keepalive_time[sock] = 0;
+				enable_keepalive_timer[channel] = DISABLE;
+				keepalive_time[channel] = 0;
 #ifdef _SEG_DEBUG_
-				printf(" > INACTIVITY TIMER: TIMEOUT\r\n");
+				printf(" > [%d]INACTIVITY TIMER: TIMEOUT\r\n", channel);
 #endif
 			}
 			
 			// Check the keee-alive timer
-			if((tcp_option[0].keepalive_en == SEG_ENABLE) && (enable_keepalive_timer[sock] == SEG_ENABLE))
+			if((tcp_option[channel].keepalive_en == SEG_ENABLE) && (enable_keepalive_timer[channel] == SEG_ENABLE))
 			{
 				// Send the first keee-alive packet
-				if((flag_sent_first_keepalive[sock] == SEG_DISABLE) 
-                    && (keepalive_time[sock] >= tcp_option[0].keepalive_wait_time) 
-                    && (tcp_option[0].keepalive_wait_time != 0))
+				if((flag_sent_first_keepalive[channel] == SEG_DISABLE) 
+                    && (keepalive_time[channel] >= tcp_option[channel].keepalive_wait_time) 
+                    && (tcp_option[channel].keepalive_wait_time != 0))
 				{
 #ifdef _SEG_DEBUG_
-					printf(" >> send_keepalive_packet_first [%d]\r\n", keepalive_time[sock]);
+					printf(" >> [%d]send_keepalive_packet_first [%d]\r\n", channel, keepalive_time[channel]);
 #endif
-					send_keepalive_packet_manual(sock); // <-> send_keepalive_packet_auto()
-					keepalive_time[sock] = 0;
+					send_keepalive_packet_manual(channel); // <-> send_keepalive_packet_auto()
+					keepalive_time[channel] = 0;
 					
-					flag_sent_first_keepalive[sock] = SEG_ENABLE;
+					flag_sent_first_keepalive[channel] = SEG_ENABLE;
 				}
 				// Send the keee-alive packet periodically
-				if((flag_sent_first_keepalive[sock] == SEG_ENABLE) 
-                    && (keepalive_time[sock] >= tcp_option[0].keepalive_retry_time) 
-                    && (tcp_option[0].keepalive_retry_time != 0))
+				if((flag_sent_first_keepalive[channel] == SEG_ENABLE) 
+                    && (keepalive_time[channel] >= tcp_option[channel].keepalive_retry_time) 
+                    && (tcp_option[channel].keepalive_retry_time != 0))
 				{
 #ifdef _SEG_DEBUG_
-					printf(" >> send_keepalive_packet_manual [%d]\r\n", keepalive_time[sock]);
+					printf(" >> [%d]send_keepalive_packet_manual [%d]\r\n", channel, keepalive_time[channel]);
 #endif
-					send_keepalive_packet_manual(sock);
-					keepalive_time[sock] = 0;
+					send_keepalive_packet_manual(channel);
+					keepalive_time[channel] = 0;
 				}
 			}
 			
 			// Check the connection password auth timer
-			if(tcp_option[0].pw_connect_en == SEG_ENABLE)
+			if(tcp_option[channel].pw_connect_en == SEG_ENABLE)
 			{
-				if((flag_connect_pw_auth[sock] == SEG_DISABLE) && (connection_auth_time[sock] >= MAX_CONNECTION_AUTH_TIME)) // timeout default: 5000ms (5 sec)
+				if((flag_connect_pw_auth[channel] == SEG_DISABLE) && (connection_auth_time[channel] >= MAX_CONNECTION_AUTH_TIME)) // timeout default: 5000ms (5 sec)
 				{
 					//disconnect(sock);
-					process_socket_termination(sock);
+					process_socket_termination(channel);
 					
-					enable_connection_auth_timer[sock] = DISABLE;
-					connection_auth_time[sock] = 0;
+					enable_connection_auth_timer[channel] = DISABLE;
+					connection_auth_time[channel] = 0;
 #ifdef _SEG_DEBUG_
-					printf(" > CONNECTION PW: AUTH TIMEOUT\r\n");
+					printf(" > [%d]CONNECTION PW: AUTH TIMEOUT\r\n", channel);
 #endif
 				}
 			}
 			break;
 		
 		case SOCK_CLOSE_WAIT:
-			while(getSn_RX_RSR(sock) || e2u_size) 
+			while(getSn_RX_RSR(channel) || e2u_size[channel]) 
             {
-                ether_to_uart(sock); // receive remaining packets
+                ether_to_uart(channel); // receive remaining packets
             }
-			disconnect(sock);
+			disconnect(channel);
 			break;
 		
 		case SOCK_FIN_WAIT:
 		case SOCK_CLOSED:
-			set_device_status(sock, ST_OPEN);
-			reset_SEG_timeflags(sock);
+			set_device_status(channel, ST_OPEN);
+			reset_SEG_timeflags();
 			
-			u2e_size[sock] = 0;
-			e2u_size[sock] = 0;
+			u2e_size[channel] = 0;
+			e2u_size[channel] = 0;
 
-			if(socket(sock, Sn_MR_TCP, network_connection[sock].local_port, Sn_MR_ND) == sock)
+			if(socket(channel, Sn_MR_TCP, network_connection[channel].local_port, Sn_MR_ND) == channel)
 			{
 				// Replace the command mode switch code GAP time (default: 500ms)
-				if((serial_command->serial_command == SEG_ENABLE) && serial_data_packing[sock].packing_time) 
+				if((serial_command->serial_command == SEG_ENABLE) && serial_data_packing[0].packing_time) 
                 {
-                    modeswitch_gap_time = serial_data_packing[sock].packing_time;
+                    modeswitch_gap_time = serial_data_packing[0].packing_time;
                 }
 				
 				// TCP Server listen
-				listen(sock);
+				listen(channel);
 				
 				if(serial_common->serial_debug_en == SEG_ENABLE)
 				{
-					printf(" > SEG:TCP_SERVER_MODE:SOCKOPEN\r\n");
+					printf(" > SEG[%d]:TCP_SERVER_MODE:SOCKOPEN\r\n", channel);
 				}
 			}
 			break;
@@ -648,7 +676,7 @@ void proc_SEG_tcp_server(uint8_t sock)
 }
 
 
-void proc_SEG_tcp_mixed(uint8_t sock)
+void proc_SEG_tcp_mixed(uint8_t channel)
 {
 	//DevConfig *s2e = get_DevConfig_pointer();
 	struct __tcp_option *tcp_option = (struct __tcp_option *)get_DevConfig_pointer()->tcp_option;
@@ -662,51 +690,66 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 	uint16_t destport = 0;
 	
 #ifdef MIXED_CLIENT_LIMITED_CONNECT
-	static uint8_t reconnection_count;
+	static uint8_t reconnection_count[2];
 #endif
 	
-	uint8_t state = getSn_SR(sock);
+	uint8_t state = getSn_SR(channel);
 	switch(state)
 	{
 		case SOCK_INIT:
-			if(mixed_state[sock] == MIXED_CLIENT)
+			if(mixed_state[channel] == MIXED_CLIENT)
 			{
-				if(reconnection_time[sock] >= tcp_option[0].reconnection)
+				if(reconnection_time[channel] >= tcp_option[channel].reconnection)
 				{
-					reconnection_time[sock] = 0; // reconnection time variable clear
+					reconnection_time[channel] = 0; // reconnection time variable clear
 					
 					// TCP connect exception checker; e.g., dns failed / zero srcip ... and etc.
-					if(check_tcp_connect_exception(sock) == ON)
+					if(check_tcp_connect_exception(channel) == ON)
 					{
 #ifdef MIXED_CLIENT_LIMITED_CONNECT
-						process_socket_termination(sock);
-						reconnection_count = 0;
-						BUFFER_CLEAR(data_rx_0);
-						mixed_state[sock] = MIXED_SERVER;
+						process_socket_termination(channel);
+						reconnection_count[channel] = 0;
+                        if(channel)
+                        {
+                            BUFFER_CLEAR(data_rx_1);
+                        }
+                        else
+                        {
+                            BUFFER_CLEAR(data_rx_0);
+                        }
+						
+						mixed_state[channel] = MIXED_SERVER;
 #endif
 						return;
 					}
 					
 					// TCP connect
-					connect(sock, network_connection[sock].remote_ip, network_connection[sock].remote_port);
+					connect(channel, network_connection[channel].remote_ip, network_connection[channel].remote_port);
 					
 #ifdef MIXED_CLIENT_LIMITED_CONNECT
-					reconnection_count++;
-					if(reconnection_count >= MAX_RECONNECTION_COUNT)
+					reconnection_count[channel]++;
+					if(reconnection_count[channel] >= MAX_RECONNECTION_COUNT)
 					{
-						process_socket_termination(sock);
-						reconnection_count = 0;
-						BUFFER_CLEAR(data_rx_0);
-						mixed_state[sock] = MIXED_SERVER;
+						process_socket_termination(channel);
+						reconnection_count[channel] = 0;
+						if(channel)
+                        {
+                            BUFFER_CLEAR(data_rx_1);
+                        }
+                        else
+                        {
+                            BUFFER_CLEAR(data_rx_0);
+                        }
+						mixed_state[channel] = MIXED_SERVER;
 					}
 	#ifdef _SEG_DEBUG_
-					if(reconnection_count != 0)	
+					if(reconnection_count[channel] != 0)	
                     {
-                        printf(" > SEG:TCP_MIXED_MODE:CLIENT_CONNECTION [%d]\r\n", reconnection_count);
+                        printf(" > SEG[%d]:TCP_MIXED_MODE:CLIENT_CONNECTION [%d]\r\n", channel, reconnection_count);
                     }
 					else						
                     {
-                        printf(" > SEG:TCP_MIXED_MODE:CLIENT_CONNECTION_RETRY FAILED\r\n");
+                        printf(" > SEG[%d]:TCP_MIXED_MODE:CLIENT_CONNECTION_RETRY FAILED\r\n", channel);
                     }
 	#endif
 #endif
@@ -717,214 +760,214 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 		case SOCK_LISTEN:
 			// UART Rx interrupt detection in MIXED_SERVER mode
 			// => Switch to MIXED_CLIENT mode
-			if((mixed_state == MIXED_SERVER) && (M_BUFFER_USED_SIZE(sock)))
+			if((mixed_state[channel] == MIXED_SERVER) && (M_BUFFER_USED_SIZE(channel)))
 			{
-				process_socket_termination(sock);
-				mixed_state[sock] = MIXED_CLIENT;
+				process_socket_termination(channel);
+				mixed_state[channel] = MIXED_CLIENT;
 				
-				reconnection_time[sock] = tcp_option[0].reconnection; // rapid initial connection
+				reconnection_time[channel] = tcp_option[channel].reconnection; // rapid initial connection
 			}
 			break;
 		
 		case SOCK_ESTABLISHED:
-			if(getSn_IR(sock) & Sn_IR_CON)
+			if(getSn_IR(channel) & Sn_IR_CON)
 			{
 				///////////////////////////////////////////////////////////////////////////////////////////////////
 				// S2E: TCP mixed (server or client) mode initialize after connection established (only once)
 				///////////////////////////////////////////////////////////////////////////////////////////////////
 				//net->state = ST_CONNECT;
-				set_device_status(sock, ST_CONNECT);
+				set_device_status(channel, ST_CONNECT);
 				
-				if(!inactivity_time[sock] && tcp_option[sock].inactivity)		
+				if(!inactivity_time[channel] && tcp_option[channel].inactivity)		
                 {
-                    enable_inactivity_timer[sock] = SEG_ENABLE;
+                    enable_inactivity_timer[channel] = SEG_ENABLE;
                 }
-				if(!keepalive_time[sock] && tcp_option[sock].keepalive_en)	
+				if(!keepalive_time[channel] && tcp_option[channel].keepalive_en)	
                 {
-                    enable_keepalive_timer[sock] = SEG_ENABLE;
+                    enable_keepalive_timer[channel] = SEG_ENABLE;
                 }
 				
 				// Connection Password option: TCP server mode only (+ mixed_server)
-				if((tcp_option[sock].pw_connect_en == SEG_DISABLE) || (mixed_state[sock] == MIXED_CLIENT))
+				if((tcp_option[channel].pw_connect_en == SEG_DISABLE) || (mixed_state[channel] == MIXED_CLIENT))
 				{
-					flag_connect_pw_auth[sock] = SEG_ENABLE;
+					flag_connect_pw_auth[channel] = SEG_ENABLE;
 				}
-				else if((mixed_state[sock] == MIXED_SERVER) && (flag_connect_pw_auth[sock] == SEG_DISABLE))
+				else if((mixed_state[channel] == MIXED_SERVER) && (flag_connect_pw_auth[channel] == SEG_DISABLE))
 				{
 					// Connection password auth timer initialize
-					enable_connection_auth_timer[sock] = SEG_ENABLE;
-					connection_auth_time[sock]  = 0;
+					enable_connection_auth_timer[channel] = SEG_ENABLE;
+					connection_auth_time[channel]  = 0;
 				}
 				
 				// Serial debug message printout
 				if(serial_common->serial_debug_en == SEG_ENABLE)
 				{
-					getsockopt(sock, SO_DESTIP, &destip);
-					getsockopt(sock, SO_DESTPORT, &destport);
+					getsockopt(channel, SO_DESTIP, &destip);
+					getsockopt(channel, SO_DESTPORT, &destport);
 					
-					if(mixed_state[sock] == MIXED_SERVER)		
+					if(mixed_state[channel] == MIXED_SERVER)		
                     {
-                        printf(" > SEG:CONNECTED FROM - %d.%d.%d.%d : %d\r\n",destip[0], destip[1], destip[2], destip[3], destport);
+                        printf(" > SEG[%d]:CONNECTED FROM - %d.%d.%d.%d : %d\r\n", channel, destip[0], destip[1], destip[2], destip[3], destport);
                     }
 					else								
                     {
-                        printf(" > SEG:CONNECTED TO - %d.%d.%d.%d : %d\r\n",destip[0], destip[1], destip[2], destip[3], destport);
+                        printf(" > SEG[%d]:CONNECTED TO - %d.%d.%d.%d : %d\r\n", channel, destip[0], destip[1], destip[2], destip[3], destport);
                     }
 				}
 				
 				
 				// Mixed mode option init
-				if(mixed_state[sock] == MIXED_SERVER)
+				if(mixed_state[channel] == MIXED_SERVER)
 				{
 					// UART Ring buffer clear
 					BUFFER_CLEAR(data_rx_0);
 				}
-				else if(mixed_state[sock] == MIXED_CLIENT)
+				else if(mixed_state[channel] == MIXED_CLIENT)
 				{
 					// Mixed-mode flag switching in advance
-					mixed_state[sock] = MIXED_SERVER;
+					mixed_state[channel] = MIXED_SERVER;
 				}
 				
 #ifdef MIXED_CLIENT_LIMITED_CONNECT
-				reconnection_count = 0;
+				reconnection_count[channel] = 0;
 #endif
 				
-				setSn_IR(sock, Sn_IR_CON);
+				setSn_IR(channel, Sn_IR_CON);
 			}
 			
 			// Serial to Ethernet process
-			if(M_BUFFER_USED_SIZE(sock) || u2e_size[sock])	
+			if(M_BUFFER_USED_SIZE(channel) || u2e_size[channel])	
             {
-                uart_to_ether(sock);
+                uart_to_ether(channel);
             }
-			if(getSn_RX_RSR(sock) 	|| e2u_size[sock])		
+			if(getSn_RX_RSR(channel) 	|| e2u_size[channel])		
             {
-                ether_to_uart(sock);
+                ether_to_uart(channel);
             }
 			
 			// Check the inactivity timer
-			if((enable_inactivity_timer[sock] == SEG_ENABLE) && (inactivity_time[sock] >= tcp_option[sock].inactivity))
+			if((enable_inactivity_timer[channel] == SEG_ENABLE) && (inactivity_time[channel] >= tcp_option[channel].inactivity))
 			{
 				//disconnect(sock);
-				process_socket_termination(sock);
+				process_socket_termination(channel);
 				
 				// Keep-alive timer disabled
-				enable_keepalive_timer[sock] = DISABLE;
-				keepalive_time[sock] = 0;
+				enable_keepalive_timer[channel] = DISABLE;
+				keepalive_time[channel] = 0;
 #ifdef _SEG_DEBUG_
-				printf(" > INACTIVITY TIMER: TIMEOUT\r\n");
+				printf(" > [%d]INACTIVITY TIMER: TIMEOUT\r\n", channel);
 #endif
 				// TCP mixed mode state transition: initial state
-				mixed_state[sock] = MIXED_SERVER;
+				mixed_state[channel] = MIXED_SERVER;
 			}
 			
 			// Check the keee-alive timer
-			if((tcp_option[sock].keepalive_en == SEG_ENABLE) && (enable_keepalive_timer[sock] == SEG_ENABLE))
+			if((tcp_option[channel].keepalive_en == SEG_ENABLE) && (enable_keepalive_timer[channel] == SEG_ENABLE))
 			{
 				// Send the first keee-alive packet
-				if((flag_sent_first_keepalive[sock] == SEG_DISABLE) 
-                    && (keepalive_time[sock] >= tcp_option[sock].keepalive_wait_time) 
-                    && (tcp_option[sock].keepalive_wait_time != 0))
+				if((flag_sent_first_keepalive[channel] == SEG_DISABLE) 
+                    && (keepalive_time[channel] >= tcp_option[channel].keepalive_wait_time) 
+                    && (tcp_option[channel].keepalive_wait_time != 0))
 				{
 #ifdef _SEG_DEBUG_
-					printf(" >> send_keepalive_packet_first [%d]\r\n", keepalive_time[sock]);
+					printf(" >> [%d]send_keepalive_packet_first [%d]\r\n", channel, keepalive_time[channel]);
 #endif
-					send_keepalive_packet_manual(sock); // <-> send_keepalive_packet_auto()
-					keepalive_time[sock] = 0;
+					send_keepalive_packet_manual(channel); // <-> send_keepalive_packet_auto()
+					keepalive_time[channel] = 0;
 					
-					flag_sent_first_keepalive[sock] = SEG_ENABLE;
+					flag_sent_first_keepalive[channel] = SEG_ENABLE;
 				}
 				// Send the keee-alive packet periodically
-				if((flag_sent_first_keepalive[sock] == SEG_ENABLE) 
-                    && (keepalive_time[sock] >= tcp_option[sock].keepalive_retry_time) 
-                    && (tcp_option[sock].keepalive_retry_time != 0))
+				if((flag_sent_first_keepalive[channel] == SEG_ENABLE) 
+                    && (keepalive_time[channel] >= tcp_option[channel].keepalive_retry_time) 
+                    && (tcp_option[channel].keepalive_retry_time != 0))
 				{
 #ifdef _SEG_DEBUG_
-					printf(" >> send_keepalive_packet_manual [%d]\r\n", keepalive_time[sock]);
+					printf(" >> [%d]send_keepalive_packet_manual [%d]\r\n", channel, keepalive_time[sock]);
 #endif
-					send_keepalive_packet_manual(sock);
-					keepalive_time[sock] = 0;
+					send_keepalive_packet_manual(channel);
+					keepalive_time[channel] = 0;
 				}
 			}
 			
 			// Check the connection password auth timer
-			if((mixed_state[sock] == MIXED_SERVER) && (tcp_option[sock].pw_connect_en == SEG_ENABLE))
+			if((mixed_state[channel] == MIXED_SERVER) && (tcp_option[channel].pw_connect_en == SEG_ENABLE))
 			{
-				if((flag_connect_pw_auth[sock] == SEG_DISABLE) && (connection_auth_time[sock] >= MAX_CONNECTION_AUTH_TIME)) // timeout default: 5000ms (5 sec)
+				if((flag_connect_pw_auth[channel] == SEG_DISABLE) && (connection_auth_time[channel] >= MAX_CONNECTION_AUTH_TIME)) // timeout default: 5000ms (5 sec)
 				{
 					//disconnect(sock);
-					process_socket_termination(sock);
+					process_socket_termination(channel);
 					
-					enable_connection_auth_timer[sock] = DISABLE;
-					connection_auth_time[sock] = 0;
+					enable_connection_auth_timer[channel] = DISABLE;
+					connection_auth_time[channel] = 0;
 #ifdef _SEG_DEBUG_
-					printf(" > CONNECTION PW: AUTH TIMEOUT\r\n");
+					printf(" > [%d]CONNECTION PW: AUTH TIMEOUT\r\n", channel);
 #endif
 				}
 			}
 			break;
 		
 		case SOCK_CLOSE_WAIT:
-			while(getSn_RX_RSR(sock) || e2u_size[sock])
+			while(getSn_RX_RSR(channel) || e2u_size[channel])
             {
-                ether_to_uart(sock); // receive remaining packets
+                ether_to_uart(channel); // receive remaining packets
             }
-			disconnect(sock);
+			disconnect(channel);
 			break;
 		
 		case SOCK_FIN_WAIT:
 		case SOCK_CLOSED:
-			set_device_status(sock, ST_OPEN);
+			set_device_status(channel, ST_OPEN);
 
-			if(mixed_state[sock] == MIXED_SERVER) // MIXED_SERVER
+			if(mixed_state[channel] == MIXED_SERVER) // MIXED_SERVER
 			{
-				reset_SEG_timeflags(sock);
+				reset_SEG_timeflags();
 				
-				u2e_size[sock] = 0;
-				e2u_size[sock] = 0;
+				u2e_size[channel] = 0;
+				e2u_size[channel] = 0;
 				
-				if(socket(sock, Sn_MR_TCP, network_connection[sock].local_port, Sn_MR_ND) == sock)
+				if(socket(channel, Sn_MR_TCP, network_connection[channel].local_port, Sn_MR_ND) == channel)
 				{
 					// Replace the command mode switch code GAP time (default: 500ms)
 					if((serial_command->serial_command == SEG_ENABLE) && serial_data_packing[0].packing_time) 
                     {
-                        modeswitch_gap_time = serial_data_packing[sock].packing_time;
+                        modeswitch_gap_time = serial_data_packing[0].packing_time;
                     }
 					
 					// TCP Server listen
-					listen(sock);
+					listen(channel);
 					
 					if(serial_common->serial_debug_en == SEG_ENABLE)
 					{
-						printf(" > SEG:TCP_MIXED_MODE:SERVER_SOCKOPEN\r\n");
+						printf(" > SEG[%d]:TCP_MIXED_MODE:SERVER_SOCKOPEN\r\n", channel);
 					}
 				}
 			}
 			else	// MIXED_CLIENT
 			{
-				e2u_size[sock] = 0;
+				e2u_size[channel] = 0;
 				
-				source_port = get_tcp_any_port(sock);
+				source_port = get_tcp_any_port(channel);
 #ifdef _SEG_DEBUG_
-				printf(" > TCP CLIENT: any_port = %d\r\n", source_port);
+				printf(" > [%d]TCP CLIENT: any_port = %d\r\n", channel, source_port);
 #endif		
-				if(socket(sock, Sn_MR_TCP, source_port, Sn_MR_ND) == sock)
+				if(socket(channel, Sn_MR_TCP, source_port, Sn_MR_ND) == channel)
 				{
 					// Replace the command mode switch code GAP time (default: 500ms)
-					if((serial_command->serial_command == SEG_ENABLE) && serial_data_packing[sock].packing_time) 
+					if((serial_command->serial_command == SEG_ENABLE) && serial_data_packing[0].packing_time) 
                     {
-                        modeswitch_gap_time = serial_data_packing[sock].packing_time;
+                        modeswitch_gap_time = serial_data_packing[0].packing_time;
                     }
 					
 					// Enable the reconnection Timer
-					if((enable_reconnection_timer[sock] == SEG_DISABLE) && tcp_option[sock].reconnection) 
+					if((enable_reconnection_timer[channel] == SEG_DISABLE) && tcp_option[channel].reconnection) 
                     {
-                        enable_reconnection_timer[sock] = SEG_ENABLE;
+                        enable_reconnection_timer[channel] = SEG_ENABLE;
                     }
 					
 					if(serial_common->serial_debug_en == SEG_ENABLE)
 					{
-						printf(" > SEG:TCP_MIXED_MODE:CLIENT_SOCKOPEN\r\n");
+						printf(" > SEG[%d]:TCP_MIXED_MODE:CLIENT_SOCKOPEN\r\n", channel);
 					}
 				}
 			}
@@ -935,7 +978,7 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 	}
 }
 
-void uart_to_ether(uint8_t sock)
+void uart_to_ether(uint8_t channel)
 {
 	struct __network_connection *network_connection = (struct __network_connection *)(get_DevConfig_pointer()->network_connection);
 	struct __serial_common *serial_common = (struct __serial_common *)&get_DevConfig_pointer()->serial_common;
@@ -951,8 +994,8 @@ void uart_to_ether(uint8_t sock)
 #endif
 	
 	// UART ring buffer -> user's buffer
-	len = get_serial_data(sock);
-	add_data_transfer_bytecount(sock, SEG_UART_RX, len);
+	len = get_serial_data(channel);
+	add_data_transfer_bytecount(channel, SEG_UART_RX, len);
 	
 	/*
 	// ## for debugging
@@ -975,13 +1018,13 @@ void uart_to_ether(uint8_t sock)
 		printf("\r\n");
 		*/
 		
-		switch(getSn_SR(sock))
+		switch(getSn_SR(channel))
 		{
 			case SOCK_UDP: // UDP_MODE
-				if((network_connection[0].remote_ip[0] == 0x00) 
-                    && (network_connection[0].remote_ip[1] == 0x00) 
-                    && (network_connection[0].remote_ip[2] == 0x00) 
-                    && (network_connection[0].remote_ip[3] == 0x00))
+				if((network_connection[channel].remote_ip[0] == 0x00) 
+                    && (network_connection[channel].remote_ip[1] == 0x00) 
+                    && (network_connection[channel].remote_ip[2] == 0x00) 
+                    && (network_connection[channel].remote_ip[3] == 0x00))
 				{
 					if((peerip[0] == 0x00) 
                         && (peerip[1] == 0x00) 
@@ -996,18 +1039,18 @@ void uart_to_ether(uint8_t sock)
 					else
 					{
 						// UDP 1:N mode
-						sent_len = (int16_t)sendto(sock, g_send_buf[sock], len, peerip, peerport);
+						sent_len = (int16_t)sendto(channel, g_send_buf[channel], len, peerip, peerport);
 					}
 				}
 				else
 				{
 					// UDP 1:1 mode
-					sent_len = (int16_t)sendto(sock, g_send_buf[sock], len, network_connection[0].remote_ip, network_connection[0].remote_port);
+					sent_len = (int16_t)sendto(channel, g_send_buf[channel], len, network_connection[channel].remote_ip, network_connection[channel].remote_port);
 				}
 				
 				if(sent_len > 0) 
                 {
-                    u2e_size[sock]-=sent_len;
+                    u2e_size[channel]-=sent_len;
                 }
 				
 				break;
@@ -1015,7 +1058,7 @@ void uart_to_ether(uint8_t sock)
 			case SOCK_ESTABLISHED: // TCP_SERVER_MODE, TCP_CLIENT_MODE, TCP_MIXED_MODE
 			case SOCK_CLOSE_WAIT:
 				// Connection password is only checked in the TCP SERVER MODE / TCP MIXED MODE (MIXED_SERVER)
-				if(flag_connect_pw_auth[sock] == SEG_ENABLE)
+				if(flag_connect_pw_auth[channel] == SEG_ENABLE)
 				{
 					
 					/* ## 1
@@ -1032,34 +1075,34 @@ void uart_to_ether(uint8_t sock)
 					*/
 					
 					// ## 3: 
-					sent_len = (int16_t)send(sock, g_send_buf[sock], len);
+					sent_len = (int16_t)send(channel, g_send_buf[channel], len);
 					if(sent_len > 0) 
                     {
-                        u2e_size[sock]-=sent_len;
+                        u2e_size[channel]-=sent_len;
                     }
 					
-					add_data_transfer_bytecount(sock, SEG_UART_TX, len);
+					add_data_transfer_bytecount(channel, SEG_UART_TX, len);
 					//printf("sent len = %d\r\n", len); // ## for debugging
 					
 					//if(!keepalive_time && netinfo->keepalive_en)
 					//if((netinfo->keepalive_en == ENABLE) && (flag_sent_first_keepalive == DISABLE))
-					if(tcp_option[sock].keepalive_en == ENABLE)
+					if(tcp_option[channel].keepalive_en == ENABLE)
 					{
-						if(flag_sent_first_keepalive[sock] == DISABLE)
+						if(flag_sent_first_keepalive[channel] == DISABLE)
 						{
-							enable_keepalive_timer[sock] = SEG_ENABLE;
+							enable_keepalive_timer[channel] = SEG_ENABLE;
 						}
 						else
 						{
-							flag_sent_first_keepalive[sock] = SEG_DISABLE;
+							flag_sent_first_keepalive[channel] = SEG_DISABLE;
 						}
-						keepalive_time[sock] = 0;
+						keepalive_time[channel] = 0;
 					}
 				}
 				break;
 			
 			case SOCK_LISTEN:
-				u2e_size[sock] = 0;
+				u2e_size[channel] = 0;
 				return;
 			
 			default:
@@ -1067,28 +1110,28 @@ void uart_to_ether(uint8_t sock)
 		}
 	}
 	
-	inactivity_time[sock] = 0;
+	inactivity_time[channel] = 0;
 	//flag_serial_input_time_elapse = SEG_DISABLE; // this flag is cleared in the 'Data packing delimiter:time' checker routine
 }
 
-uint16_t get_serial_data(uint8_t socket)
+uint16_t get_serial_data(uint8_t channel)
 {
 	struct __serial_data_packing *serial_data_packing = (struct __serial_data_packing *)(get_DevConfig_pointer()->serial_data_packing);
     
 	uint16_t i;
 	uint16_t len;
 	
-	len = M_BUFFER_USED_SIZE(socket);
+	len = M_BUFFER_USED_SIZE(channel);
 	
-	if((len + u2e_size[socket]) >= DATA_BUF_SIZE) // Avoiding u2e buffer (g_send_buf) overflow	
+	if((len + u2e_size[channel]) >= DATA_BUF_SIZE) // Avoiding u2e buffer (g_send_buf) overflow	
 	{
 		/* Checking Data packing option: charactor delimiter */
-		if((serial_data_packing[socket].packing_delimiter[0] != 0x00) && (len == 1))
+		if((serial_data_packing[channel].packing_delimiter[0] != 0x00) && (len == 1))
 		{
-			g_send_buf[socket][u2e_size[socket]] = (uint8_t)uart_getc(socket);
-			if(serial_data_packing[socket].packing_delimiter[0] == g_send_buf[socket][u2e_size[socket]])
+			g_send_buf[channel][u2e_size[channel]] = (uint8_t)uart_getc(channel);
+			if(serial_data_packing[channel].packing_delimiter[0] == g_send_buf[channel][u2e_size[channel]])
 			{
-				return u2e_size[socket];
+				return u2e_size[channel];
 			}
 		}
 		
@@ -1096,12 +1139,12 @@ uint16_t get_serial_data(uint8_t socket)
 		//return 0; 
 		
 		// serial data length value update for avoiding u2e buffer overflow
-		len = DATA_BUF_SIZE - u2e_size[socket];
+		len = DATA_BUF_SIZE - u2e_size[channel];
 	}
 	
-	if((!serial_data_packing[socket].packing_time) 
-        && (!serial_data_packing[socket].packing_size) 
-        && (!serial_data_packing[socket].packing_delimiter[0])) // No Packing delimiters.
+	if((!serial_data_packing[channel].packing_time) 
+        && (!serial_data_packing[channel].packing_size) 
+        && (!serial_data_packing[channel].packing_delimiter[0])) // No Packing delimiters.
 	{
 		//ret = uart_gets(SEG_DATA_UART, g_send_buf, len);
 		//return (uint16_t)ret;
@@ -1109,49 +1152,49 @@ uint16_t get_serial_data(uint8_t socket)
 		// ## 20150427 bugfix: Incorrect serial data storing (UART ring buffer to g_send_buf)
 		for(i = 0; i < len; i++)
 		{
-			g_send_buf[socket][u2e_size[socket]++] = (uint8_t)uart_getc(socket);
+			g_send_buf[channel][u2e_size[channel]++] = (uint8_t)uart_getc(channel);
 		}
 		
-		return u2e_size[socket];
+		return u2e_size[channel];
 	}
 	else
 	{
 		/* Checking Data packing options */
 		for(i = 0; i < len; i++)
 		{
-			g_send_buf[socket][u2e_size[socket]++] = (uint8_t)uart_getc(socket);
+			g_send_buf[channel][u2e_size[channel]++] = (uint8_t)uart_getc(channel);
 			
 			// Packing delimiter: character option
-			if((serial_data_packing[socket].packing_delimiter[0] != 0x00) && (serial_data_packing[socket].packing_delimiter[0] == g_send_buf[socket][u2e_size[socket] - 1]))
+			if((serial_data_packing[channel].packing_delimiter[0] != 0x00) && (serial_data_packing[channel].packing_delimiter[0] == g_send_buf[channel][u2e_size[channel] - 1]))
 			{
-				return u2e_size[socket];
+				return u2e_size[channel];
 			}
 			
 			// Packing delimiter: size option
-			if((serial_data_packing[socket].packing_size != 0) && (serial_data_packing[socket].packing_size == u2e_size[socket]))
+			if((serial_data_packing[channel].packing_size != 0) && (serial_data_packing[channel].packing_size == u2e_size[channel]))
 			{
-				return u2e_size[socket];
+				return u2e_size[channel];
 			}
 		}
 	}
 	
 	// Packing delimiter: time option
-	if((serial_data_packing[socket].packing_time != 0) 
-        && (u2e_size[socket] != 0) 
-        && (flag_serial_input_time_elapse[socket]))
+	if((serial_data_packing[channel].packing_time != 0) 
+        && (u2e_size[channel] != 0) 
+        && (flag_serial_input_time_elapse[channel]))
 	{
-		if(M_BUFFER_USED_SIZE(socket) == 0) 
+		if(M_BUFFER_USED_SIZE(channel) == 0) 
         {
-            flag_serial_input_time_elapse[socket] = SEG_DISABLE; // ##
+            flag_serial_input_time_elapse[channel] = SEG_DISABLE; // ##
         }
 		
-		return u2e_size[socket];
+		return u2e_size[channel];
 	}
 	
 	return 0;
 }
 
-void ether_to_uart(uint8_t sock)
+void ether_to_uart(uint8_t channel)
 {
 	struct __serial_option *serial_option = (struct __serial_option *)&(get_DevConfig_pointer()->serial_option);
     struct __serial_common *serial_common = (struct __serial_common *)&(get_DevConfig_pointer()->serial_common);
@@ -1161,10 +1204,10 @@ void ether_to_uart(uint8_t sock)
 	uint16_t len;
 	uint16_t i;
 
-	if(serial_option[sock].flow_control == flow_rts_cts)
+	if(serial_option[channel].flow_control == flow_rts_cts)
 	{
 #ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
-		if(get_uart_cts_pin(sock) != UART_CTS_LOW) 
+		if(get_uart_cts_pin(channel) != UART_CTS_LOW) 
         {
             return;
         }
@@ -1175,7 +1218,7 @@ void ether_to_uart(uint8_t sock)
 
 
 	// H/W Socket buffer -> User's buffer
-	len = getSn_RX_RSR(sock);
+	len = getSn_RX_RSR(channel);
 	if(len > DATA_BUF_SIZE) 
     {
         len = DATA_BUF_SIZE; // avoiding buffer overflow
@@ -1185,57 +1228,57 @@ void ether_to_uart(uint8_t sock)
 	
 	if(len > 0)
 	{
-		switch(getSn_SR(sock))
+		switch(getSn_SR(channel))
 		{
 			case SOCK_UDP: // UDP_MODE
-				e2u_size[sock] = recvfrom(sock, g_recv_buf[sock], len, peerip, &peerport);
+				e2u_size[channel] = recvfrom(channel, g_recv_buf[channel], len, peerip, &peerport);
 				
 				if(memcmp(peerip_tmp, peerip, 4) !=  0)
 				{
 					memcpy(peerip_tmp, peerip, 4);
 					if(serial_common->serial_debug_en == SEG_ENABLE) 
                     {
-                        printf(" > UDP Peer IP/Port: %d.%d.%d.%d : %d\r\n", peerip[0], peerip[1], peerip[2], peerip[3], peerport);
+                        printf(" > [%d]UDP Peer IP/Port: %d.%d.%d.%d : %d\r\n", channel, peerip[0], peerip[1], peerip[2], peerip[3], peerport);
                     }
 				}
 				break;
 			
 			case SOCK_ESTABLISHED: // TCP_SERVER_MODE, TCP_CLIENT_MODE, TCP_MIXED_MODE
 			case SOCK_CLOSE_WAIT:
-				e2u_size[sock] = recv(sock, g_recv_buf[sock], len);
+				e2u_size[channel] = recv(channel, g_recv_buf[channel], len);
 				break;
 			
 			default:
 				break;
 		}
 		
-		inactivity_time[sock] = 0;
-		keepalive_time[sock] = 0;
-		flag_sent_first_keepalive[sock] = DISABLE;
+		inactivity_time[channel] = 0;
+		keepalive_time[channel] = 0;
+		flag_sent_first_keepalive[channel] = DISABLE;
 		
-		add_data_transfer_bytecount(sock, SEG_ETHER_RX, e2u_size[sock]);
+		add_data_transfer_bytecount(channel, SEG_ETHER_RX, e2u_size[channel]);
 	}
 	
-	if((network_connection[sock].working_state == TCP_SERVER_MODE) 
-        || ((network_connection[sock].working_state == TCP_MIXED_MODE) && (mixed_state == MIXED_SERVER)))
+	if((network_connection[channel].working_state == TCP_SERVER_MODE) 
+        || ((network_connection[channel].working_state == TCP_MIXED_MODE) && (mixed_state[channel] == MIXED_SERVER)))
 	{
 		// Connection password authentication
-		if((tcp_option[sock].pw_connect_en == SEG_ENABLE) && (flag_connect_pw_auth == SEG_DISABLE))
+		if((tcp_option[channel].pw_connect_en == SEG_ENABLE) && (flag_connect_pw_auth == SEG_DISABLE))
 		{
-			if(check_connect_pw_auth(g_recv_buf[sock], len) == SEG_ENABLE)
+			if(check_connect_pw_auth(g_recv_buf[channel], len) == SEG_ENABLE)
 			{
-				flag_connect_pw_auth[sock] = SEG_ENABLE;
+				flag_connect_pw_auth[channel] = SEG_ENABLE;
 			}
 			else
 			{
-				flag_connect_pw_auth[sock] = SEG_DISABLE;
+				flag_connect_pw_auth[channel] = SEG_DISABLE;
 			}
 			
-			e2u_size[sock] = 0;
+			e2u_size[channel] = 0;
 			
-			if(flag_connect_pw_auth[sock] == SEG_DISABLE)
+			if(flag_connect_pw_auth[channel] == SEG_DISABLE)
 			{
-				disconnect(sock);
+				disconnect(channel);
 				return;
 			}
 		}
@@ -1244,7 +1287,7 @@ void ether_to_uart(uint8_t sock)
 	// Ethernet data transfer to DATA UART
 	if(e2u_size != 0)
 	{
-		if(serial_option[sock].dsr_en == SEG_ENABLE) // DTR / DSR handshake (flowcontrol)
+		if(serial_option[channel].dsr_en == SEG_ENABLE) // DTR / DSR handshake (flowcontrol)
 		{
 			if(get_flowcontrol_dsr_pin() == 0) 
             {
@@ -1252,31 +1295,31 @@ void ether_to_uart(uint8_t sock)
             }
 		}
 //////////////////////////////////////////////////////////////////////
-		if(serial_option[sock].uart_interface == UART_IF_RS422_485)
+		if(serial_option[channel].uart_interface == UART_IF_RS422_485)
 		{
-			uart_rs485_enable(sock);
+			uart_rs485_enable(channel);
 			//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
-			for(i = 0; i < e2u_size[sock]; i++) 
+			for(i = 0; i < e2u_size[channel]; i++) 
             {
-                uart_putc(sock, g_recv_buf[sock][i]);
+                uart_putc(channel, g_recv_buf[channel][i]);
             }
-			uart_rs485_disable(sock);
+			uart_rs485_disable(channel);
 			
-			add_data_transfer_bytecount(sock, SEG_ETHER_TX, e2u_size[sock]);
-			e2u_size[sock] = 0;
+			add_data_transfer_bytecount(channel, SEG_ETHER_TX, e2u_size[channel]);
+			e2u_size[channel] = 0;
 		}
 //////////////////////////////////////////////////////////////////////
-		else if(serial_option[sock].flow_control == flow_xon_xoff) 
+		else if(serial_option[channel].flow_control == flow_xon_xoff) 
 		{
 			if(isXON == SEG_ENABLE)
 			{
 				//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
-				for(i = 0; i < e2u_size[sock]; i++) 
+				for(i = 0; i < e2u_size[channel]; i++) 
                 {  
-                    uart_putc(sock, g_recv_buf[sock][i]);
+                    uart_putc(channel, g_recv_buf[channel][i]);
                 }
-				add_data_transfer_bytecount(sock, SEG_ETHER_TX, e2u_size[sock]);
-				e2u_size[sock] = 0;
+				add_data_transfer_bytecount(channel, SEG_ETHER_TX, e2u_size[channel]);
+				e2u_size[channel] = 0;
 			}
 			//else
 			//{
@@ -1286,39 +1329,39 @@ void ether_to_uart(uint8_t sock)
 		else
 		{
 			//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
-			for(i = 0; i < e2u_size[sock]; i++) 
+			for(i = 0; i < e2u_size[channel]; i++) 
             {   
-                uart_putc(sock, g_recv_buf[sock][i]);
+                uart_putc(channel, g_recv_buf[channel][i]);
             }
 			
-			add_data_transfer_bytecount(sock, SEG_ETHER_TX, e2u_size[sock]);
-			e2u_size[sock] = 0;
+			add_data_transfer_bytecount(channel, SEG_ETHER_TX, e2u_size[channel]);
+			e2u_size[channel] = 0;
 		}
 	}
 }
 
 
-uint16_t get_tcp_any_port(uint8_t socket)
+uint16_t get_tcp_any_port(uint8_t channel)
 {
-	if(client_any_port[socket])
+	if(client_any_port[channel])
 	{
-		if(client_any_port[socket] < 0xffff) 	
+		if(client_any_port[channel] < 0xffff) 	
 		{
-			client_any_port[socket]++;
+			client_any_port[channel]++;
 		}
 		else							
 		{
-			client_any_port[socket] = 0;
+			client_any_port[channel] = 0;
 		}
 	}
 	
-	if(client_any_port[socket] == 0)
+	if(client_any_port[channel] == 0)
 	{
 		srand(get_phylink_downtime());
-		client_any_port[socket] = (rand() % 10000) + 35000; // 35000 ~ 44999
+		client_any_port[channel] = (rand() % 10000) + 35000; // 35000 ~ 44999
 	}
 	
-	return client_any_port[socket];
+	return client_any_port[channel];
 }
 
 
@@ -1332,25 +1375,25 @@ void send_keepalive_packet_manual(uint8_t sock)
 }
 
 
-uint8_t process_socket_termination(uint8_t sock)
+uint8_t process_socket_termination(uint8_t channel)
 {
 	struct __network_connection *network_connection = (struct __network_connection *)get_DevConfig_pointer()->network_connection;
     
-	uint8_t sock_status = getSn_SR(sock);
+	uint8_t sock_status = getSn_SR(channel);
 	
-	if(sock_status == SOCK_CLOSED) return sock;
+	if(sock_status == SOCK_CLOSED) return channel;
 	
-	if(network_connection[sock].working_mode != UDP_MODE) // TCP_SERVER_MODE / TCP_CLIENT_MODE / TCP_MIXED_MODE
+	if(network_connection[channel].working_mode != UDP_MODE) // TCP_SERVER_MODE / TCP_CLIENT_MODE / TCP_MIXED_MODE
 	{
 		if((sock_status == SOCK_ESTABLISHED) || (sock_status == SOCK_CLOSE_WAIT))
 		{
-			disconnect(sock);
+			disconnect(channel);
 		}
 	}
 	
-	close(sock);
+	close(channel);
 	
-	return sock;
+	return channel;
 }
 
 
@@ -1391,7 +1434,7 @@ void init_trigger_modeswitch(uint8_t mode)
 	if(mode == DEVICE_AT_MODE)
 	{
 		opmode = DEVICE_AT_MODE;
-		for(i=0; i<2; i++)
+		for(i=0; i<CHANNEL_USED; i++)
 		{
 			set_device_status(i, ST_ATMODE);
 		}
@@ -1405,7 +1448,7 @@ void init_trigger_modeswitch(uint8_t mode)
 	else // DEVICE_GW_MODE
 	{
 		opmode = DEVICE_GW_MODE;
-		for(i=0; i<2; i++)
+		for(i=0; i<CHANNEL_USED; i++)
 		{
 			set_device_status(i, ST_OPEN);
 			if(network_connection[i].working_mode == TCP_MIXED_MODE) 
@@ -1420,7 +1463,7 @@ void init_trigger_modeswitch(uint8_t mode)
 		}
 	}
 	
-	for(i=0; i<2; i++)
+	for(i=0; i<CHANNEL_USED; i++)
 	{
 		u2e_size[i] = 0;
 
@@ -1436,10 +1479,11 @@ void init_trigger_modeswitch(uint8_t mode)
 	}
 	enable_modeswitch_timer = SEG_DISABLE;
 	BUFFER_CLEAR(data_rx_0);
+    BUFFER_CLEAR(data_rx_1);
 	modeswitch_time = 0;
 }
 
-uint8_t check_modeswitch_trigger(uint8_t ch)
+uint8_t check_modeswitch_trigger(uint8_t channel, uint8_t ch)
 {
 	struct __serial_command *serial_command = (struct __serial_command *)&(get_DevConfig_pointer()->serial_command);
 	
@@ -1448,6 +1492,7 @@ uint8_t check_modeswitch_trigger(uint8_t ch)
 	
 	if(opmode != DEVICE_GW_MODE) 				return 0;
 	if(serial_command->serial_command == SEG_DISABLE) 	return 0;
+    if(channel) 	return 0;
 	
 	switch(triggercode_idx)
 	{
@@ -1506,17 +1551,16 @@ void restore_serial_data(uint8_t idx)
 	triggercode_idx = 0;
 }
 
-uint8_t check_serial_store_permitted(uint8_t socket, uint8_t ch)
+uint8_t check_serial_store_permitted(uint8_t channel, uint8_t ch)
 {
 	struct __network_connection *network_connection = (struct __network_connection *)get_DevConfig_pointer()->network_connection;
     struct __serial_option *serial_option = (struct __serial_option *)get_DevConfig_pointer()->serial_option;
 
 	uint8_t ret = SEG_DISABLE; // SEG_DISABLE: Doesn't put the serial data in a ring buffer
-	
-	switch(network_connection[socket].working_state)
+	switch(network_connection[channel].working_state)
 	{
 		case ST_OPEN:
-			if(network_connection[socket].working_mode != TCP_MIXED_MODE) break;
+			if(network_connection[channel].working_mode != TCP_MIXED_MODE) break;
 		case ST_CONNECT:
 		case ST_UDP:
 		case ST_ATMODE:
@@ -1528,7 +1572,7 @@ uint8_t check_serial_store_permitted(uint8_t socket, uint8_t ch)
 	
 	// Software flow control: Check the XON/XOFF start/stop commands
 	// [Peer] -> [WIZnet Device]
-	if((ret == SEG_ENABLE) && (serial_option[socket].flow_control == flow_xon_xoff))
+	if((ret == SEG_ENABLE) && (serial_option[channel].flow_control == flow_xon_xoff))
 	{
 		if(ch == UART_XON)
 		{
@@ -1544,28 +1588,33 @@ uint8_t check_serial_store_permitted(uint8_t socket, uint8_t ch)
 	return ret;
 }
 
-void reset_SEG_timeflags(uint8_t socket)
+void reset_SEG_timeflags(void)
 {
-	// Timer disable
-	enable_inactivity_timer[socket] = SEG_DISABLE;
-	enable_serial_input_timer[socket] = SEG_DISABLE;
-	enable_keepalive_timer[socket] = SEG_DISABLE;
-	enable_connection_auth_timer[socket] = SEG_DISABLE;
-	
-	// Flag clear
-	flag_serial_input_time_elapse[socket] = SEG_DISABLE;
-	flag_sent_keepalive[socket] = SEG_DISABLE;
-	//flag_sent_keepalive_wait = SEG_DISABLE;
-	flag_connect_pw_auth[socket] = SEG_DISABLE; // TCP_SERVER_MODE only (+ MIXED_SERVER)
-	
-	// Timer value clear
-	inactivity_time[socket] = 0;
-	serial_input_time[socket] = 0;
-	keepalive_time[socket] = 0;
-	connection_auth_time[socket] = 0;	
+    uint8_t i;
+    for(i=0; i<CHANNEL_USED; i++)
+    {
+        // Timer disable
+        enable_inactivity_timer[i] = SEG_DISABLE;
+        enable_serial_input_timer[i] = SEG_DISABLE;
+        enable_keepalive_timer[i] = SEG_DISABLE;
+        enable_connection_auth_timer[i] = SEG_DISABLE;
+        
+        // Flag clear
+        flag_serial_input_time_elapse[i] = SEG_DISABLE;
+        flag_sent_keepalive[i] = SEG_DISABLE;
+        //flag_sent_keepalive_wait = SEG_DISABLE;
+        flag_connect_pw_auth[i] = SEG_DISABLE; // TCP_SERVER_MODE only (+ MIXED_SERVER)
+        
+        // Timer value clear
+        inactivity_time[i] = 0;
+        serial_input_time[i] = 0;
+        keepalive_time[i] = 0;
+        connection_auth_time[i] = 0;
+    }
+		
 }
 
-void init_time_delimiter_timer(uint8_t socket)
+void init_time_delimiter_timer(uint8_t channel)
 {
 	struct __serial_command *serial_command = (struct __serial_command *)&(get_DevConfig_pointer()->serial_command);
     struct __serial_data_packing *serial_data_packing = (struct __serial_data_packing *)(get_DevConfig_pointer()->serial_data_packing);
@@ -1574,22 +1623,22 @@ void init_time_delimiter_timer(uint8_t socket)
 	
 	if((serial_command->serial_command == SEG_ENABLE) && (opmode == DEVICE_GW_MODE))
 	{
-		if(serial_data_packing[socket].packing_time != 0)
+		if(serial_data_packing[channel].packing_time != 0)
 		{
-			if(enable_serial_input_timer[socket] == SEG_DISABLE) 
+			if(enable_serial_input_timer[channel] == SEG_DISABLE) 
             {
-                enable_serial_input_timer[socket] = SEG_ENABLE;
+                enable_serial_input_timer[channel] = SEG_ENABLE;
             }
-			serial_input_time[socket] = 0;
+			serial_input_time[channel] = 0;
 		}
 	}
 }
 
-uint8_t check_tcp_connect_exception(uint8_t socket)
+uint8_t check_tcp_connect_exception(uint8_t channel)
 {
-	struct __network_option *network_option = (struct __network_option *)&get_DevConfig_pointer()->network_option;
+    struct __network_option *network_option = (struct __network_option *)&get_DevConfig_pointer()->network_option;
     struct __serial_common *serial_common = (struct __serial_common *)&get_DevConfig_pointer()->serial_common;
-     struct __network_connection *network_connection = (struct __network_connection *)get_DevConfig_pointer()->network_connection;
+    struct __network_connection *network_connection = (struct __network_connection *)get_DevConfig_pointer()->network_connection;
 	
 	uint8_t srcip[4] = {0, };
 	uint8_t ret = OFF;
@@ -1618,10 +1667,10 @@ uint8_t check_tcp_connect_exception(uint8_t socket)
 		ret = ON;
 	}
 	// Destination zero IP
-	else if((network_connection[socket].remote_ip[0] == 0x00) 
-                && (network_connection[socket].remote_ip[1] == 0x00) 
-                && (network_connection[socket].remote_ip[2] == 0x00) 
-                && (network_connection[socket].remote_ip[3] == 0x00))
+	else if((network_connection[channel].remote_ip[0] == 0x00) 
+                && (network_connection[channel].remote_ip[1] == 0x00) 
+                && (network_connection[channel].remote_ip[2] == 0x00) 
+                && (network_connection[channel].remote_ip[3] == 0x00))
 	{
 		if(serial_common->serial_debug_en == SEG_ENABLE) 
         {
@@ -1630,10 +1679,10 @@ uint8_t check_tcp_connect_exception(uint8_t socket)
 		ret = ON;
 	}
 	 // Duplicate IP address
-	else if((srcip[0] == network_connection[socket].remote_ip[0]) 
-                && (srcip[1] == network_connection[socket].remote_ip[1]) 
-                && (srcip[2] == network_connection[socket].remote_ip[2]) 
-                && (srcip[3] == network_connection[socket].remote_ip[3]))
+	else if((srcip[0] == network_connection[channel].remote_ip[0]) 
+                && (srcip[1] == network_connection[channel].remote_ip[1]) 
+                && (srcip[2] == network_connection[channel].remote_ip[2]) 
+                && (srcip[3] == network_connection[channel].remote_ip[3]))
 	{
 		if(serial_common->serial_debug_en == SEG_ENABLE) 
         {
@@ -1645,9 +1694,9 @@ uint8_t check_tcp_connect_exception(uint8_t socket)
 	{
 		// Static IP address obtained
 		if((network_option->dhcp_use == SEG_DISABLE) 
-            && ((network_connection[socket].remote_ip[0] == 192) && (network_connection[socket].remote_ip[1] == 168)))
+            && ((network_connection[channel].remote_ip[0] == 192) && (network_connection[channel].remote_ip[1] == 168)))
 		{
-			if(srcip[2] != network_connection[socket].remote_ip[2]) // Class C Private IP network mismatch
+			if(srcip[2] != network_connection[channel].remote_ip[2]) // Class C Private IP network mismatch
 			{
 				if(serial_common->serial_debug_en == SEG_ENABLE) 
                 {
@@ -1662,31 +1711,31 @@ uint8_t check_tcp_connect_exception(uint8_t socket)
 }
 	
 
-void clear_data_transfer_bytecount(uint8_t socket, teDATADIR dir)
+void clear_data_transfer_bytecount(uint8_t channel, teDATADIR dir)
 {
 	switch(dir)
 	{
 		case SEG_ALL:
-			s2e_uart_rx_bytecount[socket] = 0;
-			s2e_uart_tx_bytecount[socket] = 0;
-			s2e_ether_rx_bytecount[socket] = 0;
-			s2e_ether_tx_bytecount[socket] = 0;
+			s2e_uart_rx_bytecount[channel] = 0;
+			s2e_uart_tx_bytecount[channel] = 0;
+			s2e_ether_rx_bytecount[channel] = 0;
+			s2e_ether_tx_bytecount[channel] = 0;
 			break;
 		
 		case SEG_UART_RX:
-			s2e_uart_rx_bytecount[socket] = 0;
+			s2e_uart_rx_bytecount[channel] = 0;
 			break;
 		
 		case SEG_UART_TX:
-			s2e_uart_tx_bytecount[socket] = 0;
+			s2e_uart_tx_bytecount[channel] = 0;
 			break;
 		
 		case SEG_ETHER_RX:
-			s2e_ether_rx_bytecount[socket] = 0;
+			s2e_ether_rx_bytecount[channel] = 0;
 			break;
 		
 		case SEG_ETHER_TX:
-			s2e_ether_tx_bytecount[socket] = 0;
+			s2e_ether_tx_bytecount[channel] = 0;
 			break;
 		
 		default:
@@ -1695,53 +1744,53 @@ void clear_data_transfer_bytecount(uint8_t socket, teDATADIR dir)
 }
 
 
-void add_data_transfer_bytecount(uint8_t socket, teDATADIR dir, uint16_t len)
+void add_data_transfer_bytecount(uint8_t channel, teDATADIR dir, uint16_t len)
 {
 	if(len > 0)
 	{
 		switch(dir)
 		{
 			case SEG_UART_RX:
-				if(s2e_uart_rx_bytecount[socket] < 0xffffffff)	
+				if(s2e_uart_rx_bytecount[channel] < 0xffffffff)	
 				{
-					s2e_uart_rx_bytecount[socket] += len;
+					s2e_uart_rx_bytecount[channel] += len;
 				}
 				else 
 				{					
-					s2e_uart_rx_bytecount[socket] = 0;
+					s2e_uart_rx_bytecount[channel] = 0;
 				}
 				break;
 			
 			case SEG_UART_TX:
-				if(s2e_uart_rx_bytecount[socket] < 0xffffffff)	
+				if(s2e_uart_rx_bytecount[channel] < 0xffffffff)	
 				{
-					s2e_uart_tx_bytecount[socket] += len;
+					s2e_uart_tx_bytecount[channel] += len;
 				}
 				else 									
 				{
-					s2e_uart_tx_bytecount[socket] = 0;
+					s2e_uart_tx_bytecount[channel] = 0;
 				}
 				break;
 			
 			case SEG_ETHER_RX:
-				if(s2e_uart_rx_bytecount[socket] < 0xffffffff)	
+				if(s2e_uart_rx_bytecount[channel] < 0xffffffff)	
 				{
-					s2e_ether_rx_bytecount[socket] += len;
+					s2e_ether_rx_bytecount[channel] += len;
 				}
 				else 									
 				{
-					s2e_ether_rx_bytecount[socket] = 0;
+					s2e_ether_rx_bytecount[channel] = 0;
 				}
 				break;
 			
 			case SEG_ETHER_TX:
-				if(s2e_uart_rx_bytecount[socket] < 0xffffffff)	
+				if(s2e_uart_rx_bytecount[channel] < 0xffffffff)	
 				{
-					s2e_ether_tx_bytecount[socket] += len;
+					s2e_ether_tx_bytecount[channel] += len;
 				}
 				else 									
 				{
-					s2e_ether_tx_bytecount[socket] = 0;
+					s2e_ether_tx_bytecount[channel] = 0;
 				}
 				break;
 			
@@ -1793,7 +1842,7 @@ void seg_timer_msec(void)
 	// SEGCP Keep-alive timer (for configuration tool, TCP mode)
 	
 	// Reconnection timer: Time count routine (msec)
-	for(i=0; i<2; i++)
+	for(i=0; i<CHANNEL_USED; i++)
 	{
 		if(enable_reconnection_timer[i])
 		{
@@ -1844,7 +1893,7 @@ void seg_timer_msec(void)
 	}
 	
 	// Serial data packing time delimiter timer
-	for(i=0; i<2; i++)
+	for(i=0; i<CHANNEL_USED; i++)
 	{
 		if(enable_serial_input_timer[i])
 		{
@@ -1880,7 +1929,7 @@ void seg_timer_sec(void)
 {
     uint8_t i;
 
-    for(i=0; i<2; i++)
+    for(i=0; i<CHANNEL_USED; i++)
     {
         // Inactivity timer: Time count routine (sec)
         if(enable_inactivity_timer[i])

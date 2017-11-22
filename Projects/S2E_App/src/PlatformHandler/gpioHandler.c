@@ -372,7 +372,7 @@ void init_connection_status_io(void)
 }
 
 // This function is intended only for output connection status pins; PHYlink, TCPconnection
-void set_connection_status_io(uint16_t pin, uint8_t set)
+void set_connection_status_io(uint16_t pin, uint8_t channel, uint8_t set)
 {
 	struct __serial_option *serial_option = (struct __serial_option *)&(get_DevConfig_pointer()->serial_option);
 	
@@ -392,22 +392,40 @@ void set_connection_status_io(uint16_t pin, uint8_t set)
 	}
 	else if(pin == STATUS_TCPCONNECT_PIN)
 	{
-		if(set == ON)
-		{
-			
-			if(serial_option->dsr_en == 0) GPIO_ResetBits(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN); 
-			LED_On(LED2);
-		}
-		else // OFF
-		{
-			
-			if(serial_option->dsr_en == 0) GPIO_SetBits(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN);
-			LED_Off(LED2);
-		}
+        if(channel)
+        {
+            if(set == ON)
+            {
+                
+                if(serial_option[channel].dsr_en == 0) GPIO_ResetBits(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN); 
+                LED_On(LED2);
+            }
+            else // OFF
+            {
+                
+                if(serial_option[channel].dsr_en == 0) GPIO_SetBits(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN);
+                LED_Off(LED2);
+            }
+        }
+        else
+        {
+            if(set == ON)
+            {
+                
+                if(serial_option->dsr_en == 0) GPIO_ResetBits(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN); 
+                LED_On(LED2);
+            }
+            else // OFF
+            {
+                
+                if(serial_option->dsr_en == 0) GPIO_SetBits(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN);
+                LED_Off(LED2);
+            }
+        }
 	}
 }
 
-uint8_t get_connection_status_io(uint16_t pin)
+uint8_t get_connection_status_io(uint16_t pin, uint8_t channel)
 {
 	struct __serial_option *serial_option = (struct __serial_option *)&(get_DevConfig_pointer()->serial_option);
 	uint8_t status;
@@ -421,10 +439,21 @@ uint8_t get_connection_status_io(uint16_t pin)
 	}
 	else if(pin == STATUS_TCPCONNECT_PIN)
 	{
-			if(serial_option->dsr_en == 0) 
+        if(channel)
+        {
+            if(serial_option->dsr_en == 0) 
 				status = GPIO_ReadInputDataBit(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN); 
 			else 
 				status = GPIO_ReadInputDataBit(DSR_PORT, DSR_PIN);
+        }
+        else
+        {
+            if(serial_option->dsr_en == 0) 
+				status = GPIO_ReadInputDataBit(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN); 
+			else 
+				status = GPIO_ReadInputDataBit(DSR_PORT, DSR_PIN);
+        }
+			
 	}
 	
 	return status;
@@ -496,9 +525,9 @@ void check_phylink_status(void)
 	if(prev_link_status != link_status)
 	{
 		if(link_status == 0x00)
-			set_connection_status_io(STATUS_PHYLINK_PIN, ON); 	// PHY Link up
+			set_connection_status_io(STATUS_PHYLINK_PIN, 0, ON); 	// PHY Link up
 		else
-			set_connection_status_io(STATUS_PHYLINK_PIN, OFF); 	// PHY Link down
+			set_connection_status_io(STATUS_PHYLINK_PIN, 0, OFF); 	// PHY Link down
 		
 		prev_link_status = link_status;
 	}

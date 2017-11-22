@@ -7,9 +7,10 @@
 
 #include <stdint.h>
 #include "wizchip_conf.h"
+#include "common.h"
 
-#define FWUP_DOMAIN_SIZE		30
-#define FWUP_BINPATH_SIZE		40
+#define FWUP_DOMAIN_SIZE		25
+#define FWUP_BINPATH_SIZE		35
 
 /* REMOTE Firmware update */
 // HTTP Request: DEVICE_FWUP_DOMAIN + DEVICE_FWUP_BINPATH
@@ -21,7 +22,7 @@
 struct __device_common {
     uint8_t module_type[3];		// 모듈의 종류별로 코드를 부여하고 이를 사용한다.
     uint8_t fw_ver[3];			// 10진수. Major Version . Minor Version . Maintenance Version 버전으로 나뉨
-	uint8_t module_name[20];
+	uint8_t module_name[10];
     /* Check */
     uint8_t module_mode;
 } __attribute__((packed));
@@ -64,7 +65,7 @@ struct __network_option {
     uint8_t dhcp_use;
     uint8_t dns_use;
     uint8_t dns_server_ip[4];
-    char dns_domain_name[20];
+    char dns_domain_name[10];
 } __attribute__((packed));
 
 struct __tcp_option {
@@ -123,13 +124,13 @@ typedef struct __DevConfig {
     struct __config_common config_common;
     struct __firmware_update firmware_update;					
     struct __network_common network_common;
-    struct __network_connection network_connection[1];	
+    struct __network_connection network_connection[CHANNEL_USED];	
     struct __network_option network_option;
-    struct __tcp_option tcp_option[1];
+    struct __tcp_option tcp_option[CHANNEL_USED];
     struct __serial_common serial_common;	
     struct __serial_command serial_command;	
-    struct __serial_option serial_option[1];	
-    struct __serial_data_packing serial_data_packing[1];	
+    struct __serial_option serial_option[CHANNEL_USED];	
+    struct __serial_data_packing serial_data_packing[CHANNEL_USED];	
     struct __user_io_info user_io_info;		
     
 } __attribute__((packed)) DevConfig;
@@ -151,11 +152,3 @@ void set_static_mode(void);
 void set_mac(uint8_t *mac);
 
 #endif /* S2E_PACKET_H_ */
-
-
-
-
-    
-    
-    
-	

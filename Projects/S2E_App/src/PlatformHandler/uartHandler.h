@@ -110,7 +110,7 @@ enum flow_ctrl {
 };
 */
 
-extern uint8_t flag_ringbuf_full[1];
+extern uint8_t flag_ringbuf_full[2];
 
 //extern uint32_t baud_table[]; // 14
 extern uint8_t word_len_table[];
@@ -192,8 +192,9 @@ void uart_rs485_enable(uint8_t uartNum);
 #define BUFFER_OUT_2ND_SIZE(_name) (_name##_wr)
 #define IS_BUFFER_OUT_SEPARATED(_name) (_name##_rd > _name##_wr)
 
-#define M_BUFFER_USED_SIZE(sock)    (sock==0)?BUFFER_USED_SIZE(data_rx_0):BUFFER_USED_SIZE(data_rx_1)
-#define M_BUFFER_FREE_SIZE(sock)    (sock==0)?BUFFER_FREE_SIZE(data_rx_0):BUFFER_FREE_SIZE(data_rx_1)
-
+#define M_BUFFER_IN(channel) (channel==0)?BUFFER_IN(data_rx_0):BUFFER_IN(data_rx_1)
+#define M_BUFFER_USED_SIZE(channel)    (channel==0)?BUFFER_USED_SIZE(data_rx_0):BUFFER_USED_SIZE(data_rx_1)
+#define M_BUFFER_FREE_SIZE(channel)    (channel==0)?BUFFER_FREE_SIZE(data_rx_0):BUFFER_FREE_SIZE(data_rx_1)
+#define M_IS_BUFFER_FULL(channel) (channel==0)?BUFFER_FREE_SIZE(data_rx_0) == 0:BUFFER_FREE_SIZE(data_rx_1) == 0	// I guess % calc takes time a lot, so...
 
 #endif /* UARTHANDLER_H_ */

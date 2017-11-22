@@ -35,7 +35,7 @@ uint8_t flag_fw_from_server_failed = SEGCP_DISABLE;
 static uint16_t any_port = 0;
 
 //extern uint8_t g_send_buf[DATA_BUF_SIZE]; // for dns query to HTTP server
-extern uint8_t g_recv_buf[DATA_BUF_SIZE];
+extern uint8_t g_recv_buf[2][DATA_BUF_SIZE];
 
 
 void device_set_factory_default(void)
@@ -112,7 +112,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 		if(firmware_update->fwup_server_port == 0)				return DEVICE_FWUP_RET_FAILED;
 		
 		// DNS Query to Firmware update server
-		if(process_dns_fw_server(server_ip, g_recv_buf) != SEGCP_ENABLE)
+		if(process_dns_fw_server(server_ip, g_recv_buf[0]) != SEGCP_ENABLE)
 		{
 			if(serial_common->serial_debug_en == SEGCP_ENABLE)
 			{
@@ -149,8 +149,8 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 		{
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 			//recv_len = get_firmware_from_network(SOCK_FWUPDATE, (uint8_t *)&g_recv_buf);
-			if(stype == NETWORK_APP_BACKUP) 		recv_len = get_firmware_from_network(SOCK_FWUPDATE, g_recv_buf);
-			else if(stype == SERVER_APP_BACKUP)		recv_len = get_firmware_from_server(SOCK_FWUPDATE, server_ip, g_recv_buf);
+			if(stype == NETWORK_APP_BACKUP) 		recv_len = get_firmware_from_network(SOCK_FWUPDATE, g_recv_buf[0]);
+			else if(stype == SERVER_APP_BACKUP)		recv_len = get_firmware_from_server(SOCK_FWUPDATE, server_ip, g_recv_buf[0]);
 			
 			if(recv_len > 0)
 			{

@@ -34,7 +34,7 @@ void set_DevConfig_to_factory_value(void)
 	dev_config.device_common.module_type[1] = 0x01;
 	dev_config.device_common.module_type[2] = 0x00;
 	
-	memset(dev_config.device_common.module_name, 0x00, 15);
+	memset(dev_config.device_common.module_name, 0x00, sizeof(DEVICE_ID_DEFAULT));
 	memcpy(dev_config.device_common.module_name, DEVICE_ID_DEFAULT, sizeof(DEVICE_ID_DEFAULT));
 
 	dev_config.device_common.fw_ver[0] = MAJOR_VER;
@@ -43,12 +43,14 @@ void set_DevConfig_to_factory_value(void)
 
 	dev_config.network_common.local_ip[0] = 192;
 	dev_config.network_common.local_ip[1] = 168;
-	dev_config.network_common.local_ip[2] = 11;
-	dev_config.network_common.local_ip[3] = 2;
+	dev_config.network_common.local_ip[2] = 0;
+	dev_config.network_common.local_ip[3] = 123;
+    
 	dev_config.network_common.gateway[0] = 192;
 	dev_config.network_common.gateway[1] = 168;
-	dev_config.network_common.gateway[2] = 11;
+	dev_config.network_common.gateway[2] = 0;
 	dev_config.network_common.gateway[3] = 1;
+    
 	dev_config.network_common.subnet[0] = 255;
 	dev_config.network_common.subnet[1] = 255;
 	dev_config.network_common.subnet[2] = 255;
@@ -58,10 +60,12 @@ void set_DevConfig_to_factory_value(void)
 	{
 		dev_config.network_connection[i].working_mode = TCP_SERVER_MODE; //UDP_MODE; //TCP_MIXED_MODE; 
 		dev_config.network_connection[i].working_state = ST_OPEN;
+        
 		dev_config.network_connection[i].remote_ip[0] = 192;
 		dev_config.network_connection[i].remote_ip[1] = 168;
-		dev_config.network_connection[i].remote_ip[2] = 11;
-		dev_config.network_connection[i].remote_ip[3] = 3;
+		dev_config.network_connection[i].remote_ip[2] = 0;
+		dev_config.network_connection[i].remote_ip[3] = 2;
+        
 		dev_config.network_connection[i].local_port = 5000+i;
 		dev_config.network_connection[i].remote_port = 5000+i;
 		
@@ -111,7 +115,7 @@ void set_DevConfig_to_factory_value(void)
 	dev_config.network_option.dns_server_ip[1] = 8;
 	dev_config.network_option.dns_server_ip[2] = 8;
 	dev_config.network_option.dns_server_ip[3] = 8;
-	memset(dev_config.network_option.dns_domain_name, 0x00, 50);
+	memset(dev_config.network_option.dns_domain_name, 0x00, sizeof(dev_config.network_option.dns_domain_name));
 	//memcpy(dev_config.options.dns_domain_name, "www.google.com", 14);
 
 	dev_config.serial_command.serial_command = SEGCP_ENABLE;
@@ -149,6 +153,7 @@ void set_DevConfig_to_factory_value(void)
 
 void load_DevConfig_from_storage(void)
 {
+    uint8_t i;
 	init_uart_if_sel_pin();
 	
 	read_storage(STORAGE_CONFIG, 0, &dev_config, sizeof(DevConfig));
@@ -158,14 +163,17 @@ void load_DevConfig_from_storage(void)
 		write_storage(STORAGE_CONFIG, 0, &dev_config, sizeof(DevConfig));
 	}
 	
-	dev_config.network_connection[0].working_state = ST_OPEN;
-	dev_config.network_connection[1].working_state = ST_OPEN;
-	
+    for(i=0; i<CHANNEL_USED; i++)
+    {
+        dev_config.network_connection[i].working_state = ST_OPEN;
+        dev_config.serial_option[i].uart_interface = get_uart_if_sel_pin();
+    }
+    
 	dev_config.device_common.fw_ver[0] = MAJOR_VER;
 	dev_config.device_common.fw_ver[1] = MINOR_VER;
 	dev_config.device_common.fw_ver[2] = MAINTENANCE_VER;
 	
-	dev_config.serial_option[0].uart_interface = get_uart_if_sel_pin();
+	
 }
 
 void save_DevConfig_to_storage(void)
@@ -237,10 +245,10 @@ void display_Net_Info(void)
 			else
 			{
 				printf(" # Destination IP: %d.%d.%d.%d / Port: %d\r\n", value->network_connection[i].remote_ip[0], 
-																																																		value->network_connection[i].remote_ip[1], 
-																																																		value->network_connection[i].remote_ip[2], 
-																																																		value->network_connection[i].remote_ip[3], 
-																																																		value->network_connection[i].remote_port);
+                                                                        value->network_connection[i].remote_ip[1], 
+                                                                        value->network_connection[i].remote_ip[2], 
+                                                                        value->network_connection[i].remote_ip[3], 
+                                                                        value->network_connection[i].remote_port);
 				if(value->network_connection[i].working_mode == UDP_MODE)
 				{
 					if((value->network_connection[i].remote_ip[0] == 0) 
@@ -306,4 +314,3 @@ void set_mac(uint8_t *mac)
 
 	memcpy(value->network_common.mac, mac, sizeof(value->network_common.mac));
 }
-

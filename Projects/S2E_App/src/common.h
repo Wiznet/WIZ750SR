@@ -9,7 +9,7 @@
 /* Application Firmware Version */
 #define MAJOR_VER			1
 #define MINOR_VER			1
-#define MAINTENANCE_VER		4
+#define MAINTENANCE_VER		6
 
 #define STR_VERSION_STATUS	"Develop" // or "Stable"
 //#define STR_VERSION_STATUS	"Stable"
@@ -18,10 +18,12 @@
 // W7500x HW Socket Definition//
 ////////////////////////////////
 // 0 ~ 6, Changed the S2E data socket(0)'s buffer to double
-#define SOCK_MAX_USED		7
+#define CHANNEL_USED		2
 
-//#define SOCK_DATA1			0
-//#define SOCK_DATA2			1
+#define SOCK_MAX_USED		6
+
+#define SOCK_DATA1			0
+#define SOCK_DATA2			1
 #define SOCK_CONFIG_UDP		2
 #define SOCK_CONFIG_TCP		3
 
@@ -59,7 +61,7 @@
 // Ethernet					  //
 ////////////////////////////////
 /* Buffer size */
-#define DATA_BUF_SIZE		2048
+#define DATA_BUF_SIZE		1024
 #define CONFIG_BUF_SIZE		512
 
 ////////////////////////////////

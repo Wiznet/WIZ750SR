@@ -151,6 +151,7 @@
 	#define STATUS_TCPCONNECT_PIN		GPIO_Pin_1
 	#define STATUS_TCPCONNECT_PORT		STATUS_PHYLINK_PORT
 	#define STATUS_TCPCONNECT_PAD_AF	STATUS_PHYLINK_PAD_AF
+    
 
 	// DTR / DSR - Handshaking signals, Shared with PHYLINK_PIN and TCPCONNECT_PIN (selectable)
 	// > DTR - Data Terminal Ready, Direction: Output (= PHYLINK_PIN)

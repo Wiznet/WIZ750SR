@@ -40,7 +40,9 @@ uint8_t * tbSEGCPCMD[] = {"MC", "VR", "MN", "IM", "OP", "DD", "CP", "PO", "DG", 
 							"LG", "ER", "FW", "MA", "PW", "SV", "EX", "RT", "UN", "ST",
 							"FR", "EC", "K!", "UE", "GA", "GB", "GC", "GD", "CA", "CB", 
 							"CC", "CD", "SC", "S0", "S1", "RX", "FS", "FC", "FP", "FD",
-							"FH", "UI", 0};
+							"FH", "UI", "QS", "QO", "QH", "QP", "QL", "RV", "RA", "RS",
+                            "RE", "RR", "EN", "EI", "EB", "ED", "EP", "ES", "EF", "E0",
+                            "E1", "NT", "NS", "ND", 0};
 
 uint8_t * tbSEGCPERR[] = {"ERNULL", "ERNOTAVAIL", "ERNOPARAM", "ERIGNORED", "ERNOCOMMAND", "ERINVALIDPARAM", "ERNOPRIVILEGE"};
 
@@ -138,9 +140,9 @@ void do_segcp(void)
 			//printf(" - SetSystemClock: %lu (Hz) \r\n", PLL_SOURCE_8MHz);
 			//printf(" - GetSystemClock: %d (Hz) \r\n", GetSystemClock());
 			
-			status_bak = (teDEVSTATUS)get_device_status();
+			status_bak = (teDEVSTATUS)get_device_status(0);
             
-            for(i=0; i<2; i++)
+            for(i=0; i<CHANNEL_USED; i++)
             {
                 set_device_status(i, ST_UPGRADE);
             }
@@ -162,7 +164,7 @@ void do_segcp(void)
 					uart_puts(SEG_DATA_UART, "REBOOT\r\n", 8);
 				}
 				*/
-                for(i=0; i<2; i++)
+                for(i=0; i<CHANNEL_USED; i++)
                 {
                     set_device_status(i, ST_OPEN);
                 }
@@ -182,7 +184,7 @@ void do_segcp(void)
 					uart_puts(SEG_DATA_UART, "FS:UPDATE_FAILED\r\n", 18);
 				}
 				*/
-                for(i=0; i<2; i++)
+                for(i=0; i<CHANNEL_USED; i++)
                 {
                     set_device_status(i, status_bak);
 				}
@@ -319,7 +321,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 	uint8_t param[SEGCP_PARAM_MAX*2];
 	
 #ifdef _SEGCP_DEBUG_   
-	printf("SEGCP_REQ : %s\r\n",segcp_req);
+	printf("SEGCP_REQ : %s\r\n", segcp_req);
 #endif
 	memset(trep, 0, sizeof(trep));
 	treq = strtok(segcp_req, SEGCP_DELIMETER);
@@ -361,6 +363,9 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						break;
 					case SEGCP_OP: sprintf(trep,"%d", dev_config->network_connection[0].working_mode); // opmode
 						break;
+                    /* Add Command */
+                    case SEGCP_QO: sprintf(trep,"%d", dev_config->network_connection[1].working_mode); // opmode
+						break;
 					//case SEGCP_DD: sprintf(trep,"%d", tsvDEVCONFnew.ddns_en);
 					case SEGCP_DD: sprintf(trep,"%d", 0);
 						break;
@@ -373,11 +378,23 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						break;
 					case SEGCP_KA: sprintf(trep,"%d", dev_config->tcp_option[0].keepalive_en);
 						break;
+                    /* Add Command */
+                    case SEGCP_RA: sprintf(trep,"%d", dev_config->tcp_option[1].keepalive_en);
+						break;
 					case SEGCP_KI: sprintf(trep,"%d", dev_config->tcp_option[0].keepalive_wait_time);
+						break;
+                    /* Add Command */
+                    case SEGCP_RS: sprintf(trep,"%d", dev_config->tcp_option[1].keepalive_wait_time);
 						break;
 					case SEGCP_KE: sprintf(trep,"%d", dev_config->tcp_option[0].keepalive_retry_time);
 						break;
+                    /* Add Command */
+                    case SEGCP_RE: sprintf(trep,"%d", dev_config->tcp_option[1].keepalive_retry_time);
+						break;
 					case SEGCP_RI: sprintf(trep,"%d", dev_config->tcp_option[0].reconnection);
+						break;
+                    /* Add Command */
+                    case SEGCP_RR: sprintf(trep,"%d", dev_config->tcp_option[1].reconnection);
 						break;
 					case SEGCP_LI:
 						sprintf(trep,"%d.%d.%d.%d", dev_config->network_common.local_ip[0], dev_config->network_common.local_ip[1],
@@ -425,7 +442,13 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						break;
 					case SEGCP_LP: sprintf(trep, "%d", dev_config->network_connection[0].local_port);
 						break;
+                    /* Add Command */
+                    case SEGCP_QL: sprintf(trep, "%d", dev_config->network_connection[1].local_port);
+						break;
 					case SEGCP_RP: sprintf(trep, "%d", dev_config->network_connection[0].remote_port);
+						break;
+                    /* Add Command */
+                    case SEGCP_QP: sprintf(trep, "%d", dev_config->network_connection[1].remote_port);
 						break;
 					case SEGCP_RH: 
 						if(dev_config->network_option.dns_use == SEGCP_DISABLE)
@@ -439,23 +462,63 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 							else sprintf(trep, "%s", dev_config->network_option.dns_domain_name);
 						}
 						break;
+                    /* Add Command */
+                    case SEGCP_QH: 
+						if(dev_config->network_option.dns_use == SEGCP_DISABLE)
+						{
+							sprintf(trep, "%d.%d.%d.%d", dev_config->network_connection[1].remote_ip[0], dev_config->network_connection[1].remote_ip[1],
+														dev_config->network_connection[1].remote_ip[2], dev_config->network_connection[1].remote_ip[3]);
+						}
+						else
+						{
+							if(dev_config->network_option.dns_domain_name[1] == 0) sprintf(trep, "%c", SEGCP_NULL);
+							else sprintf(trep, "%s", dev_config->network_option.dns_domain_name);
+						}
+						break;
 					case SEGCP_BR: sprintf(trep, "%d", dev_config->serial_option[0].baud_rate);
+						break;
+                    /* Add Command */  
+                    case SEGCP_EB: sprintf(trep, "%d", dev_config->serial_option[1].baud_rate);
 						break;
 					case SEGCP_DB: sprintf(trep, "%d", dev_config->serial_option[0].data_bits);
 						break;
+                    /* Add Command */     
+                    case SEGCP_ED: sprintf(trep, "%d", dev_config->serial_option[1].data_bits);
+						break;
 					case SEGCP_PR: sprintf(trep, "%d", dev_config->serial_option[0].parity);
+						break;
+                    /* Add Command */
+                    case SEGCP_EP: sprintf(trep, "%d", dev_config->serial_option[1].parity);
 						break;
 					case SEGCP_SB: sprintf(trep, "%d", dev_config->serial_option[0].stop_bits);
 						break;
+                    /* Add Command */
+                    case SEGCP_ES: sprintf(trep, "%d", dev_config->serial_option[1].stop_bits);
+						break;
 					case SEGCP_FL: sprintf(trep, "%d", dev_config->serial_option[0].flow_control);
+						break;
+                    /* Add Command */    
+                    case SEGCP_EF: sprintf(trep, "%d", dev_config->serial_option[1].flow_control);
 						break;
 					case SEGCP_IT: sprintf(trep, "%d", dev_config->tcp_option[0].inactivity);
 						break;
+                    /* Add Command */    
+                    case SEGCP_RV: sprintf(trep, "%d", dev_config->tcp_option[1].inactivity);
+						break;
 					case SEGCP_PT: sprintf(trep, "%d", dev_config->serial_data_packing[0].packing_time);
+						break;
+                    /* Add Command */ 
+                    case SEGCP_NT: sprintf(trep, "%d", dev_config->serial_data_packing[1].packing_time);
 						break;
 					case SEGCP_PS: sprintf(trep, "%d", dev_config->serial_data_packing[0].packing_size);
 						break;
+                    /* Add Command */ 
+                    case SEGCP_NS: sprintf(trep, "%d", dev_config->serial_data_packing[1].packing_size);
+						break;
 					case SEGCP_PD: sprintf(trep, "%02X", dev_config->serial_data_packing[0].packing_delimiter[0]);
+						break;
+                    /* Add Command */ 
+                    case SEGCP_ND: sprintf(trep, "%02X", dev_config->serial_data_packing[1].packing_delimiter[0]);
 						break;
 					case SEGCP_TE: sprintf(trep, "%d", dev_config->serial_command.serial_command);
 						break;
@@ -508,10 +571,18 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						sprintf(trep, "%d%d", dev_config->serial_option[0].dtr_en, dev_config->serial_option[0].dsr_en);
 						break;
 					case SEGCP_S0:
-						sprintf(trep, "%d", get_connection_status_io(STATUS_PHYLINK_PIN)); // STATUS_PHYLINK_PIN (in) == DTR_PIN (out)
+						sprintf(trep, "%d", get_connection_status_io(STATUS_PHYLINK_PIN, 0)); // STATUS_PHYLINK_PIN (in) == DTR_PIN (out)
+						break;
+                    /* Add Command */
+                    case SEGCP_E0:
+						sprintf(trep, "%d", get_connection_status_io(STATUS_PHYLINK_PIN, 1)); // STATUS_PHYLINK_PIN (in) == DTR_PIN (out)
 						break;
 					case SEGCP_S1:
-						sprintf(trep, "%d", get_connection_status_io(STATUS_TCPCONNECT_PIN)); // STATUS_TCPCONNECT_PIN (in) == DSR_PIN (in)
+						sprintf(trep, "%d", get_connection_status_io(STATUS_TCPCONNECT_PIN, 0)); // STATUS_TCPCONNECT_PIN (in) == DSR_PIN (in)
+						break;
+                    /* Add Command */
+                    case SEGCP_E1:
+						sprintf(trep, "%d", get_connection_status_io(STATUS_TCPCONNECT_PIN, 1)); // STATUS_TCPCONNECT_PIN (in) == DSR_PIN (in)
 						break;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // UART Rx flush
@@ -586,11 +657,27 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						// OLD: UART COUNT
 						//sprintf(trep, "%d", DEVICE_UART_CNT); 
 						break;
+                    /* Add Command */
+                    case SEGCP_EN:
+						// NEW: UART Interface String - TTL/RS-232 or RS-422/485
+						sprintf(trep, "%s", uart_if_table[dev_config->serial_option[1].uart_interface]);
+						
+						// OLD: UART COUNT
+						//sprintf(trep, "%d", DEVICE_UART_CNT); 
+						break;
 					case SEGCP_UI: 
 						// NEW: UART Interface Number- [0] TTL/RS-232 or [1] RS-422/485
 						sprintf(trep, "%d", dev_config->serial_option[0].uart_interface);
 						break;
+                    /* Add Command */
+                    case SEGCP_EI: 
+						// NEW: UART Interface Number- [0] TTL/RS-232 or [1] RS-422/485
+						sprintf(trep, "%d", dev_config->serial_option[1].uart_interface);
+						break;
 					case SEGCP_ST: sprintf(trep, "%s", strDEVSTATUS[dev_config->network_connection[0].working_state]);
+						break;
+                    /* Add Command */
+                    case SEGCP_QS: sprintf(trep, "%s", strDEVSTATUS[dev_config->network_connection[1].working_state]);
 						break;
 					case SEGCP_FR: 
 						if(gSEGCPPRIVILEGE & (SEGCP_PRIVILEGE_SET|SEGCP_PRIVILEGE_WRITE)) 
@@ -661,11 +748,21 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						}
 						else
 						{
-                            for(i=0; i<2; i++)
-                            {
-                                process_socket_termination(i);
-                                dev_config->network_connection[0].working_mode = tmp_byte;
-                            }
+                            process_socket_termination(0);
+                            dev_config->network_connection[0].working_mode = tmp_byte;
+						}
+						break;
+                    /* Add Command */
+                    case SEGCP_QO: 
+						tmp_byte = is_hex(*param);
+						if(param_len != 1 || tmp_byte > UDP_MODE)
+						{
+							ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						}
+						else
+						{
+                            process_socket_termination(1);
+                            dev_config->network_connection[1].working_mode = tmp_byte;
 						}
 						break;
 				   case SEGCP_DD: // ## Does nothing
@@ -695,20 +792,44 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else dev_config->tcp_option[0].keepalive_en = tmp_byte;
 						break;
+                    /* Add Command */
+                    case SEGCP_RA:
+						tmp_byte = is_hex(*param);
+						if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						else dev_config->tcp_option[1].keepalive_en = tmp_byte;
+						break;
 					case SEGCP_KI:
 						sscanf(param,"%ld", &tmp_long);
 						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else dev_config->tcp_option[0].keepalive_wait_time = (uint16_t) tmp_long;
+						break;
+                    /* Add Command */
+                    case SEGCP_RS:
+						sscanf(param,"%ld", &tmp_long);
+						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						else dev_config->tcp_option[1].keepalive_wait_time = (uint16_t) tmp_long;
 						break;
 					case SEGCP_KE:
 						sscanf(param,"%ld", &tmp_long);
 						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else dev_config->tcp_option[0].keepalive_retry_time = (uint16_t) tmp_long;
 						break;
+                    /* Add Command */
+                    case SEGCP_RE:
+						sscanf(param,"%ld", &tmp_long);
+						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						else dev_config->tcp_option[1].keepalive_retry_time = (uint16_t) tmp_long;
+						break;
 					case SEGCP_RI:
 						sscanf(param,"%ld", &tmp_long);
 						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else dev_config->tcp_option[0].reconnection = (uint16_t) tmp_long;
+						break;
+                    /* Add Command */
+                    case SEGCP_RR:
+						sscanf(param,"%ld", &tmp_long);
+						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						else dev_config->tcp_option[1].reconnection = (uint16_t) tmp_long;
 						break;
 					case SEGCP_LI:
 						if(is_ipaddr(param, tmp_ip))
@@ -818,10 +939,22 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else dev_config->network_connection[0].local_port = (uint16_t)tmp_long;
 						break;
+                    /* Add Command */
+                    case SEGCP_QL:
+						sscanf(param,"%ld", &tmp_long);
+						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						else dev_config->network_connection[1].local_port = (uint16_t)tmp_long;
+						break;
 					case SEGCP_RP:
 						sscanf(param,"%ld", &tmp_long);
 						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;                  
 						else dev_config->network_connection[0].remote_port = (uint16_t)tmp_long;
+						break;
+                    /* Add Command */
+                    case SEGCP_QP:
+						sscanf(param,"%ld", &tmp_long);
+						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;                  
+						else dev_config->network_connection[1].remote_port = (uint16_t)tmp_long;
 						break;
 					case SEGCP_RH:
 						if(is_ipaddr(param, tmp_ip))
@@ -840,25 +973,66 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						}
 						
 						break;
+                    /* Add Command */
+                    case SEGCP_QH:
+						if(is_ipaddr(param, tmp_ip))
+						{
+							dev_config->network_option.dns_use = SEGCP_DISABLE;
+							dev_config->network_connection[1].remote_ip[0] = tmp_ip[0];
+							dev_config->network_connection[1].remote_ip[1] = tmp_ip[1];
+							dev_config->network_connection[1].remote_ip[2] = tmp_ip[2];
+							dev_config->network_connection[1].remote_ip[3] = tmp_ip[3];
+						}
+						else
+						{
+							dev_config->network_option.dns_use = SEGCP_ENABLE;
+							if(param[0] == SEGCP_NULL) dev_config->network_option.dns_domain_name[0] = 0;
+							else strcpy(dev_config->network_option.dns_domain_name, param);
+						}
+						break;
 					case SEGCP_BR:
 						sscanf(param, "%d", &tmp_int);
 						if(param_len > 2 || tmp_int > baud_230400) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else dev_config->serial_option[0].baud_rate = (uint8_t)tmp_int;
+						break;
+                    /* Add Command */
+                    case SEGCP_EB:
+						sscanf(param, "%d", &tmp_int);
+						if(param_len > 2 || tmp_int > baud_230400) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						else dev_config->serial_option[1].baud_rate = (uint8_t)tmp_int;
 						break;
 					case SEGCP_DB:
 						tmp_byte = is_hex(*param);
 						if(param_len != 1 || tmp_byte > word_len8) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else dev_config->serial_option[0].data_bits = tmp_byte;
 						break;
+                    /* Add Command */
+                    case SEGCP_ED:
+						tmp_byte = is_hex(*param);
+						if(param_len != 1 || tmp_byte > word_len8) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						else dev_config->serial_option[1].data_bits = tmp_byte;
+						break;
 					case SEGCP_PR:
 						tmp_byte = is_hex(*param);
 						if(param_len != 1 || tmp_byte > parity_even) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else dev_config->serial_option[0].parity = tmp_byte;
 						break;
+                    /* Add Command */
+                    case SEGCP_EP:
+						tmp_byte = is_hex(*param);
+						if(param_len != 1 || tmp_byte > parity_even) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						else dev_config->serial_option[1].parity = tmp_byte;
+						break;
 					case SEGCP_SB:
 						tmp_byte = is_hex(*param);
 						if(param_len != 1 || tmp_byte > stop_bit2) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else dev_config->serial_option[0].stop_bits = tmp_byte;
+						break;
+                    /* Add Command */
+                    case SEGCP_ES:
+						tmp_byte = is_hex(*param);
+						if(param_len != 1 || tmp_byte > stop_bit2) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						else dev_config->serial_option[1].stop_bits = tmp_byte;
 						break;
 					case SEGCP_FL:
 						tmp_byte = is_hex(*param);
@@ -878,20 +1052,57 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 							}
 						}
 						break;
+                    /* Add Command */
+                    case SEGCP_EF:
+						tmp_byte = is_hex(*param);
+						if(param_len != 1 || tmp_byte > flow_rts_cts)
+						{
+							ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						}
+						else
+						{
+							if(dev_config->serial_option[1].uart_interface == UART_IF_RS422_485)
+							{
+								dev_config->serial_option[1].flow_control = flow_none;
+							}
+							else
+							{
+								dev_config->serial_option[1].flow_control = tmp_byte;
+							}
+						}
+						break;
 					case SEGCP_IT:
 						sscanf(param, "%ld", &tmp_long);
 						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else dev_config->tcp_option[0].inactivity = (uint16_t)tmp_long;
+						break;
+                    /* Add Command */
+                    case SEGCP_RV:
+						sscanf(param, "%ld", &tmp_long);
+						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						else dev_config->tcp_option[1].inactivity = (uint16_t)tmp_long;
 						break;
 					case SEGCP_PT:
 						sscanf(param, "%ld", &tmp_long);
 						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else dev_config->serial_data_packing[0].packing_time = (uint16_t)tmp_long;
 						break;
+                    /* Add Command */
+                    case SEGCP_NT:
+						sscanf(param, "%ld", &tmp_long);
+						if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						else dev_config->serial_data_packing[1].packing_time = (uint16_t)tmp_long;
+						break;
 					case SEGCP_PS:
 						sscanf(param, "%d", &tmp_int);
 						if(param_len > 3 || tmp_int > 0xFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else dev_config->serial_data_packing[0].packing_size = (uint8_t)tmp_int;
+						break;
+                    /* Add Command */
+                    case SEGCP_NS:
+						sscanf(param, "%d", &tmp_int);
+						if(param_len > 3 || tmp_int > 0xFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						else dev_config->serial_data_packing[1].packing_size = (uint8_t)tmp_int;
 						break;
 					case SEGCP_PD:
 						if(param_len != 2 || !is_hexstr(param))
@@ -907,6 +1118,24 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 								dev_config->serial_data_packing[0].packing_delimiter_length = 0;
 							else 
 								dev_config->serial_data_packing[0].packing_delimiter_length = 1;
+						}
+						
+						break;
+                    /* Add Command */
+                    case SEGCP_ND:
+						if(param_len != 2 || !is_hexstr(param))
+						{
+							ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						}
+						else
+						{
+							sscanf(param,"%x", &tmp_int);
+							dev_config->serial_data_packing[1].packing_delimiter[0] = (uint8_t)tmp_int;
+							
+							if(dev_config->serial_data_packing[1].packing_delimiter[0] == 0x00) 
+								dev_config->serial_data_packing[1].packing_delimiter_length = 0;
+							else 
+								dev_config->serial_data_packing[1].packing_delimiter_length = 1;
 						}
 						
 						break;
@@ -1053,7 +1282,13 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						}
 						break;
 					case SEGCP_S0:
+                    /* Add Cammand */
+                    case SEGCP_E0:
 					case SEGCP_S1:
+						ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						break;
+                    /* Add Cammand */
+                    case SEGCP_E1:
 						ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						break;
 ///////////////////////////////////////////////////////////////////////////////////////////////
@@ -1105,8 +1340,14 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						break;
 
 					case SEGCP_UN:
+                    /* Add Command */
+                    case SEGCP_EN:
 					case SEGCP_UI:
+                    /* Add Command */    
+                    case SEGCP_EI:
 					case SEGCP_ST:
+                    /* Add Command */
+                    case SEGCP_QS:
 					case SEGCP_LG:
 					case SEGCP_ER: 
 					case SEGCP_MA:

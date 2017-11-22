@@ -20,7 +20,7 @@
 /* W7500 IAP: Flash memory map */
 // Main flash size: 128kB (512 Sectors == 32 Blocks)
 #define FLASH_START_ADDR	0x00000000
-#define FLASH_END_ADDR		0x0001FFFF
+#define FLASH_END_ADDR		0x0001FEFF
 
 // Data flash 0 size: 256bytes (1 Sector)
 #define DAT0_START_ADDR		0x0003FE00
@@ -30,6 +30,8 @@
 #define DAT1_START_ADDR		0x0003FF00
 #define DAT1_END_ADDR		0x0003FFFF
 
+// For MAC Address size: 256bytes (1 Sector, 512th Sector)
+#define MAC_ADDR            0x0001FF00
 
 void erase_flash_sector(uint32_t sector_addr);
 void erase_flash_block(uint32_t block_addr);

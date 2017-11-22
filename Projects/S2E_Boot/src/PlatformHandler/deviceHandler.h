@@ -45,7 +45,7 @@
 #define	DEVICE_APP_BACKUP_BLOCKS			(12) // not used
 #define	DEVICE_APP_BACKUP_REMAIN_SECTORS	(8)  // not used
 
-#define DEVICE_MAC_ADDR						(DAT0_START_ADDR)
+#define DEVICE_MAC_ADDR						(MAC_ADDR)
 #define DEVICE_CONFIG_ADDR					(DAT1_START_ADDR)
 
 

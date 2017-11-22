@@ -127,7 +127,8 @@ int main(void)
 	load_DevConfig_from_storage();
 	
 	/* Set the device working mode: BOOT */
-	dev_config->network_info[0].state = ST_BOOT;
+	dev_config->network_connection[0].working_state = ST_BOOT;
+    dev_config->network_connection[1].working_state = ST_BOOT;
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// W7500x Application: Check the MAC address and Firmware update
@@ -216,7 +217,7 @@ int main(void)
 	// W7500x Application: Initialize part2
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	if(dev_config->serial_info[0].serial_debug_en)
+	if(dev_config->serial_common.serial_debug_en)
 	{
 		// Debug UART: Device information print out
 		display_Dev_Info_header();
@@ -228,7 +229,7 @@ int main(void)
 	
 	/* Network Configuration - DHCP client */
 	// Initialize Network Information: DHCP or Static IP allocation
-	if(dev_config->options.dhcp_use)
+	if(dev_config->network_option.dhcp_use)
 	{
 		if(process_dhcp() == DHCP_IP_LEASED) // DHCP success
 		{
@@ -245,7 +246,7 @@ int main(void)
 	}
 	
 	// Debug UART: Network information print out (includes DHCP IP allocation result)
-	if(dev_config->serial_info[0].serial_debug_en)
+	if(dev_config->serial_common.serial_debug_en)
 	{
 		display_Net_Info();
 		display_Dev_Info_dhcp();
@@ -262,7 +263,7 @@ int main(void)
 	{
 		do_segcp();
 		
-		if(dev_config->options.dhcp_use) DHCP_run(); // DHCP client handler for IP renewal
+		if(dev_config->network_option.dhcp_use) DHCP_run(); // DHCP client handler for IP renewal
 		
 		if(flag_check_main_routine)
 		{
@@ -446,7 +447,7 @@ void display_Dev_Info_header(void)
 	#endif
 #endif
 	
-	printf(" >> Firmware version: Boot %d.%d.%d %s\r\n", dev_config->fw_ver[0], dev_config->fw_ver[1], dev_config->fw_ver[2], STR_VERSION_STATUS);
+	printf(" >> Firmware version: Boot %d.%d.%d %s\r\n", dev_config->device_common.fw_ver[0], dev_config->device_common.fw_ver[1], dev_config->device_common.fw_ver[2], STR_VERSION_STATUS);
 	printf("%s\r\n", STR_BAR);
 }
 
@@ -455,7 +456,7 @@ void display_Dev_Info_dhcp(void)
 {
 	DevConfig *dev_config = get_DevConfig_pointer();
 	
-	if(dev_config->options.dhcp_use) 
+	if(dev_config->network_option.dhcp_use) 
 	{
 		if(flag_process_dhcp_success == ON) printf(" # DHCP IP Leased time : %u seconds\r\n", getDHCPLeasetime());
 		else printf(" # DHCP Failed\r\n");
@@ -477,8 +478,8 @@ uint8_t check_mac_address(void)
 	uint8_t trep[MACSTR_SIZE] = {0, };
 	uint8_t ret = 0;
 	
-	if(((dev_config->network_info_common.mac[0] != 0x00) || (dev_config->network_info_common.mac[1] != 0x08) || (dev_config->network_info_common.mac[2] != 0xDC))  ||
-		((dev_config->network_info_common.mac[0] == 0xff) && (dev_config->network_info_common.mac[1] == 0xff) && (dev_config->network_info_common.mac[2] == 0xff)))
+	if(((dev_config->network_common.mac[0] != 0x00) || (dev_config->network_common.mac[1] != 0x08) || (dev_config->network_common.mac[2] != 0xDC))  ||
+		((dev_config->network_common.mac[0] == 0xff) && (dev_config->network_common.mac[1] == 0xff) && (dev_config->network_common.mac[2] == 0xff)))
 	{
 		read_storage(STORAGE_MAC, 0, mac_buf, 0);
 		
@@ -504,7 +505,7 @@ uint8_t check_mac_address(void)
 				{
 					// Save the MAC address to PRIVATE SPACE for MAC address only
 					erase_storage(STORAGE_MAC);
-					write_storage(STORAGE_MAC, 0, dev_config->network_info_common.mac, 0);
+					write_storage(STORAGE_MAC, 0, dev_config->network_common.mac, 0);
 					
 					// Set factory default
 					set_DevConfig_to_factory_value();
@@ -515,14 +516,14 @@ uint8_t check_mac_address(void)
 				}
 				else
 				{
-					if(dev_config->serial_info[0].serial_debug_en) printf("%s\r\n", trep);
+					if(dev_config->serial_common.serial_debug_en) printf("%s\r\n", trep);
 					memset(mac_str, 0x00, MACSTR_SIZE);
 				}
 			}
 		}
 		else // Lost the MAC address, MAC address restore
 		{
-			memcpy(dev_config->network_info_common.mac, mac_buf, 6);
+			memcpy(dev_config->network_common.mac, mac_buf, 6);
 			save_DevConfig_to_storage();
 		}
 		

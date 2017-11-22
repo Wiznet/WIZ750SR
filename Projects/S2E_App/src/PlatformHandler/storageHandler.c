@@ -61,7 +61,6 @@ uint32_t read_storage(teDATASTORAGE stype, uint32_t addr, void *data, uint16_t s
 uint32_t write_storage(teDATASTORAGE stype, uint32_t addr, void *data, uint16_t size)
 {
 	uint32_t ret_len;
-	
 	switch(stype)
 	{
 		case STORAGE_MAC:

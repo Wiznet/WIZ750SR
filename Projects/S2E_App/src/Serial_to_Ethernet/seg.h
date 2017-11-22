@@ -12,7 +12,8 @@
 #define SEG_DATA_UART1		1	// S2E Data UART selector, [0] UART0 or [1] UART1
 #define SEG_DEBUG_UART		2	// S2E Debug UART, fixed
 
-#define SEG_DATA_BUF_SIZE	2048	// UART Ring buffer size
+#define SEG_DATA_BUF_SIZE	1024	// UART Ring buffer size
+//#define SEG_DATA_BUF_SIZE	2048	// UART Ring buffer size
 //#define SEG_DATA_BUF_SIZE	3072	// UART Ring buffer size
 //#define SEG_DATA_BUF_SIZE	4096	// UART Ring buffer size
 
@@ -29,7 +30,7 @@
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
 #ifndef DATA_BUF_SIZE
-	#define DATA_BUF_SIZE	2048
+	#define DATA_BUF_SIZE	1024
 #endif
 
 #define SEG_DISABLE			0
@@ -45,7 +46,7 @@ extern char * str_working[];
 typedef enum{SEG_UART_RX, SEG_UART_TX, SEG_ETHER_RX, SEG_ETHER_TX, SEG_ALL} teDATADIR;
 
 // Serial to Ethernet function handler; call by main loop
-void do_seg(uint8_t sock);
+void do_seg(void);
 
 // Timer for S2E core operations
 void seg_timer_sec(void);
@@ -54,17 +55,17 @@ void seg_timer_msec(void);
 void init_trigger_modeswitch(uint8_t mode);
 
 void set_device_status(uint8_t socket, teDEVSTATUS status);
-uint8_t get_device_status(void);
+uint8_t get_device_status(uint8_t channel);
 
-uint8_t process_socket_termination(uint8_t socket);
+uint8_t process_socket_termination(uint8_t channel);
 
 // Send Keep-alive packet manually (once)
 void send_keepalive_packet_manual(uint8_t sock);
 
 //These functions must be located in UART Rx IRQ Handler.
-uint8_t check_serial_store_permitted(uint8_t socket, uint8_t ch);
-uint8_t check_modeswitch_trigger(uint8_t ch);	// Serial command mode switch trigger code (3-bytes) checker
-void init_time_delimiter_timer(uint8_t socket); 			// Serial data packing option [Time]: Timer enalble function for Time delimiter
+uint8_t check_serial_store_permitted(uint8_t channel, uint8_t ch);
+uint8_t check_modeswitch_trigger(uint8_t channel, uint8_t ch);	// Serial command mode switch trigger code (3-bytes) checker
+void init_time_delimiter_timer(uint8_t chanel); 			// Serial data packing option [Time]: Timer enalble function for Time delimiter
 
 // UART tx/rx and Ethernet tx/rx data transfer bytes counter
 void clear_data_transfer_bytecount(uint8_t socket, teDATADIR dir);

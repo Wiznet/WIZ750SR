@@ -78,8 +78,8 @@ static __IO uint32_t TimingDelay;
 
 /* Public variables ---------------------------------------------------------*/
 // Shared buffer declaration
-uint8_t g_send_buf[CHANNEL_USED][DATA_BUF_SIZE];
-uint8_t g_recv_buf[CHANNEL_USED][DATA_BUF_SIZE];
+uint8_t g_send_buf[DEVICE_UART_CNT][DATA_BUF_SIZE];
+uint8_t g_recv_buf[DEVICE_UART_CNT][DATA_BUF_SIZE];
 
 /**
   * @brief  Main program
@@ -88,7 +88,7 @@ uint8_t g_recv_buf[CHANNEL_USED][DATA_BUF_SIZE];
   */
 int main(void)
 {
-	uint8_t i;
+    uint8_t i;
 	DevConfig *dev_config = get_DevConfig_pointer();
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -115,8 +115,16 @@ int main(void)
 	Mac_Conf();
 	
 	/* UART Initialization */
-	S2E_UART_Configuration();
-	
+	//S2E_UART_Configuration();
+    //S2E_UART1_Configuration();
+    UART0_Configuration();
+    UART1_Configuration();
+
+    
+	uart_puts(SEG_DATA_UART0, (uint8_t *)"Test UART0\r\n", sizeof("Test UART0\r\n"));
+    
+    uart_puts(SEG_DATA_UART1, (uint8_t *)"Test UART1\r\n", sizeof("Test UART1\r\n"));
+    
 	/* GPIO Initialization*/
 	IO_Configuration();
 	
@@ -189,9 +197,10 @@ int main(void)
 	}
 	
 	
-	printf("PHY Link status: %x\r\n", GPIO_ReadInputDataBit(PHYLINK_IN_PORT, PHYLINK_IN_PIN));
+	printf("PHY Link status: %x\r\n", get_phylink());
 	
-	
+    
+	//link();
 	while(1) // main loop
 	{
 		do_segcp();
@@ -211,7 +220,7 @@ int main(void)
 			flag_check_phylink = 0;	// flag clear
 		}
 		
-		for(i=0; i<CHANNEL_USED; i++)
+		for(i=0; i<DEVICE_UART_CNT; i++)
 		{
 			// ## debugging: Ring buffer full
 			if(flag_ringbuf_full[i])
@@ -268,7 +277,7 @@ static void W7500x_WZTOE_Init(void)
 	uint8_t rx_size[8] = { 2, 2, 2, 2, 2, 2, 0, 0 }; // default: { 2, 2, 2, 2, 2, 2, 2, 2 }
 	
 	/* Structure for TCP timeout control: RTR, RCR */
-	wiz_NetTimeout * net_timeout;
+	//wiz_NetTimeout * net_timeout;
 	
 #ifdef _MAIN_DEBUG_
 	uint8_t i;
@@ -321,7 +330,7 @@ int8_t process_dhcp(void)
 	DHCP_init(SOCK_DHCP, g_send_buf[0]);
 	reg_dhcp_cbfunc(w7500x_dhcp_assign, w7500x_dhcp_assign, w7500x_dhcp_conflict);
 	
-    for(i=0; i<CHANNEL_USED; i++)
+    for(i=0; i<DEVICE_UART_CNT; i++)
     {
         set_device_status(i, ST_UPGRADE);
     }
@@ -357,7 +366,7 @@ int8_t process_dhcp(void)
 		do_segcp(); // Process the requests of configuration tool during the DHCP client run.
 	}
 	
-    for(i=0; i<CHANNEL_USED; i++)
+    for(i=0; i<DEVICE_UART_CNT; i++)
     {
         set_device_status(i, ST_OPEN);
     }
@@ -385,7 +394,7 @@ int8_t process_dns(void)
 	dns_server_ip[2] = dev_config->network_option.dns_server_ip[2];
 	dns_server_ip[3] = dev_config->network_option.dns_server_ip[3];
 	
-    for(i=0; i<CHANNEL_USED; i++)
+    for(i=0; i<DEVICE_UART_CNT; i++)
     {
         set_device_status(i, ST_UPGRADE);
     }
@@ -419,7 +428,7 @@ int8_t process_dns(void)
 		if(dev_config->network_option.dhcp_use) DHCP_run();
 	}
 	
-    for(i=0; i<CHANNEL_USED; i++)
+    for(i=0; i<DEVICE_UART_CNT; i++)
     {
         set_device_status(i, ST_OPEN);
     }
@@ -434,7 +443,7 @@ void display_Dev_Info_header(void)
 	printf("%s\r\n", STR_BAR);
 	
 #if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750MINI) || (DEVICE_BOARD_NAME == WIZ750JR))
-	printf(" %s[%d]PORT \r\n", DEVICE_ID_DEFAULT, CHANNEL_USED);
+	printf(" %s[%d]PORT \r\n", DEVICE_ID_DEFAULT, DEVICE_UART_CNT);
 	printf(" >> WIZnet Serial to Ethernet Device\r\n");
 #else
 	#ifndef __W7500P__
@@ -457,7 +466,7 @@ void display_Dev_Info_main(void)
 	    
 	printf(" - Device name: %s\r\n", dev_config->device_common.module_name);
     
-    for(i=0; i<CHANNEL_USED; i++)
+    for(i=0; i<DEVICE_UART_CNT; i++)
     {
     printf(" - [%d] Channel mode: %s\r\n", i, str_working[dev_config->network_connection[i].working_mode]);
     }
@@ -466,7 +475,7 @@ void display_Dev_Info_main(void)
 		printf("\t- Obtaining IP settings: [%s]\r\n", (dev_config->network_option.dhcp_use == 1)?"Automatic - DHCP":"Static");
 		printf("\t- TCP/UDP ports\r\n");
     
-    for(i=0; i<CHANNEL_USED; i++)
+    for(i=0; i<DEVICE_UART_CNT; i++)
     {
 		printf("\t   + [%d] Channel S2E data port: [%d]\r\n", 0, dev_config->network_connection[i].local_port);
     }
@@ -476,21 +485,21 @@ void display_Dev_Info_main(void)
 	printf(" - Search ID code: \r\n");
 		printf("\t- %s: [%s]\r\n", (dev_config->config_common.pw_search[0] != 0)?"Enabled":"Disabled", (dev_config->config_common.pw_search[0] != 0)?dev_config->config_common.pw_search:"None");
 	
-    for(i=0; i<CHANNEL_USED; i++)
+    for(i=0; i<DEVICE_UART_CNT; i++)
     {
 	printf(" - [%d] Channel Ethernet connection password: \r\n", i);
 		printf("\t- %s %s\r\n", (dev_config->tcp_option[i].pw_connect_en == 1)?"Enabled":"Disabled", "(TCP server / mixed mode only)");
     }
      
 	printf(" - Connection timer settings: \r\n");
-    for(i=0; i<CHANNEL_USED; i++)
+    for(i=0; i<DEVICE_UART_CNT; i++)
     {
 		printf("\t- [%d] Channel Inactivity timer: ", i);
 			if(dev_config->tcp_option[i].inactivity) printf("[%d] (sec)\r\n", dev_config->tcp_option[i].inactivity);
 			else printf("%s\r\n", STR_DISABLED);
     }
        
-    for(i=0; i<CHANNEL_USED; i++)
+    for(i=0; i<DEVICE_UART_CNT; i++)
     {    
 		printf("\t- [%d] Channel Reconnect interval: ", i);
 			if(dev_config->tcp_option[i].reconnection) printf("[%d] (msec)\r\n", dev_config->tcp_option[i].reconnection);
@@ -499,7 +508,7 @@ void display_Dev_Info_main(void)
 
 	
 	printf(" - Serial settings: \r\n");
-    for(i=0; i<CHANNEL_USED; i++)
+    for(i=0; i<DEVICE_UART_CNT; i++)
     {
 		printf("\t- [%d] Channel Data %s port:  [%s%d]\r\n", i, STR_UART, STR_UART, i);
 		printf("\t   + UART IF: [%s]\r\n", uart_if_table[dev_config->serial_option[i].uart_interface]);
@@ -515,7 +524,7 @@ void display_Dev_Info_main(void)
 		printf("\t- Debug %s port: [%s%d]\r\n", STR_UART, STR_UART, SEG_DEBUG_UART);
 		printf("\t   + %s / %s %s\r\n", "115200-8-N-1", "NONE", "(fixed)");
 		
-    for(i=0; i<CHANNEL_USED; i++)
+    for(i=0; i<DEVICE_UART_CNT; i++)
     {
 	printf(" - [%d] Channel Serial data packing options:\r\n", i);
 		printf("\t- Time: ");

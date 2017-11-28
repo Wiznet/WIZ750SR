@@ -142,7 +142,7 @@ void do_segcp(void)
 			
 			status_bak = (teDEVSTATUS)get_device_status(0);
             
-            for(i=0; i<CHANNEL_USED; i++)
+            for(i=0; i<DEVICE_UART_CNT; i++)
             {
                 set_device_status(i, ST_UPGRADE);
             }
@@ -164,7 +164,7 @@ void do_segcp(void)
 					uart_puts(SEG_DATA_UART, "REBOOT\r\n", 8);
 				}
 				*/
-                for(i=0; i<CHANNEL_USED; i++)
+                for(i=0; i<DEVICE_UART_CNT; i++)
                 {
                     set_device_status(i, ST_OPEN);
                 }
@@ -184,7 +184,7 @@ void do_segcp(void)
 					uart_puts(SEG_DATA_UART, "FS:UPDATE_FAILED\r\n", 18);
 				}
 				*/
-                for(i=0; i<CHANNEL_USED; i++)
+                for(i=0; i<DEVICE_UART_CNT; i++)
                 {
                     set_device_status(i, status_bak);
 				}
@@ -571,23 +571,24 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						sprintf(trep, "%d%d", dev_config->serial_option[0].dtr_en, dev_config->serial_option[0].dsr_en);
 						break;
 					case SEGCP_S0:
-						sprintf(trep, "%d", get_connection_status_io(STATUS_PHYLINK_PIN, 0)); // STATUS_PHYLINK_PIN (in) == DTR_PIN (out)
+						sprintf(trep, "%d", get_connection_status_io(PHYLINK, 0)); // STATUS_PHYLINK_PIN (in) == DTR_PIN (out)
 						break;
                     /* Add Command */
                     case SEGCP_E0:
-						sprintf(trep, "%d", get_connection_status_io(STATUS_PHYLINK_PIN, 1)); // STATUS_PHYLINK_PIN (in) == DTR_PIN (out)
+						sprintf(trep, "%d", get_connection_status_io(PHYLINK, 1)); // STATUS_PHYLINK_PIN (in) == DTR_PIN (out)
 						break;
 					case SEGCP_S1:
-						sprintf(trep, "%d", get_connection_status_io(STATUS_TCPCONNECT_PIN, 0)); // STATUS_TCPCONNECT_PIN (in) == DSR_PIN (in)
+						sprintf(trep, "%d", get_connection_status_io(TCPCONNECT, 0)); // STATUS_TCPCONNECT_PIN (in) == DSR_PIN (in)
 						break;
                     /* Add Command */
                     case SEGCP_E1:
-						sprintf(trep, "%d", get_connection_status_io(STATUS_TCPCONNECT_PIN, 1)); // STATUS_TCPCONNECT_PIN (in) == DSR_PIN (in)
+						sprintf(trep, "%d", get_connection_status_io(TCPCONNECT, 1)); // STATUS_TCPCONNECT_PIN (in) == DSR_PIN (in)
 						break;
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // UART Rx flush
 					case SEGCP_RX:
 						uart_rx_flush(SEG_DATA_UART0);
+                        uart_rx_flush(SEG_DATA_UART1);
 						sprintf(trep, "%s", "FLUSH");
 						//ret |= SEGCP_RET_ERR_NOTAVAIL;
 						break;

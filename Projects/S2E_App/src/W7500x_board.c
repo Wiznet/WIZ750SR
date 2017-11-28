@@ -39,9 +39,7 @@ void W7500x_Board_Init(void)
 	flag_hw_trig_enable = (get_hw_trig_pin()?0:1);
 	
 	/* PHY link input pin */
-#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750MINI) || (DEVICE_BOARD_NAME == WIZ750JR))
-	init_phylink_in_pin();
-#endif
+    init_phylink();
 	
 #ifdef __USE_EXT_EEPROM__
 	init_eeprom();
@@ -106,37 +104,54 @@ static void PHY_Init(void)
 
 
 // Status pins, active low
-void init_phylink_in_pin(void)
+void init_phylink(void)
 {
-	GPIO_Configuration(PHYLINK_IN_PORT, PHYLINK_IN_PIN, GPIO_Mode_IN, PHYLINK_IN_PAD_AF);
+    #ifdef __USE_PHYLINK_CHECK_PIN__
+        GPIO_Configuration(PHYLINK_IN_PORT, PHYLINK_IN_PIN, GPIO_Mode_IN, PHYLINK_IN_PAD_AF);
+    #else
+		;
+	#endif
 }
 
 
-uint8_t get_phylink_in_pin(void)
+uint8_t get_phylink(void)
 {
-	// PHYlink input; Active low
-	return GPIO_ReadInputDataBit(PHYLINK_IN_PORT, PHYLINK_IN_PIN);
+    #ifdef __USE_PHYLINK_CHECK_PIN__
+        // PHYlink input; Active low
+        return GPIO_ReadInputDataBit(PHYLINK_IN_PORT, PHYLINK_IN_PIN);
+    #else
+		return !link();
+	#endif
 }
 
 // Hardware mode switch pin, active low
 void init_hw_trig_pin(void)
 {
-	GPIO_Configuration(HW_TRIG_PORT, HW_TRIG_PIN, GPIO_Mode_IN, HW_TRIG_PAD_AF);
-	HW_TRIG_PORT->OUTENCLR = HW_TRIG_PIN;
+    #ifdef __USE_HW_TRIG_PIN__
+        GPIO_Configuration(HW_TRIG_PORT, HW_TRIG_PIN, GPIO_Mode_IN, HW_TRIG_PAD_AF);
+        HW_TRIG_PORT->OUTENCLR = HW_TRIG_PIN;
+    #else
+		;
+	#endif
 }
 
 
 uint8_t get_hw_trig_pin(void)
 {
-	// HW_TRIG input; Active low
-	uint8_t hw_trig, i;
-	for(i = 0; i < 5; i++)
-	{
-		hw_trig = GPIO_ReadInputDataBit(HW_TRIG_PORT, HW_TRIG_PIN);
-		if(hw_trig != 0) return 1; // High
-		delay(5);
-	}
-	return 0; // Low
+    #ifdef __USE_HW_TRIG_PIN__
+        // HW_TRIG input; Active low
+        uint8_t hw_trig, i;
+        for(i = 0; i < 5; i++)
+        {
+            hw_trig = GPIO_ReadInputDataBit(HW_TRIG_PORT, HW_TRIG_PIN);
+            if(hw_trig != 0) return 1; // High
+            delay(5);
+        }
+    #else
+		;
+	#endif
+        
+	return 1; // Low
 }
 
 

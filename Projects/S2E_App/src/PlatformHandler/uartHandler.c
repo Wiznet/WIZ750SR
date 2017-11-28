@@ -26,7 +26,7 @@ int32_t uart_gets(uint8_t uartNum, uint8_t* buf, uint16_t reqSize);
 /* Private macro -------------------------------------------------------------*/
 
 /* Private variables ---------------------------------------------------------*/
-uint8_t flag_ringbuf_full[CHANNEL_USED] = {0,};
+uint8_t flag_ringbuf_full[DEVICE_UART_CNT] = {0,};
 
 // UART Ring buffer declaration
 BUFFER_DEFINITION(data_rx_0, SEG_DATA_BUF_SIZE);
@@ -47,19 +47,20 @@ BUFFER_DEFINITION(data_rx_1, SEG_DATA_BUF_SIZE);
 uint8_t word_len_table[] = {7, 8, 9};
 uint8_t * parity_table[] = {(uint8_t *)"N", (uint8_t *)"ODD", (uint8_t *)"EVEN"};
 uint8_t stop_bit_table[] = {1, 2};
-uint8_t * flow_ctrl_table[] = {(uint8_t *)"NONE", (uint8_t *)"XON/XOFF", (uint8_t *)"RTS/CTS"};
+//uint8_t * flow_ctrl_table[] = {(uint8_t *)"NONE", (uint8_t *)"XON/XOFF", (uint8_t *)"RTS/CTS"};
+uint8_t * flow_ctrl_table[] = {(uint8_t *)"NONE", (uint8_t *)"XON/XOFF", (uint8_t *)"RTS/CTS", (uint8_t *)"RTS Only"};
 uint8_t * uart_if_table[] = {(uint8_t *)UART_IF_STR_RS232_TTL, (uint8_t *)UART_IF_STR_RS422_485};
 
 // XON/XOFF Status; 
-static uint8_t xonoff_status[CHANNEL_USED] = {UART_XON,};
+static uint8_t xonoff_status[DEVICE_UART_CNT] = {UART_XON,};
 
 // RTS Status; __USE_GPIO_HARDWARE_FLOWCONTROL__ defined
 #ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
-	static uint8_t rts_status[CHANNEL_USED] = {UART_RTS_LOW,};
+	static uint8_t rts_status[DEVICE_UART_CNT] = {UART_RTS_LOW,};
 #endif
 
 // UART Interface selecter; RS-422 or RS-485 use only
-static uint8_t uart_if_mode[CHANNEL_USED] = {UART_IF_RS422,};
+static uint8_t uart_if_mode[DEVICE_UART_CNT] = {UART_IF_RS422,};
 
 /* Public functions ----------------------------------------------------------*/
 
@@ -108,23 +109,24 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * s2e_uart)
 #ifdef _SEG_DEBUG_
 				UART_SendData(s2e_uart, ch);	// ## UART echo; for debugging
 #endif
-                //if(!channel)
+                if(channel==0)
                 {
-                    if(!(check_modeswitch_trigger(channel, ch))) // ret: [0] data / [!0] trigger code
+                    if((check_modeswitch_trigger(ch))==0) // ret: [0] data / [1] trigger code
                     {
-                        if(check_serial_store_permitted(channel, ch)) // ret: [0] not permitted / [1] permitted
+                        if(check_serial_store_permitted(channel, ch)==1) // ret: [0] not permitted / [1] permitted
                         {
-                            if(channel==0)
-                            {
-                                BUFFER_IN(data_rx_0)=ch;
-                                BUFFER_IN_MOVE(data_rx_0, 1);
-                            }
-                            else
-                            {
-                                BUFFER_IN(data_rx_1)=ch;
-                                BUFFER_IN_MOVE(data_rx_1, 1);
-                            }
+ 
+                            BUFFER_IN(data_rx_0)=ch;
+                            BUFFER_IN_MOVE(data_rx_0, 1);
                         }
+                    }
+                }
+                else
+                {
+                    if(check_serial_store_permitted(channel, ch)==1) // ret: [0] not permitted / [1] permitted
+                    {
+                        BUFFER_IN(data_rx_1)=ch;
+                        BUFFER_IN_MOVE(data_rx_1, 1);
                     }
                 }
 			}
@@ -161,7 +163,7 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * s2e_uart)
 	}
 */
 }
-
+#if 0
 void S2E_UART_Configuration(void)
 {
 	DevConfig *value = get_DevConfig_pointer();
@@ -190,8 +192,56 @@ void S2E_UART_Configuration(void)
 	NVIC_SetPriority(UART1_IRQn, 1);
 	NVIC_EnableIRQ(UART1_IRQn);
 }
+#endif
+#if 0
+void S2E_UART_Configuration(void)
+{
+	//DevConfig *value = get_DevConfig_pointer();
+	struct __serial_option *serial_option = (struct __serial_option *)get_DevConfig_pointer()->serial_option;
+    
+	/* Configure the UART0 */
+	serial_info_init(UART0, &(serial_option[0])); // Load the UART_data Settings from Flash
+	
+	/* Configure UART0 Interrupt Enable */
+	//UART_ITConfig(UART_data, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
+	UART_ITConfig(UART0, UART_IT_FLAG_RXI, ENABLE);
+	
+	/* NVIC configuration */
+	NVIC_ClearPendingIRQ(UART0_IRQn);
+	NVIC_SetPriority(UART0_IRQn, 1);
+	NVIC_EnableIRQ(UART0_IRQn);
+    
+    /* Configure the UART1 */
+	serial_info_init(UART1, &(serial_option[1])); // Load the UART_data Settings from Flash
+	
+	/* Configure UART1 Interrupt Enable */
+	//UART_ITConfig(UART_data, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
+	UART_ITConfig(UART1, UART_IT_FLAG_RXI, ENABLE);
+	
+	/* NVIC configuration */
+	NVIC_ClearPendingIRQ(UART1_IRQn);
+	NVIC_SetPriority(UART1_IRQn, 1);
+	NVIC_EnableIRQ(UART1_IRQn);
+}
+#endif
+#if 1
+void UART0_Configuration(void)
+{
+	UART_InitTypeDef UART_InitStructure;
 
-/*
+	// UART Initialization
+	UART_StructInit(&UART_InitStructure);
+	UART_Init(UART0, &UART_InitStructure);
+    
+    /* Configure UART0 Interrupt Enable */
+	//UART_ITConfig(UART_data, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
+	UART_ITConfig(UART0, UART_IT_FLAG_RXI, ENABLE);
+	
+	/* NVIC configuration */
+	NVIC_ClearPendingIRQ(UART0_IRQn);
+	NVIC_SetPriority(UART0_IRQn, 1);
+	NVIC_EnableIRQ(UART0_IRQn);
+}
 void UART1_Configuration(void)
 {
 	UART_InitTypeDef UART_InitStructure;
@@ -199,9 +249,17 @@ void UART1_Configuration(void)
 	// UART Initialization
 	UART_StructInit(&UART_InitStructure);
 	UART_Init(UART1, &UART_InitStructure);
+    
+    /* Configure UART0 Interrupt Enable */
+	//UART_ITConfig(UART_data, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
+	UART_ITConfig(UART1, UART_IT_FLAG_RXI, ENABLE);
+	
+	/* NVIC configuration */
+	NVIC_ClearPendingIRQ(UART1_IRQn);
+	NVIC_SetPriority(UART1_IRQn, 1);
+	NVIC_EnableIRQ(UART1_IRQn);
 }
-*/
-
+#endif
 void UART2_Configuration(void)
 {
 	/* Configure UART2: Simple UART */
@@ -286,12 +344,13 @@ void serial_info_init(UART_TypeDef *pUART, struct __serial_option *serial)
 				break;
 			case flow_rts_cts:
 #ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
+                UART_InitStructure.UART_HardwareFlowControl = UART_HardwareFlowControl_None;
 				if(pUART == UART0)
 				{
 					GPIO_Configuration(UART0_RTS_PORT, UART0_RTS_PIN, GPIO_Mode_OUT, UART0_RTS_PAD_AF);
 					GPIO_Configuration(UART0_CTS_PORT, UART0_CTS_PIN, GPIO_Mode_IN, UART0_CTS_PAD_AF);
 					set_uart_rts_pin_low(channel);
-				}
+			 	}
 				else if(pUART == UART1)
 				{
 					GPIO_Configuration(UART1_RTS_PORT, UART1_RTS_PIN, GPIO_Mode_OUT, UART1_RTS_PAD_AF);
@@ -314,8 +373,22 @@ void serial_info_init(UART_TypeDef *pUART, struct __serial_option *serial)
 	{
 		UART_InitStructure.UART_HardwareFlowControl = UART_HardwareFlowControl_None;
 		
-		// GPIO configration (RTS pin -> GPIO: 485SEL)
-		get_uart_rs485_sel(SEG_DATA_UART0);
+        // GPIO configration (RTS pin -> GPIO: 485SEL)
+		if((serial[channel].flow_control != flow_rtsonly) && (serial[channel].flow_control != flow_reverserts)) // Added by James in March 29
+		{
+			get_uart_rs485_sel(SEG_DATA_UART0);
+		}
+        else	// Added by James in March 29
+		{
+			if(serial->flow_control == flow_rtsonly)
+			{
+				uart_if_mode[channel] = UART_IF_RS485;
+			}
+            else
+			{
+				uart_if_mode[channel] = UART_IF_RS485_REVERSE;
+			}
+		}
 		uart_rs485_rs422_init(SEG_DATA_UART0);
 		//printf("UART Interface: %s mode\r\n", uart_if_mode?"RS-485":"RS-422");
 	}
@@ -336,7 +409,7 @@ void check_uart_flow_control(uint8_t channel, uint8_t flow_ctrl)
             (channel==0)?UartPutc(UART0, UART_XOFF):UartPutc(UART1, UART_XOFF);
 			xonoff_status[channel] = UART_XOFF;
 #ifdef _UART_DEBUG_
-			printf(" >> SEND XOFF [%d / %d]\r\n", M_BUFFER_USED_SIZE(socket), SEG_DATA_BUF_SIZE);
+			printf(" >> SEND XOFF [%d / %d]\r\n", M_BUFFER_USED_SIZE(channel), SEG_DATA_BUF_SIZE);
 #endif
 		}
 		else if((xonoff_status[channel] == UART_XOFF) && (M_BUFFER_USED_SIZE(channel) < UART_ON_THRESHOLD)) // Send the transmit start command to peer. -go XON
@@ -351,6 +424,7 @@ void check_uart_flow_control(uint8_t channel, uint8_t flow_ctrl)
 	}
 	else if(flow_ctrl == flow_rts_cts) // RTS pin control
 	{
+#ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__        
 		// Buffer full occurred
 		if((rts_status[channel] == UART_RTS_LOW) && (M_BUFFER_USED_SIZE(channel) > UART_OFF_THRESHOLD))
 		{
@@ -370,12 +444,15 @@ void check_uart_flow_control(uint8_t channel, uint8_t flow_ctrl)
 			printf(" >> UART_RTS_LOW [%d / %d]\r\n", M_BUFFER_USED_SIZE(channel), SEG_DATA_BUF_SIZE);
 #endif
 		}
+#else
+        ;
+#endif
 	}
 }
 
 int32_t uart_putc(uint8_t uartNum, uint8_t ch)
 {
-	DevConfig *value = get_DevConfig_pointer();
+	//DevConfig *value = get_DevConfig_pointer();
 	
 	if(uartNum == SEG_DATA_UART0)
 	{
@@ -510,6 +587,10 @@ void uart_rx_flush(uint8_t uartNum)
 	{
 		BUFFER_CLEAR(data_rx_0);
 	}
+    else if(uartNum == SEG_DATA_UART1)
+	{
+		BUFFER_CLEAR(data_rx_1);
+	}
 }
 
 uint8_t get_uart_rs485_sel(uint8_t uartNum)
@@ -610,7 +691,7 @@ uint8_t get_uart_cts_pin(uint8_t uartNum)
 #ifdef _UART_DEBUG_
 	static uint8_t prev_cts_pin;
 #endif
-	
+    
 	if(uartNum == 0) // UART0
 	{
 		cts_pin = GPIO_ReadInputDataBit(UART0_CTS_PORT, UART0_CTS_PIN); 
@@ -619,7 +700,7 @@ uint8_t get_uart_cts_pin(uint8_t uartNum)
 	{
 		cts_pin = GPIO_ReadInputDataBit(UART1_CTS_PORT, UART1_CTS_PIN); 
 	}
-	
+    
 #ifdef _UART_DEBUG_
 	if(cts_pin != prev_cts_pin)
 	{

@@ -2,14 +2,14 @@
 #define _COMMON_H
 
 #include <stdint.h>
-
+  
 ////////////////////////////////
 // Product Version			  //
 ////////////////////////////////
 /* Application Firmware Version */
 #define MAJOR_VER			1
 #define MINOR_VER			1
-#define MAINTENANCE_VER		6
+#define MAINTENANCE_VER		8
 
 #define STR_VERSION_STATUS	"Develop" // or "Stable"
 //#define STR_VERSION_STATUS	"Stable"
@@ -18,8 +18,6 @@
 // W7500x HW Socket Definition//
 ////////////////////////////////
 // 0 ~ 6, Changed the S2E data socket(0)'s buffer to double
-#define CHANNEL_USED		2
-
 #define SOCK_MAX_USED		6
 
 #define SOCK_DATA1			0
@@ -73,6 +71,7 @@
 #define W7500P_S2E			3
 #define WIZ750MINI			4
 #define WIZ750JR			5
+#define WIZ750SR_2PORT		6	
 #define UNKNOWN_DEVICE		0xff
 
 ////////////////////////////////

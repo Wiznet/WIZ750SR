@@ -7,7 +7,7 @@
 #include "ConfigData.h"
 //#include "seg.h"
 
-//#define _UART_DEBUG_
+#define _UART_DEBUG_
 
 #ifndef DATA_BUF_SIZE
 	#define DATA_BUF_SIZE 2048
@@ -27,6 +27,7 @@
 
 #define UART_IF_RS422				0
 #define UART_IF_RS485				1
+#define UART_IF_RS485_REVERSE	    2				//Added by James in March 29
 
 // If the define '__USE_UART_IF_SELECTOR__' disabled, default UART interface is selected to be 'UART_IF_DEFAULT'
 #define UART_IF_DEFAULT				UART_IF_RS232_TTL
@@ -44,19 +45,17 @@
 // UART0
 #define UART0_RTS_PIN				GPIO_Pin_12
 #define UART0_RTS_PORT				GPIOA
-#define UART0_RTS_PAD_AF			PAD_AF1 // 2nd function, GPIO
+#define UART0_RTS_PAD_AF			PAD_AF1 
 #define UART0_CTS_PIN				GPIO_Pin_11
 #define UART0_CTS_PORT				GPIOA
-#define UART0_CTS_PAD_AF			PAD_AF1 // 2nd function, GPIO
-
+#define UART0_CTS_PAD_AF			PAD_AF1
 // UART1
 #define UART1_RTS_PIN				GPIO_Pin_1
 #define UART1_RTS_PORT				GPIOC
-#define UART1_RTS_PAD_AF			PAD_AF1 // 2nd function, GPIO
-#define UART1_CTS_PIN				GPIO_Pin_7
-#define UART1_CTS_PORT				GPIOA
-#define UART1_CTS_PAD_AF			PAD_AF1 // 2nd function, GPIO
-
+#define UART1_RTS_PAD_AF			PAD_AF1 
+#define UART1_CTS_PIN				GPIO_Pin_0
+#define UART1_CTS_PORT				GPIOC
+#define UART1_CTS_PAD_AF			PAD_AF1
 
 enum baud {
 	baud_300 = 0,
@@ -95,7 +94,9 @@ enum parity {
 enum flow_ctrl {
 	flow_none = 0,
 	flow_xon_xoff = 1,
-	flow_rts_cts = 2
+	flow_rts_cts = 2,
+	flow_rtsonly = 3,  // RTS_ONLY
+	flow_reverserts = 4 // Reverse RTS
 };
 
 
@@ -120,10 +121,9 @@ extern uint8_t * flow_ctrl_table[];
 extern uint8_t * uart_if_table[];
 
 void S2E_UART_IRQ_Handler(UART_TypeDef * s2e_uart);
-void S2E_UART_Configuration(void);
-
-//void UART0_Configuration(void); // This function was incorporated into the function "S2E_UART_Configuration()"
-//void UART1_Configuration(void); // This function was incorporated into the function "S2E_UART_Configuration()"
+//void S2E_UART_Configuration(void);
+void UART0_Configuration(void); // This function was incorporated into the function "S2E_UART_Configuration()"
+void UART1_Configuration(void); // This function was incorporated into the function "S2E_UART_Configuration()"
 void UART2_Configuration(void);
 
 void serial_info_init(UART_TypeDef *pUART, struct __serial_option *serial);

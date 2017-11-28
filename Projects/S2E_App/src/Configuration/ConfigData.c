@@ -163,7 +163,7 @@ void load_DevConfig_from_storage(void)
 		write_storage(STORAGE_CONFIG, 0, &dev_config, sizeof(DevConfig));
 	}
 	
-    for(i=0; i<CHANNEL_USED; i++)
+    for(i=0; i<DEVICE_UART_CNT; i++)
     {
         dev_config.network_connection[i].working_state = ST_OPEN;
         dev_config.serial_option[i].uart_interface = get_uart_if_sel_pin();

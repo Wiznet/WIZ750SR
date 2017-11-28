@@ -12,8 +12,8 @@
 #define SEG_DATA_UART1		1	// S2E Data UART selector, [0] UART0 or [1] UART1
 #define SEG_DEBUG_UART		2	// S2E Debug UART, fixed
 
-#define SEG_DATA_BUF_SIZE	1024	// UART Ring buffer size
-//#define SEG_DATA_BUF_SIZE	2048	// UART Ring buffer size
+//#define SEG_DATA_BUF_SIZE	1024	// UART Ring buffer size
+#define SEG_DATA_BUF_SIZE	2048	// UART Ring buffer size
 //#define SEG_DATA_BUF_SIZE	3072	// UART Ring buffer size
 //#define SEG_DATA_BUF_SIZE	4096	// UART Ring buffer size
 
@@ -64,7 +64,7 @@ void send_keepalive_packet_manual(uint8_t sock);
 
 //These functions must be located in UART Rx IRQ Handler.
 uint8_t check_serial_store_permitted(uint8_t channel, uint8_t ch);
-uint8_t check_modeswitch_trigger(uint8_t channel, uint8_t ch);	// Serial command mode switch trigger code (3-bytes) checker
+uint8_t check_modeswitch_trigger(uint8_t ch);	// Serial command mode switch trigger code (3-bytes) checker
 void init_time_delimiter_timer(uint8_t chanel); 			// Serial data packing option [Time]: Timer enalble function for Time delimiter
 
 // UART tx/rx and Ethernet tx/rx data transfer bytes counter

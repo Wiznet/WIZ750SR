@@ -18,52 +18,52 @@ BUFFER_DECLARATION(data_rx_1);
 uint8_t flag_s2e_application_running = 0;
 
 uint8_t opmode = DEVICE_GW_MODE;
-static uint8_t mixed_state[CHANNEL_USED] = {MIXED_SERVER,};
+static uint8_t mixed_state[DEVICE_UART_CNT] = {MIXED_SERVER,};
 static uint8_t sw_modeswitch_at_mode_on = SEG_DISABLE;
-static uint16_t client_any_port[CHANNEL_USED] = {0,};
+static uint16_t client_any_port[DEVICE_UART_CNT] = {0,};
 
 // Timer Enable flags / Time
-uint8_t enable_inactivity_timer[CHANNEL_USED] = {SEG_DISABLE,};
-volatile uint16_t inactivity_time[CHANNEL_USED] = {0,};
+uint8_t enable_inactivity_timer[DEVICE_UART_CNT] = {SEG_DISABLE,};
+volatile uint16_t inactivity_time[DEVICE_UART_CNT] = {0,};
 
-uint8_t enable_keepalive_timer[CHANNEL_USED] = {SEG_DISABLE,};
-volatile uint16_t keepalive_time[CHANNEL_USED] = {0,};
+uint8_t enable_keepalive_timer[DEVICE_UART_CNT] = {SEG_DISABLE,};
+volatile uint16_t keepalive_time[DEVICE_UART_CNT] = {0,};
 
 uint8_t enable_modeswitch_timer = SEG_DISABLE;
 volatile uint16_t modeswitch_time = 0;
 volatile uint16_t modeswitch_gap_time = DEFAULT_MODESWITCH_INTER_GAP;
 
-uint8_t enable_reconnection_timer[CHANNEL_USED] = {SEG_DISABLE,};
-volatile uint16_t reconnection_time[CHANNEL_USED] = {0,};
+uint8_t enable_reconnection_timer[DEVICE_UART_CNT] = {SEG_DISABLE,};
+volatile uint16_t reconnection_time[DEVICE_UART_CNT] = {0,};
 
-uint8_t enable_serial_input_timer[CHANNEL_USED] = {SEG_DISABLE,};
-volatile uint16_t serial_input_time[CHANNEL_USED] = {0,};
-uint8_t flag_serial_input_time_elapse[CHANNEL_USED] = {SEG_DISABLE,}; // for Time delimiter
+uint8_t enable_serial_input_timer[DEVICE_UART_CNT] = {SEG_DISABLE,};
+volatile uint16_t serial_input_time[DEVICE_UART_CNT] = {0,};
+uint8_t flag_serial_input_time_elapse[DEVICE_UART_CNT] = {SEG_DISABLE,}; // for Time delimiter
 
 // added for auth timeout
-uint8_t enable_connection_auth_timer[CHANNEL_USED] = {SEG_DISABLE,};
-volatile uint16_t connection_auth_time[CHANNEL_USED] = {0,};
+uint8_t enable_connection_auth_timer[DEVICE_UART_CNT] = {SEG_DISABLE,};
+volatile uint16_t connection_auth_time[DEVICE_UART_CNT] = {0,};
 
 // flags
-uint8_t flag_connect_pw_auth[CHANNEL_USED] = {SEG_DISABLE,}; // TCP_SERVER_MODE only
-uint8_t flag_sent_keepalive[CHANNEL_USED] = {SEG_DISABLE,};
-uint8_t flag_sent_first_keepalive[CHANNEL_USED] = {SEG_DISABLE,};
+uint8_t flag_connect_pw_auth[DEVICE_UART_CNT] = {SEG_DISABLE,}; // TCP_SERVER_MODE only
+uint8_t flag_sent_keepalive[DEVICE_UART_CNT] = {SEG_DISABLE,};
+uint8_t flag_sent_first_keepalive[DEVICE_UART_CNT] = {SEG_DISABLE,};
 
 // static variables for function: check_modeswitch_trigger()
 static uint8_t triggercode_idx;
 static uint8_t ch_tmp[3];
 
 // User's buffer / size idx
-extern uint8_t g_send_buf[CHANNEL_USED][DATA_BUF_SIZE];
-extern uint8_t g_recv_buf[CHANNEL_USED][DATA_BUF_SIZE];
-uint16_t u2e_size[CHANNEL_USED] = {0,};
-uint16_t e2u_size[CHANNEL_USED] = {0,};
+extern uint8_t g_send_buf[DEVICE_UART_CNT][DATA_BUF_SIZE];
+extern uint8_t g_recv_buf[DEVICE_UART_CNT][DATA_BUF_SIZE];
+uint16_t u2e_size[DEVICE_UART_CNT] = {0,};
+uint16_t e2u_size[DEVICE_UART_CNT] = {0,};
 
 // S2E Data byte count variables
-volatile uint32_t s2e_uart_rx_bytecount[CHANNEL_USED] = {0,};
-volatile uint32_t s2e_uart_tx_bytecount[CHANNEL_USED] = {0,};
-volatile uint32_t s2e_ether_rx_bytecount[CHANNEL_USED] = {0,};
-volatile uint32_t s2e_ether_tx_bytecount[CHANNEL_USED] = {0,};
+volatile uint32_t s2e_uart_rx_bytecount[DEVICE_UART_CNT] = {0,};
+volatile uint32_t s2e_uart_tx_bytecount[DEVICE_UART_CNT] = {0,};
+volatile uint32_t s2e_ether_rx_bytecount[DEVICE_UART_CNT] = {0,};
+volatile uint32_t s2e_ether_tx_bytecount[DEVICE_UART_CNT] = {0,};
 
 // UDP: Peer netinfo
 uint8_t peerip[4] = {0, };
@@ -78,7 +78,7 @@ char * str_working[] = {"TCP_CLIENT_MODE", "TCP_SERVER_MODE", "TCP_MIXED_MODE", 
 uint8_t flag_process_dhcp_success = OFF;
 uint8_t flag_process_dns_success = OFF;
 
-uint8_t isSocketOpen_TCPclient[CHANNEL_USED] = {OFF,};
+uint8_t isSocketOpen_TCPclient[DEVICE_UART_CNT] = {OFF,};
 
 // ## timeflag for debugging
 uint8_t tmp_timeflag_for_debug = 0;
@@ -148,7 +148,7 @@ void do_seg(void)
 	// Serial AT command mode enabled, initial settings
 	if((opmode == DEVICE_GW_MODE) && (sw_modeswitch_at_mode_on == SEG_ENABLE))
 	{
-		for(i=0; i<CHANNEL_USED; i++)
+		for(i=0; i<DEVICE_UART_CNT; i++)
 		{
 			// Socket disconnect (TCP only) / clos
 			process_socket_termination(i);
@@ -161,7 +161,7 @@ void do_seg(void)
 	
 	if(opmode == DEVICE_GW_MODE) 
 	{
-        for(i=0; i<CHANNEL_USED; i++)
+        for(i=0; i<DEVICE_UART_CNT; i++)
         {
             switch(network_connection[i].working_mode)
             {
@@ -227,11 +227,11 @@ void set_device_status(uint8_t channel, teDEVSTATUS status)
 	// Status indicator pins
 	if(network_connection[channel].working_state == ST_CONNECT)
 	{
-		set_connection_status_io(STATUS_TCPCONNECT_PIN, channel, ON); // Status I/O pin to low
+		set_connection_status_io(TCPCONNECT, channel, ON); // Status I/O pin to low
 	}
 	else
 	{
-		set_connection_status_io(STATUS_TCPCONNECT_PIN, channel, OFF); // Status I/O pin to high
+		set_connection_status_io(TCPCONNECT, channel, OFF); // Status I/O pin to high
 	}
 }
 
@@ -435,7 +435,7 @@ void proc_SEG_tcp_client(uint8_t channel)
                     && (tcp_option[channel].keepalive_retry_time != 0))
 				{
 #ifdef _SEG_DEBUG_
-					printf(" >> [%d]send_keepalive_packet_manual [%d]\r\n", channel, keepalive_time[sock]);
+					printf(" >> [%d]send_keepalive_packet_manual [%d]\r\n", channel, keepalive_time[channel]);
 #endif
 					send_keepalive_packet_manual(channel);
 					keepalive_time[channel] = 0;
@@ -462,7 +462,7 @@ void proc_SEG_tcp_client(uint8_t channel)
 			
 			source_port = get_tcp_any_port(channel);
 #ifdef _SEG_DEBUG_
-			printf(" > [%d]TCP CLIENT: client_any_port = %d\r\n", channel, client_any_port[sock]);
+			printf(" > [%d]TCP CLIENT: client_any_port = %d\r\n", channel, client_any_port[channel]);
 #endif		
 			if(socket(channel, Sn_MR_TCP, source_port, Sn_MR_ND) == channel)
 			{
@@ -883,7 +883,7 @@ void proc_SEG_tcp_mixed(uint8_t channel)
                     && (tcp_option[channel].keepalive_retry_time != 0))
 				{
 #ifdef _SEG_DEBUG_
-					printf(" >> [%d]send_keepalive_packet_manual [%d]\r\n", channel, keepalive_time[sock]);
+					printf(" >> [%d]send_keepalive_packet_manual [%d]\r\n", channel, keepalive_time[channel]);
 #endif
 					send_keepalive_packet_manual(channel);
 					keepalive_time[channel] = 0;
@@ -989,8 +989,8 @@ void uart_to_ether(uint8_t channel)
 	//uint16_t ret;
 	//uint16_t i; // ## for debugging
 	
-#if (DEVICE_BOARD_NAME == WIZ750SR)
-	if(get_phylink_in_pin() != 0) return; // PHY link down
+#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == WIZ750JR))
+	if(get_phylink() != 0) return; // PHY link down
 #endif
 	
 	// UART ring buffer -> user's buffer
@@ -1212,7 +1212,17 @@ void ether_to_uart(uint8_t channel)
             return;
         }
 #else
-		; // check the CTS reg
+		//; // check the CTS reg
+        if(channel)
+        {
+            if((UART1->FR &UART_FR_CTS )!=0)
+                return;
+        }
+        else
+        {
+            if((UART0->FR &UART_FR_CTS )!=0)
+                return;
+        }
 #endif
 	}
 
@@ -1303,6 +1313,9 @@ void ether_to_uart(uint8_t channel)
             {
                 uart_putc(channel, g_recv_buf[channel][i]);
             }
+            
+            for(i = 0; i < 65535; i++)  ; //wait
+            
 			uart_rs485_disable(channel);
 			
 			add_data_transfer_bytecount(channel, SEG_ETHER_TX, e2u_size[channel]);
@@ -1415,7 +1428,7 @@ uint8_t check_connect_pw_auth(uint8_t * buf, uint16_t len)
 	}
 	
 #ifdef _SEG_DEBUG_
-	printf(" > Connection password: %s, len: %d\r\n", option->pw_connect, strlen(option->pw_connect));
+	printf(" > Connection password: %s, len: %d\r\n", tcp_option->pw_connect, strlen(tcp_option->pw_connect));
 	printf(" > Entered password: %s, len: %d\r\n", pwbuf, len);
 	printf(" >> Auth %s\r\n", ret ? "success":"failed");
 #endif
@@ -1434,7 +1447,7 @@ void init_trigger_modeswitch(uint8_t mode)
 	if(mode == DEVICE_AT_MODE)
 	{
 		opmode = DEVICE_AT_MODE;
-		for(i=0; i<CHANNEL_USED; i++)
+		for(i=0; i<DEVICE_UART_CNT; i++)
 		{
 			set_device_status(i, ST_ATMODE);
 		}
@@ -1448,7 +1461,7 @@ void init_trigger_modeswitch(uint8_t mode)
 	else // DEVICE_GW_MODE
 	{
 		opmode = DEVICE_GW_MODE;
-		for(i=0; i<CHANNEL_USED; i++)
+		for(i=0; i<DEVICE_UART_CNT; i++)
 		{
 			set_device_status(i, ST_OPEN);
 			if(network_connection[i].working_mode == TCP_MIXED_MODE) 
@@ -1463,7 +1476,7 @@ void init_trigger_modeswitch(uint8_t mode)
 		}
 	}
 	
-	for(i=0; i<CHANNEL_USED; i++)
+	for(i=0; i<DEVICE_UART_CNT; i++)
 	{
 		u2e_size[i] = 0;
 
@@ -1483,7 +1496,7 @@ void init_trigger_modeswitch(uint8_t mode)
 	modeswitch_time = 0;
 }
 
-uint8_t check_modeswitch_trigger(uint8_t channel, uint8_t ch)
+uint8_t check_modeswitch_trigger(uint8_t ch)
 {
 	struct __serial_command *serial_command = (struct __serial_command *)&(get_DevConfig_pointer()->serial_command);
 	
@@ -1492,7 +1505,6 @@ uint8_t check_modeswitch_trigger(uint8_t channel, uint8_t ch)
 	
 	if(opmode != DEVICE_GW_MODE) 				return 0;
 	if(serial_command->serial_command == SEG_DISABLE) 	return 0;
-    if(channel) 	return 0;
 	
 	switch(triggercode_idx)
 	{
@@ -1591,7 +1603,7 @@ uint8_t check_serial_store_permitted(uint8_t channel, uint8_t ch)
 void reset_SEG_timeflags(void)
 {
     uint8_t i;
-    for(i=0; i<CHANNEL_USED; i++)
+    for(i=0; i<DEVICE_UART_CNT; i++)
     {
         // Timer disable
         enable_inactivity_timer[i] = SEG_DISABLE;
@@ -1842,7 +1854,7 @@ void seg_timer_msec(void)
 	// SEGCP Keep-alive timer (for configuration tool, TCP mode)
 	
 	// Reconnection timer: Time count routine (msec)
-	for(i=0; i<CHANNEL_USED; i++)
+	for(i=0; i<DEVICE_UART_CNT; i++)
 	{
 		if(enable_reconnection_timer[i])
 		{
@@ -1893,7 +1905,7 @@ void seg_timer_msec(void)
 	}
 	
 	// Serial data packing time delimiter timer
-	for(i=0; i<CHANNEL_USED; i++)
+	for(i=0; i<DEVICE_UART_CNT; i++)
 	{
 		if(enable_serial_input_timer[i])
 		{
@@ -1929,7 +1941,7 @@ void seg_timer_sec(void)
 {
     uint8_t i;
 
-    for(i=0; i<CHANNEL_USED; i++)
+    for(i=0; i<DEVICE_UART_CNT; i++)
     {
         // Inactivity timer: Time count routine (sec)
         if(enable_inactivity_timer[i])

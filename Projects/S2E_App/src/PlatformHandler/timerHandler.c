@@ -15,10 +15,15 @@ static volatile uint8_t  sec_cnt = 0;
 static volatile uint8_t  min_cnt = 0;
 static volatile uint32_t hour_cnt = 0;
 
+static volatile uint16_t _1usec_cnt = 0;
+static volatile uint16_t  _1msec_cnt = 0;
+static volatile uint16_t  _1sec_cnt = 0;
+static volatile uint32_t _1min_cnt = 0;
+
 static uint8_t enable_phylink_check = 1;
 static volatile uint32_t phylink_down_time_msec;
 
-void Timer_Configuration(void)
+void Timer0_Configuration(void)
 {
 	DUALTIMER_InitTypDef Dualtimer_InitStructure;
 	
@@ -44,12 +49,12 @@ void Timer_Configuration(void)
 	DUALTIMER_Start(DUALTIMER0_0);
 }
 
-void Timer_IRQ_Handler(void)
+void Timer0_IRQ_Handler(void)
 {
 	if(DUALTIMER_GetIntStatus(DUALTIMER0_0))
 	{
 		DUALTIMER_IntClear(DUALTIMER0_0);
-		
+		//printf(",");
 		msec_cnt++; // millisecond counter
 		
 		seg_timer_msec();		// [msec] time counter for SEG (S2E)
@@ -99,7 +104,76 @@ void Timer_IRQ_Handler(void)
 		DUALTIMER_IntClear(DUALTIMER0_1);
 	}
 }
+void Timer1_Configuration(void)
+{
+	DUALTIMER_InitTypDef Dualtimer_InitStructure;
+	
+	NVIC_EnableIRQ(DUALTIMER1_IRQn);
+	
+	/* Dualtimer 1_0 clock enable */
+	DUALTIMER_ClockEnable(DUALTIMER1_0);
 
+	/* Dualtimer 1_0 configuration */
+	//Dualtimer_InitStructure.TimerLoad = 0x0000BB80; // 48MHz/1
+	Dualtimer_InitStructure.TimerLoad = GetSystemClock() / 10000;
+	Dualtimer_InitStructure.TimerControl_Mode = DUALTIMER_TimerControl_Periodic;
+	Dualtimer_InitStructure.TimerControl_OneShot = DUALTIMER_TimerControl_Wrapping;
+	Dualtimer_InitStructure.TimerControl_Pre = DUALTIMER_TimerControl_Pre_1;
+	Dualtimer_InitStructure.TimerControl_Size = DUALTIMER_TimerControl_Size_32;
+
+	DUALTIMER_Init(DUALTIMER1_0, &Dualtimer_InitStructure);
+
+	/* Dualtimer 1_0 Interrupt enable */
+	DUALTIMER_IntConfig(DUALTIMER1_0, ENABLE);
+
+	/* Dualtimer 1_0 start */
+	//DUALTIMER_Start(DUALTIMER1_0);
+}
+void Timer1_Start(void)
+{
+    _1usec_cnt=0;
+    _1msec_cnt=0;
+    _1sec_cnt=0;
+    _1min_cnt=0;
+	DUALTIMER_Start(DUALTIMER1_0);
+}
+void Timer1_Stop(void)
+{
+	DUALTIMER_Stop(DUALTIMER1_0);
+    printf("###%d.%d.%d.%d###\r\n", _1min_cnt, _1sec_cnt, _1msec_cnt, _1usec_cnt);
+}
+void Timer1_IRQ_Handler(void)
+{
+	if(DUALTIMER_GetIntStatus(DUALTIMER1_0))
+	{
+		DUALTIMER_IntClear(DUALTIMER1_0);
+        
+        _1usec_cnt++; 
+        //printf(".");
+		if(_1usec_cnt >= 1000 - 1)
+		{
+			_1usec_cnt = 0;
+			_1msec_cnt++;
+		}
+		
+		if(_1msec_cnt >= 1000) 
+		{
+			_1msec_cnt = 0;
+			_1sec_cnt++;
+		}
+		
+		if(_1sec_cnt >= 60)
+		{
+			_1sec_cnt = 0;
+			_1min_cnt++;
+		}
+	}
+
+	if(DUALTIMER_GetIntStatus(DUALTIMER1_1))
+	{
+		DUALTIMER_IntClear(DUALTIMER1_1);
+	}
+}
 uint32_t getDeviceUptime_hour(void)
 {
 	return hour_cnt;

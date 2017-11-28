@@ -652,7 +652,8 @@ void proc_SEG_tcp_server(uint8_t channel)
 			u2e_size[channel] = 0;
 			e2u_size[channel] = 0;
 
-			if(socket(channel, Sn_MR_TCP, network_connection[channel].local_port, Sn_MR_ND) == channel)
+			//if(socket(channel, Sn_MR_TCP, network_connection[channel].local_port, Sn_MR_ND) == channel)
+            if(socket(channel, Sn_MR_TCP, network_connection[channel].local_port, 0) == channel)
 			{
 				// Replace the command mode switch code GAP time (default: 500ms)
 				if((serial_command->serial_command == SEG_ENABLE) && serial_data_packing[0].packing_time) 
@@ -989,6 +990,9 @@ void uart_to_ether(uint8_t channel)
 	//uint16_t ret;
 	//uint16_t i; // ## for debugging
 	
+    printf("uart_to_ether");
+    Timer1_Start();
+    
 #if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == WIZ750JR))
 	if(get_phylink() != 0) return; // PHY link down
 #endif
@@ -1109,7 +1113,9 @@ void uart_to_ether(uint8_t channel)
 				break;
 		}
 	}
-	
+    
+	Timer1_Stop();
+        
 	inactivity_time[channel] = 0;
 	//flag_serial_input_time_elapse = SEG_DISABLE; // this flag is cleared in the 'Data packing delimiter:time' checker routine
 }
@@ -1204,6 +1210,9 @@ void ether_to_uart(uint8_t channel)
 	uint16_t len;
 	uint16_t i;
 
+    printf("ether_to_uart");
+    //Timer1_Start();
+    
 	if(serial_option[channel].flow_control == flow_rts_cts)
 	{
 #ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
@@ -1295,7 +1304,7 @@ void ether_to_uart(uint8_t channel)
 	}
 	
 	// Ethernet data transfer to DATA UART
-	if(e2u_size != 0)
+	if(e2u_size[channel] != 0)
 	{
 		if(serial_option[channel].dsr_en == SEG_ENABLE) // DTR / DSR handshake (flowcontrol)
 		{
@@ -1341,16 +1350,22 @@ void ether_to_uart(uint8_t channel)
 		}
 		else
 		{
+            Timer1_Start();
+            
 			//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
 			for(i = 0; i < e2u_size[channel]; i++) 
             {   
                 uart_putc(channel, g_recv_buf[channel][i]);
             }
-			
+            
+			Timer1_Stop();
+            
 			add_data_transfer_bytecount(channel, SEG_ETHER_TX, e2u_size[channel]);
 			e2u_size[channel] = 0;
 		}
 	}
+    
+    //Timer1_Stop();
 }
 
 
@@ -1774,7 +1789,7 @@ void add_data_transfer_bytecount(uint8_t channel, teDATADIR dir, uint16_t len)
 				break;
 			
 			case SEG_UART_TX:
-				if(s2e_uart_rx_bytecount[channel] < 0xffffffff)	
+				if(s2e_uart_tx_bytecount[channel] < 0xffffffff)	
 				{
 					s2e_uart_tx_bytecount[channel] += len;
 				}
@@ -1785,7 +1800,7 @@ void add_data_transfer_bytecount(uint8_t channel, teDATADIR dir, uint16_t len)
 				break;
 			
 			case SEG_ETHER_RX:
-				if(s2e_uart_rx_bytecount[channel] < 0xffffffff)	
+				if(s2e_ether_rx_bytecount[channel] < 0xffffffff)	
 				{
 					s2e_ether_rx_bytecount[channel] += len;
 				}
@@ -1796,7 +1811,7 @@ void add_data_transfer_bytecount(uint8_t channel, teDATADIR dir, uint16_t len)
 				break;
 			
 			case SEG_ETHER_TX:
-				if(s2e_uart_rx_bytecount[channel] < 0xffffffff)	
+				if(s2e_ether_tx_bytecount[channel] < 0xffffffff)	
 				{
 					s2e_ether_tx_bytecount[channel] += len;
 				}

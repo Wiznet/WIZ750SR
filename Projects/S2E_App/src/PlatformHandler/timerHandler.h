@@ -3,8 +3,11 @@
 
 #include <stdint.h>
 
-void Timer_Configuration(void);
-void Timer_IRQ_Handler(void);
+void Timer0_Configuration(void);
+void Timer0_IRQ_Handler(void);
+
+void Timer1_Configuration(void);
+void Timer1_IRQ_Handler(void);
 
 uint32_t getDeviceUptime_hour(void);
 uint8_t  getDeviceUptime_min(void);

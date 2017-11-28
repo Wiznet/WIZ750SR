@@ -89,6 +89,7 @@ uint8_t g_recv_buf[DEVICE_UART_CNT][DATA_BUF_SIZE];
 int main(void)
 {
     uint8_t i;
+    uint32_t time;
 	DevConfig *dev_config = get_DevConfig_pointer();
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,7 +108,6 @@ int main(void)
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// W7500x Application: Initialize
 	////////////////////////////////////////////////////////////////////////////////////////////////////
-	
 	/* Load the Configuration data */
 	load_DevConfig_from_storage();
 	
@@ -196,10 +196,8 @@ int main(void)
 		flag_hw_trig_enable = 0;
 	}
 	
-	
 	printf("PHY Link status: %x\r\n", get_phylink());
 	
-    
 	//link();
 	while(1) // main loop
 	{
@@ -247,8 +245,11 @@ static void W7500x_Init(void)
 	/* Set System init */
 	SystemInit_User(DEVICE_CLOCK_SELECT, DEVICE_PLL_SOURCE_CLOCK, DEVICE_TARGET_SYSTEM_CLOCK);
 
-	/* DualTimer Initialization */
-	Timer_Configuration();
+	/* DualTimer0 Initialization */
+	Timer0_Configuration();
+    
+    /* DualTimer1 Initialization */
+	Timer1_Configuration();
 	
 	/* Simple UART init for Debugging */
 	UART2_Configuration();

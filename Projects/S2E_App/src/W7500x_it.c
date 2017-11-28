@@ -204,7 +204,7 @@ void DMA_Handler(void)
   */
 void DUALTIMER0_Handler(void)
 {
-	Timer_IRQ_Handler();
+	Timer0_IRQ_Handler();
 }
 
 
@@ -214,7 +214,9 @@ void DUALTIMER0_Handler(void)
   * @retval None
   */
 void DUALTIMER1_Handler(void)
-{}
+{
+    Timer1_IRQ_Handler();
+}
 
 
 /**

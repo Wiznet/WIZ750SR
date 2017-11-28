@@ -131,7 +131,7 @@ void do_segcp(void)
 				UART2_Configuration();
 				
 				/* DualTimer Re-Initialization */
-				Timer_Configuration();
+				Timer0_Configuration();
 			}
 #endif
 			// SystemClock Debug
@@ -198,7 +198,7 @@ void do_segcp(void)
 					UART2_Configuration();
 					
 					/* DualTimer Re-Initialization */
-					Timer_Configuration();
+					Timer0_Configuration();
 				}
 #endif
 				// SystemClock Debug

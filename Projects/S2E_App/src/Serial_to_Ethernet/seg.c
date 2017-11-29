@@ -93,7 +93,7 @@ void proc_SEG_udp(uint8_t channel);
 void uart_to_ether(uint8_t channel);
 void ether_to_uart(uint8_t channel);
 uint16_t get_serial_data(uint8_t channel);
-void reset_SEG_timeflags(void);
+void reset_SEG_timeflags(uint8_t channel);
 uint8_t check_connect_pw_auth(uint8_t * buf, uint16_t len);
 void restore_serial_data(uint8_t idx);
 
@@ -456,7 +456,7 @@ void proc_SEG_tcp_client(uint8_t channel)
 		case SOCK_FIN_WAIT:
 		case SOCK_CLOSED:
 			set_device_status(channel, ST_OPEN);
-			reset_SEG_timeflags();
+			reset_SEG_timeflags(channel);
 			
 			u2e_size[channel] = 0;
 			e2u_size[channel] = 0;
@@ -535,6 +535,7 @@ void proc_SEG_tcp_server(uint8_t channel)
 				
 				if(tcp_option[channel].pw_connect_en == SEG_DISABLE)	
                 {
+                    
                     flag_connect_pw_auth[channel] = SEG_ENABLE;		// TCP server mode only (+ mixed_server)
                 }
 				else
@@ -648,7 +649,7 @@ void proc_SEG_tcp_server(uint8_t channel)
 		case SOCK_FIN_WAIT:
 		case SOCK_CLOSED:
 			set_device_status(channel, ST_OPEN);
-			reset_SEG_timeflags();
+			reset_SEG_timeflags(channel);
 			
 			u2e_size[channel] = 0;
 			e2u_size[channel] = 0;
@@ -923,7 +924,7 @@ void proc_SEG_tcp_mixed(uint8_t channel)
 
 			if(mixed_state[channel] == MIXED_SERVER) // MIXED_SERVER
 			{
-				reset_SEG_timeflags();
+				reset_SEG_timeflags(channel);
 				
 				u2e_size[channel] = 0;
 				e2u_size[channel] = 0;
@@ -1065,7 +1066,6 @@ void uart_to_ether(uint8_t channel)
 				// Connection password is only checked in the TCP SERVER MODE / TCP MIXED MODE (MIXED_SERVER)
 				if(flag_connect_pw_auth[channel] == SEG_ENABLE)
 				{
-					
 					/* ## 1
 					len = send(sock, g_send_buf, len);
 					u2e_size = 0;
@@ -1129,7 +1129,7 @@ uint16_t get_serial_data(uint8_t channel)
 	uint16_t len;
 	
 	len = M_BUFFER_USED_SIZE(channel);
-	
+    
 	if((len + u2e_size[channel]) >= DATA_BUF_SIZE) // Avoiding u2e buffer (g_send_buf) overflow	
 	{
 		/* Checking Data packing option: charactor delimiter */
@@ -1619,30 +1619,25 @@ uint8_t check_serial_store_permitted(uint8_t channel, uint8_t ch)
 	return ret;
 }
 
-void reset_SEG_timeflags(void)
+void reset_SEG_timeflags(uint8_t channel)
 {
-    uint8_t i;
-    for(i=0; i<DEVICE_UART_CNT; i++)
-    {
-        // Timer disable
-        enable_inactivity_timer[i] = SEG_DISABLE;
-        enable_serial_input_timer[i] = SEG_DISABLE;
-        enable_keepalive_timer[i] = SEG_DISABLE;
-        enable_connection_auth_timer[i] = SEG_DISABLE;
-        
-        // Flag clear
-        flag_serial_input_time_elapse[i] = SEG_DISABLE;
-        flag_sent_keepalive[i] = SEG_DISABLE;
-        //flag_sent_keepalive_wait = SEG_DISABLE;
-        flag_connect_pw_auth[i] = SEG_DISABLE; // TCP_SERVER_MODE only (+ MIXED_SERVER)
-        
-        // Timer value clear
-        inactivity_time[i] = 0;
-        serial_input_time[i] = 0;
-        keepalive_time[i] = 0;
-        connection_auth_time[i] = 0;
-    }
-		
+    // Timer disable
+    enable_inactivity_timer[channel] = SEG_DISABLE;
+    enable_serial_input_timer[channel] = SEG_DISABLE;
+    enable_keepalive_timer[channel] = SEG_DISABLE;
+    enable_connection_auth_timer[channel] = SEG_DISABLE;
+    
+    // Flag clear
+    flag_serial_input_time_elapse[channel] = SEG_DISABLE;
+    flag_sent_keepalive[channel] = SEG_DISABLE;
+    //flag_sent_keepalive_wait = SEG_DISABLE;
+    flag_connect_pw_auth[channel] = SEG_DISABLE; // TCP_SERVER_MODE only (+ MIXED_SERVER)
+    
+    // Timer value clear
+    inactivity_time[channel] = 0;
+    serial_input_time[channel] = 0;
+    keepalive_time[channel] = 0;
+    connection_auth_time[channel] = 0;	
 }
 
 void init_time_delimiter_timer(uint8_t channel)

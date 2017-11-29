@@ -71,7 +71,8 @@ uint8_t peerip_tmp[4] = {0xff, };
 uint16_t peerport = 0;
 
 // XON/XOFF (Software flow control) flag, Serial data can be transmitted to peer when XON enabled. 
-uint8_t isXON = SEG_ENABLE;
+uint8_t isXON[DEVICE_UART_CNT] = {SEG_ENABLE,};
+//uint8_t isXON = SEG_ENABLE;
 
 char * str_working[] = {"TCP_CLIENT_MODE", "TCP_SERVER_MODE", "TCP_MIXED_MODE", "UDP_MODE"};
 
@@ -103,7 +104,7 @@ uint16_t get_tcp_any_port(uint8_t channel);
 
 // UART tx/rx and Ethernet tx/rx data transfer bytes counter
 void add_data_transfer_bytecount(uint8_t channel, teDATADIR dir, uint16_t len);
-
+uint32_t get_data_transfer_bytecount(uint8_t channel, teDATADIR dir);
 /* Public & Private functions ------------------------------------------------*/
 
 void do_seg(void)
@@ -999,7 +1000,7 @@ void uart_to_ether(uint8_t channel)
 	
 	// UART ring buffer -> user's buffer
 	len = get_serial_data(channel);
-	add_data_transfer_bytecount(channel, SEG_UART_RX, len);
+	//add_data_transfer_bytecount(channel, SEG_UART_RX, len);
 	
 	/*
 	// ## for debugging
@@ -1085,7 +1086,7 @@ void uart_to_ether(uint8_t channel)
                         u2e_size[channel]-=sent_len;
                     }
 					
-					add_data_transfer_bytecount(channel, SEG_UART_TX, len);
+					//add_data_transfer_bytecount(channel, SEG_UART_TX, len);
 					//printf("sent len = %d\r\n", len); // ## for debugging
 					
 					//if(!keepalive_time && netinfo->keepalive_en)
@@ -1211,7 +1212,7 @@ void ether_to_uart(uint8_t channel)
 	uint16_t i;
 
     printf("ether_to_uart");
-    //Timer1_Start();
+    Timer1_Start();
     
 	if(serial_option[channel].flow_control == flow_rts_cts)
 	{
@@ -1244,7 +1245,7 @@ void ether_to_uart(uint8_t channel)
     }
 	
 	//printf("ether_to_uart: %d\r\n", len); // ## for debugging
-	
+	//printf("getSn_SR(%d), 0x%x", channel, getSn_SR(channel));
 	if(len > 0)
 	{
 		switch(getSn_SR(channel))
@@ -1333,7 +1334,8 @@ void ether_to_uart(uint8_t channel)
 //////////////////////////////////////////////////////////////////////
 		else if(serial_option[channel].flow_control == flow_xon_xoff) 
 		{
-			if(isXON == SEG_ENABLE)
+			if(isXON[channel] == SEG_ENABLE)
+            //if(isXON == SEG_ENABLE)
 			{
 				//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
 				for(i = 0; i < e2u_size[channel]; i++) 
@@ -1350,7 +1352,7 @@ void ether_to_uart(uint8_t channel)
 		}
 		else
 		{
-            Timer1_Start();
+            //Timer1_Start();
             
 			//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
 			for(i = 0; i < e2u_size[channel]; i++) 
@@ -1358,14 +1360,14 @@ void ether_to_uart(uint8_t channel)
                 uart_putc(channel, g_recv_buf[channel][i]);
             }
             
-			Timer1_Stop();
+			//Timer1_Stop();
             
 			add_data_transfer_bytecount(channel, SEG_ETHER_TX, e2u_size[channel]);
 			e2u_size[channel] = 0;
 		}
 	}
     
-    //Timer1_Stop();
+    Timer1_Stop();
 }
 
 
@@ -1603,12 +1605,14 @@ uint8_t check_serial_store_permitted(uint8_t channel, uint8_t ch)
 	{
 		if(ch == UART_XON)
 		{
-			isXON = SEG_ENABLE;
+			isXON[channel] = SEG_ENABLE;
+            //isXON = SEG_ENABLE;
 			ret = SEG_DISABLE; 
 		}
 		else if(ch == UART_XOFF)
 		{
-			isXON = SEG_DISABLE;
+			isXON[channel] = SEG_DISABLE;
+            //isXON = SEG_DISABLE;
 			ret = SEG_DISABLE;
 		}
 	}
@@ -1778,7 +1782,7 @@ void add_data_transfer_bytecount(uint8_t channel, teDATADIR dir, uint16_t len)
 		switch(dir)
 		{
 			case SEG_UART_RX:
-				if(s2e_uart_rx_bytecount[channel] < 0xffffffff)	
+				if(s2e_uart_rx_bytecount[channel] < SEG_DATA_BUF_SIZE)	
 				{
 					s2e_uart_rx_bytecount[channel] += len;
 				}
@@ -1789,7 +1793,7 @@ void add_data_transfer_bytecount(uint8_t channel, teDATADIR dir, uint16_t len)
 				break;
 			
 			case SEG_UART_TX:
-				if(s2e_uart_tx_bytecount[channel] < 0xffffffff)	
+				if(s2e_uart_tx_bytecount[channel] < SEG_DATA_BUF_SIZE)	
 				{
 					s2e_uart_tx_bytecount[channel] += len;
 				}
@@ -1827,27 +1831,27 @@ void add_data_transfer_bytecount(uint8_t channel, teDATADIR dir, uint16_t len)
 	}
 }
 
-/*
-uint32_t get_data_transfer_bytecount(teDATADIR dir)
+
+uint32_t get_data_transfer_bytecount(uint8_t channel, teDATADIR dir)
 {
 	uint32_t ret = 0;
 	
 	switch(dir)
 	{
 		case SEG_UART_RX:
-			ret = s2e_uart_rx_bytecount;
+			ret = s2e_uart_rx_bytecount[channel];
 			break;
 		
 		case SEG_UART_TX:
-			ret = s2e_uart_tx_bytecount;
+			ret = s2e_uart_tx_bytecount[channel];
 			break;
 		
 		case SEG_ETHER_RX:
-			ret = s2e_ether_rx_bytecount;
+			ret = s2e_ether_rx_bytecount[channel];
 			break;
 		
 		case SEG_ETHER_TX:
-			ret = s2e_ether_tx_bytecount;
+			ret = s2e_ether_tx_bytecount[channel];
 			break;
 		
 		default:
@@ -1855,7 +1859,7 @@ uint32_t get_data_transfer_bytecount(teDATADIR dir)
 	}
 	return ret;
 }
-*/
+
 
 // This function have to call every 1 millisecond by Timer IRQ handler routine.
 void seg_timer_msec(void)

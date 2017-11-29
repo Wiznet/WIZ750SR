@@ -155,13 +155,13 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * s2e_uart)
 		
 		UART_ClearITPendingBit(s2e_uart, UART_IT_FLAG_RXI);
 	}
-/*
+
 	// Does not use: UART Tx interrupt
 	if(UART_GetITStatus(s2e_uart, UART_IT_FLAG_TXI)) 
 	{
 		UART_ClearITPendingBit(s2e_uart, UART_IT_FLAG_TXI);
 	}
-*/
+
 }
 #if 0
 void S2E_UART_Configuration(void)
@@ -235,7 +235,8 @@ void UART0_Configuration(void)
     
     /* Configure UART0 Interrupt Enable */
 	//UART_ITConfig(UART_data, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
-	UART_ITConfig(UART0, UART_IT_FLAG_RXI, ENABLE);
+	UART_ITConfig(UART0, UART_IT_FLAG_RXI | UART_IT_FLAG_TXI, ENABLE);
+    //UART_ITConfig(UART0, UART_IT_FLAG_RXI, ENABLE);
 	
 	/* NVIC configuration */
 	NVIC_ClearPendingIRQ(UART0_IRQn);
@@ -252,7 +253,8 @@ void UART1_Configuration(void)
     
     /* Configure UART0 Interrupt Enable */
 	//UART_ITConfig(UART_data, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
-	UART_ITConfig(UART1, UART_IT_FLAG_RXI, ENABLE);
+    UART_ITConfig(UART1, UART_IT_FLAG_RXI | UART_IT_FLAG_TXI, ENABLE);
+    //UART_ITConfig(UART1, UART_IT_FLAG_RXI, ENABLE);
 	
 	/* NVIC configuration */
 	NVIC_ClearPendingIRQ(UART1_IRQn);

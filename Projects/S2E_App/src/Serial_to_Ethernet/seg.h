@@ -68,8 +68,8 @@ uint8_t check_modeswitch_trigger(uint8_t ch);	// Serial command mode switch trig
 void init_time_delimiter_timer(uint8_t chanel); 			// Serial data packing option [Time]: Timer enalble function for Time delimiter
 
 // UART tx/rx and Ethernet tx/rx data transfer bytes counter
-void clear_data_transfer_bytecount(uint8_t socket, teDATADIR dir);
-uint32_t get_data_transfer_bytecount(uint8_t socket, teDATADIR dir);
+void clear_data_transfer_bytecount(uint8_t channel, teDATADIR dir);
+uint32_t get_data_transfer_bytecount(uint8_t channel, teDATADIR dir);
 
 #endif /* SEG_H_ */
 

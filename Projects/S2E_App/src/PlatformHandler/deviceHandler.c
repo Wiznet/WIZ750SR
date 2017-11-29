@@ -35,7 +35,7 @@ uint8_t flag_fw_from_server_failed = SEGCP_DISABLE;
 static uint16_t any_port = 0;
 
 //extern uint8_t g_send_buf[DATA_BUF_SIZE]; // for dns query to HTTP server
-extern uint8_t g_recv_buf[2][DATA_BUF_SIZE];
+extern uint8_t g_recv_buf[DEVICE_UART_CNT][DATA_BUF_SIZE];
 
 
 void device_set_factory_default(void)
@@ -64,7 +64,7 @@ void device_reboot(void)
 	uint8_t i;
 	device_socket_termination();
 	
-	for(i=0; i<2; i++)
+	for(i=0; i<DEVICE_UART_CNT; i++)
 	{
 		clear_data_transfer_bytecount(i, SEG_ALL);
 	}

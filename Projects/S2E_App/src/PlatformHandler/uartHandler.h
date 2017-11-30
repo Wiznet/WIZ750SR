@@ -5,6 +5,7 @@
 #include "W7500x_uart.h"
 #include "common.h"
 #include "ConfigData.h"
+#include "ring_buffer.h"
 //#include "seg.h"
 
 #define _UART_DEBUG_
@@ -12,6 +13,9 @@
 #ifndef DATA_BUF_SIZE
 	#define DATA_BUF_SIZE 2048
 #endif
+
+#define UART_SRB_SIZE 1024	/* Send */
+#define UART_RRB_SIZE 1024	/* Receive */
 
 // XON/XOFF: Transmitter On / Off, Software flow control
 #define UART_XON				0x11 // 17
@@ -111,7 +115,9 @@ enum flow_ctrl {
 };
 */
 
-extern uint8_t flag_ringbuf_full[2];
+extern RINGBUFF_T txring[DEVICE_UART_CNT];
+
+extern uint8_t flag_ringbuf_full[DEVICE_UART_CNT];
 
 //extern uint32_t baud_table[]; // 14
 extern uint8_t word_len_table[];
@@ -126,11 +132,13 @@ void UART0_Configuration(void); // This function was incorporated into the funct
 void UART1_Configuration(void); // This function was incorporated into the function "S2E_UART_Configuration()"
 void UART2_Configuration(void);
 
-void serial_info_init(UART_TypeDef *pUART, struct __serial_option *serial);
-
+//void serial_info_init(UART_TypeDef *pUART, struct __serial_option *serial);
+void serial_info_init(UART_InitTypeDef* UART_InitStructure, struct __serial_option *serial, uint8_t channel);
 // #1 XON/XOFF Software flow control: Check the Buffer usage and Send the start/stop commands
 void check_uart_flow_control(uint8_t socket, uint8_t flow_ctrl);
-
+void Chip_UART_TXIntHandlerRB(UART_TypeDef *pUART, RINGBUFF_T *pTXRB);
+uint32_t Chip_UART_SendRB(UART_TypeDef *pUART, RINGBUFF_T *pRB, const void *data, uint16_t bytes);
+void UART_buffer_flush(RINGBUFF_T *buf);
 // Hardware flow control by GPIOs (RTS/CTS)
 #ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
 uint8_t get_uart_cts_pin(uint8_t uartNum);

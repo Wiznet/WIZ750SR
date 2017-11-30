@@ -158,6 +158,8 @@ void do_seg(void)
 		init_trigger_modeswitch(DEVICE_AT_MODE);
 		// Mode switch flag disabled
 		sw_modeswitch_at_mode_on = SEG_DISABLE;
+        
+        UART_buffer_flush(&txring[i]);
 	}
 	
 	if(opmode == DEVICE_GW_MODE) 
@@ -992,8 +994,8 @@ void uart_to_ether(uint8_t channel)
 	//uint16_t ret;
 	//uint16_t i; // ## for debugging
 	
-    printf("uart_to_ether");
-    Timer1_Start();
+    //printf("uart_to_ether");
+    //Timer1_Start();
     
 #if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == WIZ750JR))
 	if(get_phylink() != 0) return; // PHY link down
@@ -1115,7 +1117,7 @@ void uart_to_ether(uint8_t channel)
 		}
 	}
     
-	Timer1_Stop();
+	//Timer1_Stop();
         
 	inactivity_time[channel] = 0;
 	//flag_serial_input_time_elapse = SEG_DISABLE; // this flag is cleared in the 'Data packing delimiter:time' checker routine
@@ -1211,8 +1213,8 @@ void ether_to_uart(uint8_t channel)
 	uint16_t len;
 	uint16_t i;
 
-    printf("ether_to_uart");
-    Timer1_Start();
+    //printf("ether_to_uart");
+    //Timer1_Start();
     
 	if(serial_option[channel].flow_control == flow_rts_cts)
 	{
@@ -1239,14 +1241,17 @@ void ether_to_uart(uint8_t channel)
 
 	// H/W Socket buffer -> User's buffer
 	len = getSn_RX_RSR(channel);
-	if(len > DATA_BUF_SIZE) 
+	//if(len > DATA_BUF_SIZE) 
+    if(len > UART_SRB_SIZE) 
     {
-        len = DATA_BUF_SIZE; // avoiding buffer overflow
+        //len = DATA_BUF_SIZE; // avoiding buffer overflow
+        len = UART_SRB_SIZE; // avoiding buffer overflow
     }
 	
 	//printf("ether_to_uart: %d\r\n", len); // ## for debugging
 	//printf("getSn_SR(%d), 0x%x", channel, getSn_SR(channel));
-	if(len > 0)
+	//if(len > 0)
+    if((len > 0) && len <= RingBuffer_GetFree(&txring[channel])) 
 	{
 		switch(getSn_SR(channel))
 		{
@@ -1265,7 +1270,8 @@ void ether_to_uart(uint8_t channel)
 			
 			case SOCK_ESTABLISHED: // TCP_SERVER_MODE, TCP_CLIENT_MODE, TCP_MIXED_MODE
 			case SOCK_CLOSE_WAIT:
-				e2u_size[channel] = recv(channel, g_recv_buf[channel], len);
+				//e2u_size[channel] = recv(channel, g_recv_buf[channel], len);
+                e2u_size[channel] = recv(channel, g_recv_buf[channel], sizeof(g_recv_buf[channel]));
 				break;
 			
 			default:
@@ -1355,9 +1361,18 @@ void ether_to_uart(uint8_t channel)
             //Timer1_Start();
             
 			//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
-			for(i = 0; i < e2u_size[channel]; i++) 
+			/*for(i = 0; i < e2u_size[channel]; i++) 
             {   
                 uart_putc(channel, g_recv_buf[channel][i]);
+            }*/
+            if(channel)
+            {
+                Chip_UART_SendRB(UART1, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
+                //Chip_UART_SendRB(UART1, &txring[channel], g_recv_buf[channel], len);
+            }
+            else
+            {
+                Chip_UART_SendRB(UART0, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
             }
             
 			//Timer1_Stop();
@@ -1367,7 +1382,7 @@ void ether_to_uart(uint8_t channel)
 		}
 	}
     
-    Timer1_Stop();
+    //Timer1_Stop();
 }
 
 

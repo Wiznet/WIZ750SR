@@ -10,7 +10,9 @@
 #include <stdio.h> // for debugging
 
 /* Private typedef -----------------------------------------------------------*/
-
+RINGBUFF_T txring[DEVICE_UART_CNT];
+//static uint8_t rxbuff[DEVICE_UART_CNT][UART_RRB_SIZE];
+static uint8_t txbuff[DEVICE_UART_CNT][UART_SRB_SIZE];
 /* Private define ------------------------------------------------------------*/
 
 /* Private functions prototypes ----------------------------------------------*/
@@ -132,26 +134,6 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * s2e_uart)
 			}
 		}
 		init_time_delimiter_timer(channel);
-
-/*		else
-		{
-			//ch = UartGetc(s2e_uart);
-			ch = UART_ReceiveData(s2e_uart);
-			
-#ifdef _SEG_DEBUG_
-			UART_SendData(s2e_uart, ch);	// ## UART echo; for debugging
-#endif
-			if(!(check_modeswitch_trigger(ch))) // ret: [0] data / [!0] trigger code
-			{
-				if(check_serial_store_permitted(ch)) // ret: [0] not permitted / [1] permitted
-				{
-					BUFFER_IN(data_rx) = ch;
-					BUFFER_IN_MOVE(data_rx, 1);
-				}
-			}
-		}
-		init_time_delimiter_timer(chanel);
-*/
 		
 		UART_ClearITPendingBit(s2e_uart, UART_IT_FLAG_RXI);
 	}
@@ -159,49 +141,64 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * s2e_uart)
 	// Does not use: UART Tx interrupt
 	if(UART_GetITStatus(s2e_uart, UART_IT_FLAG_TXI)) 
 	{
+        Chip_UART_TXIntHandlerRB(s2e_uart, &txring[channel]);
 		UART_ClearITPendingBit(s2e_uart, UART_IT_FLAG_TXI);
 	}
 
 }
-#if 0
-void S2E_UART_Configuration(void)
+void Chip_UART_TXIntHandlerRB(UART_TypeDef *pUART, RINGBUFF_T *pTXRB)
 {
-	DevConfig *value = get_DevConfig_pointer();
-	
-	/* Configure the UART0 */
-	serial_info_init(UART0, &(value->serial_option[0])); // Load the UART_data Settings from Flash
-	
-	/* Configure UART0 Interrupt Enable */
-	//UART_ITConfig(UART_data, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
-	UART_ITConfig(UART0, UART_IT_FLAG_RXI, ENABLE);
-	
-	/* NVIC configuration */
-	NVIC_ClearPendingIRQ(UART0_IRQn);
-	NVIC_SetPriority(UART0_IRQn, 1);
-	NVIC_EnableIRQ(UART0_IRQn);
+    uint8_t ch_tx;
     
-    /* Configure the UART1 */
-	serial_info_init(UART1, &(value->serial_option[1])); // Load the UART_data Settings from Flash
-	
-	/* Configure UART1 Interrupt Enable */
-	//UART_ITConfig(UART_data, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
-	UART_ITConfig(UART1, UART_IT_FLAG_RXI, ENABLE);
-	
-	/* NVIC configuration */
-	NVIC_ClearPendingIRQ(UART1_IRQn);
-	NVIC_SetPriority(UART1_IRQn, 1);
-	NVIC_EnableIRQ(UART1_IRQn);
+    if(RingBuffer_Pop(pTXRB, &ch_tx))
+    {
+        UART_SendData(pUART, ch_tx);
+    }
+    else												// RingBuffer Empty
+    {
+        UART_ITConfig(pUART, UART_IT_FLAG_TXI, DISABLE);
+    }    
 }
-#endif
+uint32_t Chip_UART_SendRB(UART_TypeDef *pUART, RINGBUFF_T *pRB, const void *data, uint16_t bytes)
+{
+	uint32_t ret;
+	uint8_t *p8 = (uint8_t *) data;
+	uint8_t ch;
+
+	/* Don't let UART transmit ring buffer change in the UART IRQ handler */
+	//UART_ITConfig(pUART, UART_IT_FLAG_TXI, DISABLE);
+
+	/* Move as much data as possible into transmit ring buffer */
+	ret = RingBuffer_InsertMult(pRB, p8, bytes);
+
+	/* Enable UART transmit interrupt */
+    
+	UART_ITConfig(pUART, UART_IT_FLAG_TXI, ENABLE);
+
+	if(RingBuffer_Pop(pRB, &ch))
+	{
+		UART_SendData(pUART, ch);
+	}
+	//UART_SendData(pUART, 0x0a);
+
+	return ret;
+}
+void UART_buffer_flush(RINGBUFF_T *buf)
+{
+	RingBuffer_Flush(buf);
+}
 #if 0
 void S2E_UART_Configuration(void)
 {
+    UART_InitTypeDef UART_InitStructure;
 	//DevConfig *value = get_DevConfig_pointer();
 	struct __serial_option *serial_option = (struct __serial_option *)get_DevConfig_pointer()->serial_option;
     
 	/* Configure the UART0 */
-	serial_info_init(UART0, &(serial_option[0])); // Load the UART_data Settings from Flash
-	
+    //serial_info_init(UART0, &(value->serial_option[0])); // Load the UART_data Settings from Flash
+	//serial_info_init(UART0, &(serial_option[0])); // Load the UART_data Settings from Flash
+    serial_info_init(&UART_InitStructure, &serial_option[0], 0);
+	UART_Init(UART0,&UART_InitStructure);
 	/* Configure UART0 Interrupt Enable */
 	//UART_ITConfig(UART_data, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
 	UART_ITConfig(UART0, UART_IT_FLAG_RXI, ENABLE);
@@ -212,8 +209,10 @@ void S2E_UART_Configuration(void)
 	NVIC_EnableIRQ(UART0_IRQn);
     
     /* Configure the UART1 */
-	serial_info_init(UART1, &(serial_option[1])); // Load the UART_data Settings from Flash
-	
+    //serial_info_init(UART1, &(value->serial_option[1])); // Load the UART_data Settings from Flash
+	//serial_info_init(UART1, &(serial_option[1])); // Load the UART_data Settings from Flash
+	serial_info_init(&UART_InitStructure, &serial_option[1], 1);
+	UART_Init(UART1,&UART_InitStructure);
 	/* Configure UART1 Interrupt Enable */
 	//UART_ITConfig(UART_data, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
 	UART_ITConfig(UART1, UART_IT_FLAG_RXI, ENABLE);
@@ -228,13 +227,16 @@ void S2E_UART_Configuration(void)
 void UART0_Configuration(void)
 {
 	UART_InitTypeDef UART_InitStructure;
+    
+    /* Ring Buffer */
+	//RingBuffer_Init(&rxring, rxbuff, 1, UART_RRB_SIZE);
+	RingBuffer_Init(&txring[0], txbuff[0], 1, UART_SRB_SIZE);
 
 	// UART Initialization
 	UART_StructInit(&UART_InitStructure);
 	UART_Init(UART0, &UART_InitStructure);
     
     /* Configure UART0 Interrupt Enable */
-	//UART_ITConfig(UART_data, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
 	UART_ITConfig(UART0, UART_IT_FLAG_RXI | UART_IT_FLAG_TXI, ENABLE);
     //UART_ITConfig(UART0, UART_IT_FLAG_RXI, ENABLE);
 	
@@ -246,13 +248,16 @@ void UART0_Configuration(void)
 void UART1_Configuration(void)
 {
 	UART_InitTypeDef UART_InitStructure;
+    
+    /* Ring Buffer */
+	//RingBuffer_Init(&rxring, rxbuff, 1, UART_RRB_SIZE);
+	RingBuffer_Init(&txring[1], txbuff[1], 1, UART_SRB_SIZE);
 
 	// UART Initialization
 	UART_StructInit(&UART_InitStructure);
 	UART_Init(UART1, &UART_InitStructure);
     
     /* Configure UART0 Interrupt Enable */
-	//UART_ITConfig(UART_data, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
     UART_ITConfig(UART1, UART_IT_FLAG_RXI | UART_IT_FLAG_TXI, ENABLE);
     //UART_ITConfig(UART1, UART_IT_FLAG_RXI, ENABLE);
 	
@@ -270,35 +275,37 @@ void UART2_Configuration(void)
 	S_UART_Init(115200);
 }
 
-void serial_info_init(UART_TypeDef *pUART, struct __serial_option *serial)
+//void serial_info_init(UART_TypeDef *pUART, struct __serial_option *serial)
+void serial_info_init(UART_InitTypeDef* UART_InitStructure, struct __serial_option *serial, uint8_t channel)
 {
-	UART_InitTypeDef UART_InitStructure;
+    //struct __serial_option *serial_option = (struct __serial_option *)get_DevConfig_pointer()->serial_option;
+	//UART_InitTypeDef UART_InitStructure;
 	uint32_t valid_arg = 0;
 	uint32_t baud_table[] = {300, 600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400};
     
-    uint8_t channel = (pUART == UART0)? 0 : 1;
+    //uint8_t channel = (pUART == UART0)? 0 : 1;
     
    
 	/* Set Baud Rate */
 	if(serial[channel].baud_rate < (sizeof(baud_table) / sizeof(baud_table[0])))
 	{
-		UART_InitStructure.UART_BaudRate = baud_table[serial[channel].baud_rate];
+		UART_InitStructure->UART_BaudRate = baud_table[serial[channel].baud_rate];
 		valid_arg = 1;
 	}
 	
 	if(!valid_arg)
-		UART_InitStructure.UART_BaudRate = baud_table[baud_115200];
+		UART_InitStructure->UART_BaudRate = baud_table[baud_115200];
 
 	/* Set Data Bits */
 	switch(serial[channel].data_bits) {
 		case word_len7:
-			UART_InitStructure.UART_WordLength = UART_WordLength_7b;
+			UART_InitStructure->UART_WordLength = UART_WordLength_7b;
 			break;
 		case word_len8:
-			UART_InitStructure.UART_WordLength = UART_WordLength_8b;
+			UART_InitStructure->UART_WordLength = UART_WordLength_8b;
 			break;
 		default:
-			UART_InitStructure.UART_WordLength = UART_WordLength_8b;
+			UART_InitStructure->UART_WordLength = UART_WordLength_8b;
 			serial[channel].data_bits = word_len8;
 			break;
 	}
@@ -306,13 +313,13 @@ void serial_info_init(UART_TypeDef *pUART, struct __serial_option *serial)
 	/* Set Stop Bits */
 	switch(serial[channel].stop_bits) {
 		case stop_bit1:
-			UART_InitStructure.UART_StopBits = UART_StopBits_1;
+			UART_InitStructure->UART_StopBits = UART_StopBits_1;
 			break;
 		case stop_bit2:
-			UART_InitStructure.UART_StopBits = UART_StopBits_2;
+			UART_InitStructure->UART_StopBits = UART_StopBits_2;
 			break;
 		default:
-			UART_InitStructure.UART_StopBits = UART_StopBits_1;
+			UART_InitStructure->UART_StopBits = UART_StopBits_1;
 			serial[channel].stop_bits = stop_bit1;
 			break;
 	}
@@ -320,16 +327,16 @@ void serial_info_init(UART_TypeDef *pUART, struct __serial_option *serial)
 	/* Set Parity Bits */
 	switch(serial[channel].parity) {
 		case parity_none:
-			UART_InitStructure.UART_Parity = UART_Parity_No;
+			UART_InitStructure->UART_Parity = UART_Parity_No;
 			break;
 		case parity_odd:
-			UART_InitStructure.UART_Parity = UART_Parity_Odd;
+			UART_InitStructure->UART_Parity = UART_Parity_Odd;
 			break;
 		case parity_even:
-			UART_InitStructure.UART_Parity = UART_Parity_Even;
+			UART_InitStructure->UART_Parity = UART_Parity_Even;
 			break;
 		default:
-			UART_InitStructure.UART_Parity = UART_Parity_No;
+			UART_InitStructure->UART_Parity = UART_Parity_No;
 			serial[channel].parity = parity_none;
 			break;
 	}
@@ -342,7 +349,7 @@ void serial_info_init(UART_TypeDef *pUART, struct __serial_option *serial)
 		//8		CTS		Clear To Send		Input
 		switch(serial[channel].flow_control) {
 			case flow_none:
-				UART_InitStructure.UART_HardwareFlowControl = UART_HardwareFlowControl_None;
+				UART_InitStructure->UART_HardwareFlowControl = UART_HardwareFlowControl_None;
 				break;
 			case flow_rts_cts:
 #ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
@@ -360,20 +367,20 @@ void serial_info_init(UART_TypeDef *pUART, struct __serial_option *serial)
 					set_uart_rts_pin_low(channel);
 				}
 #else
-				UART_InitStructure.UART_HardwareFlowControl = UART_HardwareFlowControl_RTS_CTS;
+				UART_InitStructure->UART_HardwareFlowControl = UART_HardwareFlowControl_RTS_CTS;
 #endif
 				break;
 			case flow_xon_xoff:
-				UART_InitStructure.UART_HardwareFlowControl = UART_HardwareFlowControl_None;
+				UART_InitStructure->UART_HardwareFlowControl = UART_HardwareFlowControl_None;
 				break;
 			default:
-				UART_InitStructure.UART_HardwareFlowControl = UART_HardwareFlowControl_None;
+				UART_InitStructure->UART_HardwareFlowControl = UART_HardwareFlowControl_None;
 				break;
 		}
 	}
 	else // UART_IF_RS422_485
 	{
-		UART_InitStructure.UART_HardwareFlowControl = UART_HardwareFlowControl_None;
+		UART_InitStructure->UART_HardwareFlowControl = UART_HardwareFlowControl_None;
 		
         // GPIO configration (RTS pin -> GPIO: 485SEL)
 		if((serial[channel].flow_control != flow_rtsonly) && (serial[channel].flow_control != flow_reverserts)) // Added by James in March 29
@@ -396,8 +403,8 @@ void serial_info_init(UART_TypeDef *pUART, struct __serial_option *serial)
 	}
 	
 	/* Configure the UARTx */
-	UART_InitStructure.UART_Mode = UART_Mode_Rx | UART_Mode_Tx;
-	UART_Init(pUART, &UART_InitStructure);
+	UART_InitStructure->UART_Mode = UART_Mode_Rx | UART_Mode_Tx;
+	//UART_Init(pUART-> &UART_InitStructure);
 }
 
 

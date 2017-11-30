@@ -249,7 +249,7 @@ static void W7500x_Init(void)
 	Timer0_Configuration();
     
     /* DualTimer1 Initialization */
-	Timer1_Configuration();
+	//Timer1_Configuration();
 	
 	/* Simple UART init for Debugging */
 	UART2_Configuration();

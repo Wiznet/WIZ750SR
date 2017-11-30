@@ -21,8 +21,10 @@
 
 /* Private define ------------------------------------------------------------*/
 // Ring Buffer declaration
-BUFFER_DECLARATION(data_rx_0);
-BUFFER_DECLARATION(data_rx_1);
+//BUFFER_DECLARATION(data_rx_0);
+//BUFFER_DECLARATION(data_rx_1);
+extern RINGBUFF_T txring[DEVICE_UART_CNT];
+extern RINGBUFF_T rxring[DEVICE_UART_CNT];
 /* Private functions ---------------------------------------------------------*/
 uint16_t uart_get_commandline(uint8_t uartNum, uint8_t* buf, uint16_t maxSize);
 
@@ -1598,7 +1600,8 @@ uint16_t proc_SEGCP_uart(uint8_t * segcp_rep)
 	uint16_t ret = 0;
 	uint8_t segcp_req[SEGCP_PARAM_MAX*2];
 	
-	if(BUFFER_USED_SIZE(data_rx_0))
+	//if(BUFFER_USED_SIZE(data_rx_0))
+    if(RingBuffer_GetSize(&rxring[0]))
 	{
 		len = uart_get_commandline(SEG_DATA_UART0, segcp_req, (sizeof(segcp_req) - 1));
 		
@@ -1627,7 +1630,8 @@ uint16_t uart_get_commandline(uint8_t uartNum, uint8_t* buf, uint16_t maxSize)
 	
 	uint16_t i;
 	//uint16_t j;
-	uint16_t len = BUFFER_USED_SIZE(data_rx_0);
+	//uint16_t len = BUFFER_USED_SIZE(data_rx_0);
+    uint16_t len = RingBuffer_GetSize(&rxring[0]);
 	
 	if(len >= 4) // Minimum of command: 4-bytes, e.g., MC\r\n (MC$0d$0a)
 	{

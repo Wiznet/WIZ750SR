@@ -115,7 +115,8 @@ enum flow_ctrl {
 };
 */
 
-extern RINGBUFF_T txring[DEVICE_UART_CNT];
+//extern RINGBUFF_T txring[DEVICE_UART_CNT];
+//extern RINGBUFF_T rxring[DEVICE_UART_CNT];
 
 extern uint8_t flag_ringbuf_full[DEVICE_UART_CNT];
 
@@ -154,7 +155,7 @@ void set_uart_rts_pin_low(uint8_t uartNum);
 int32_t uart_putc(uint8_t uartNum, uint8_t ch);
 int32_t uart_getc(uint8_t uartNum);
 int32_t uart_puts(uint8_t uartNum, uint8_t* buf, uint16_t reqSize);
-int32_t uart_gets(uint8_t uartNum, uint8_t* buf, uint16_t reqSize);
+//int32_t uart_gets(uint8_t uartNum, uint8_t* buf, uint16_t reqSize);
 
 void uart_rx_flush(uint8_t uartNum);
 

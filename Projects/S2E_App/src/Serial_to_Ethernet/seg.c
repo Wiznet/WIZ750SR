@@ -12,8 +12,10 @@
 
 /* Private define ------------------------------------------------------------*/
 // Ring Buffer
-BUFFER_DECLARATION(data_rx_0);
-BUFFER_DECLARATION(data_rx_1);
+//BUFFER_DECLARATION(data_rx_0);
+//BUFFER_DECLARATION(data_rx_1);
+extern RINGBUFF_T txring[DEVICE_UART_CNT];
+extern RINGBUFF_T rxring[DEVICE_UART_CNT];
 /* Private variables ---------------------------------------------------------*/
 uint8_t flag_s2e_application_running = 0;
 
@@ -258,7 +260,8 @@ void proc_SEG_udp(uint8_t channel)
 	switch(state)
 	{
 		case SOCK_UDP:
-			if(M_BUFFER_USED_SIZE(channel) || u2e_size[channel])	
+			//if(M_BUFFER_USED_SIZE(channel) || u2e_size[channel])
+            if(RingBuffer_GetCount(&rxring[channel]) || u2e_size[channel])        
             {
                 uart_to_ether(channel);
             }
@@ -270,6 +273,7 @@ void proc_SEG_udp(uint8_t channel)
 			
 		case SOCK_CLOSED:
 			//reset_SEG_timeflags();
+            /*    
             if(channel)
             {
                 BUFFER_CLEAR(data_rx_1);
@@ -278,7 +282,8 @@ void proc_SEG_udp(uint8_t channel)
             {
                 BUFFER_CLEAR(data_rx_0);
             }
-			
+            */
+			RingBuffer_Flush(&rxring[channel]);
 			u2e_size[channel] = 0;
 			e2u_size[channel] = 0;
 			
@@ -376,6 +381,7 @@ void proc_SEG_tcp_client(uint8_t channel)
 				}
 				
 				// UART Ring buffer clear
+                /*
                 if(channel==1)
                 {
                     BUFFER_CLEAR(data_rx_1);
@@ -384,6 +390,8 @@ void proc_SEG_tcp_client(uint8_t channel)
                 {
                     BUFFER_CLEAR(data_rx_0);
                 }
+                */
+                RingBuffer_Flush(&rxring[channel]);
 				
 				
 				// Debug message enable flag: TCP client sokect open 
@@ -393,7 +401,8 @@ void proc_SEG_tcp_client(uint8_t channel)
 			}
 			
 			// Serial to Ethernet process
-			if(M_BUFFER_USED_SIZE(channel) || u2e_size[channel])	
+			//if(M_BUFFER_USED_SIZE(channel) || u2e_size[channel])	
+            if(RingBuffer_GetCount(&rxring[channel]) || u2e_size[channel])  
 			{
 					uart_to_ether(channel);
 			}
@@ -557,6 +566,8 @@ void proc_SEG_tcp_server(uint8_t channel)
 				
 				// UART Ring buffer clear
                 //(channel==0)?BUFFER_CLEAR(data_rx_0):BUFFER_CLEAR(data_rx_1);
+                
+                /*
                 if(channel)
                 {
                     BUFFER_CLEAR(data_rx_1);
@@ -565,13 +576,15 @@ void proc_SEG_tcp_server(uint8_t channel)
                 {
                     BUFFER_CLEAR(data_rx_0);
                 }
-				
+				*/
+                RingBuffer_Flush(&rxring[channel]);
 				
 				setSn_IR(channel, Sn_IR_CON);
 			}
 			
 			// Serial to Ethernet process
-			if(M_BUFFER_USED_SIZE(channel) || u2e_size[channel])	
+			//if(M_BUFFER_USED_SIZE(channel) || u2e_size[channel])	
+            if(RingBuffer_GetCount(&rxring[channel]) || u2e_size[channel]) 
             {
                 uart_to_ether(channel);
             }
@@ -714,6 +727,7 @@ void proc_SEG_tcp_mixed(uint8_t channel)
 #ifdef MIXED_CLIENT_LIMITED_CONNECT
 						process_socket_termination(channel);
 						reconnection_count[channel] = 0;
+                        /*
                         if(channel)
                         {
                             BUFFER_CLEAR(data_rx_1);
@@ -722,7 +736,9 @@ void proc_SEG_tcp_mixed(uint8_t channel)
                         {
                             BUFFER_CLEAR(data_rx_0);
                         }
-						
+						*/
+                        RingBuffer_Flush(&rxring[channel]);
+                        
 						mixed_state[channel] = MIXED_SERVER;
 #endif
 						return;
@@ -737,6 +753,7 @@ void proc_SEG_tcp_mixed(uint8_t channel)
 					{
 						process_socket_termination(channel);
 						reconnection_count[channel] = 0;
+                        /*
 						if(channel)
                         {
                             BUFFER_CLEAR(data_rx_1);
@@ -745,6 +762,9 @@ void proc_SEG_tcp_mixed(uint8_t channel)
                         {
                             BUFFER_CLEAR(data_rx_0);
                         }
+                        */
+                        RingBuffer_Flush(&rxring[channel]);
+                        
 						mixed_state[channel] = MIXED_SERVER;
 					}
 	#ifdef _SEG_DEBUG_
@@ -765,7 +785,8 @@ void proc_SEG_tcp_mixed(uint8_t channel)
 		case SOCK_LISTEN:
 			// UART Rx interrupt detection in MIXED_SERVER mode
 			// => Switch to MIXED_CLIENT mode
-			if((mixed_state[channel] == MIXED_SERVER) && (M_BUFFER_USED_SIZE(channel)))
+			//if((mixed_state[channel] == MIXED_SERVER) && (M_BUFFER_USED_SIZE(channel)))
+            if((mixed_state[channel] == MIXED_SERVER) && RingBuffer_GetCount(&rxring[channel]))
 			{
 				process_socket_termination(channel);
 				mixed_state[channel] = MIXED_CLIENT;
@@ -825,7 +846,8 @@ void proc_SEG_tcp_mixed(uint8_t channel)
 				if(mixed_state[channel] == MIXED_SERVER)
 				{
 					// UART Ring buffer clear
-					BUFFER_CLEAR(data_rx_0);
+					//BUFFER_CLEAR(data_rx_0);
+                    RingBuffer_Flush(&rxring[channel]);
 				}
 				else if(mixed_state[channel] == MIXED_CLIENT)
 				{
@@ -841,7 +863,8 @@ void proc_SEG_tcp_mixed(uint8_t channel)
 			}
 			
 			// Serial to Ethernet process
-			if(M_BUFFER_USED_SIZE(channel) || u2e_size[channel])	
+			//if(M_BUFFER_USED_SIZE(channel) || u2e_size[channel])	
+            if(RingBuffer_GetCount(&rxring[channel]) || u2e_size[channel])	
             {
                 uart_to_ether(channel);
             }
@@ -1130,7 +1153,8 @@ uint16_t get_serial_data(uint8_t channel)
 	uint16_t i;
 	uint16_t len;
 	
-	len = M_BUFFER_USED_SIZE(channel);
+	//len = M_BUFFER_USED_SIZE(channel);
+    len = RingBuffer_GetCount(&rxring[channel]);
     
 	if((len + u2e_size[channel]) >= DATA_BUF_SIZE) // Avoiding u2e buffer (g_send_buf) overflow	
 	{
@@ -1192,7 +1216,8 @@ uint16_t get_serial_data(uint8_t channel)
         && (u2e_size[channel] != 0) 
         && (flag_serial_input_time_elapse[channel]))
 	{
-		if(M_BUFFER_USED_SIZE(channel) == 0) 
+		//if(M_BUFFER_USED_SIZE(channel) == 0) 
+        if(RingBuffer_GetCount(&rxring[channel]) == 0) 
         {
             flag_serial_input_time_elapse[channel] = SEG_DISABLE; // ##
         }
@@ -1521,10 +1546,14 @@ void init_trigger_modeswitch(uint8_t mode)
 		keepalive_time[i] = 0;
 		serial_input_time[i] = 0;
 		flag_serial_input_time_elapse[i] = 0;
+        
+        RingBuffer_Flush(&rxring[i]);
 	}
 	enable_modeswitch_timer = SEG_DISABLE;
-	BUFFER_CLEAR(data_rx_0);
+	/*
+    BUFFER_CLEAR(data_rx_0);
     BUFFER_CLEAR(data_rx_1);
+    */
 	modeswitch_time = 0;
 }
 
@@ -1586,9 +1615,13 @@ void restore_serial_data(uint8_t idx)
 	
 	for(i = 0; i < idx; i++)
 	{
+        /*
 		BUFFER_IN(data_rx_0) = ch_tmp[i];
 		BUFFER_IN_MOVE(data_rx_0, 1);
 		ch_tmp[i] = 0x00;
+        */
+        RingBuffer_Insert(&rxring[0], &ch_tmp[i]);
+        ch_tmp[i] = 0x00;
 	}
 	
 	enable_modeswitch_timer = SEG_DISABLE;

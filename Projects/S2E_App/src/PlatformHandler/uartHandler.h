@@ -103,21 +103,6 @@ enum flow_ctrl {
 	flow_reverserts = 4 // Reverse RTS
 };
 
-
-/*
-// old
-enum flow_ctrl {
-	flow_none = 0,
-	flow_xon_xoff = 1,
-	flow_rts_cts = 2,
-	flow_rs422 = 3,
-	flow_rs485 = 4
-};
-*/
-
-//extern RINGBUFF_T txring[DEVICE_UART_CNT];
-//extern RINGBUFF_T rxring[DEVICE_UART_CNT];
-
 extern uint8_t flag_ringbuf_full[DEVICE_UART_CNT];
 
 //extern uint32_t baud_table[]; // 14
@@ -128,13 +113,10 @@ extern uint8_t * flow_ctrl_table[];
 extern uint8_t * uart_if_table[];
 
 void S2E_UART_IRQ_Handler(UART_TypeDef * s2e_uart);
-//void S2E_UART_Configuration(void);
-void UART0_Configuration(void); // This function was incorporated into the function "S2E_UART_Configuration()"
-void UART1_Configuration(void); // This function was incorporated into the function "S2E_UART_Configuration()"
+void S2E_UART_Configuration(uint8_t channel);
 void UART2_Configuration(void);
 
-//void serial_info_init(UART_TypeDef *pUART, struct __serial_option *serial);
-void serial_info_init(UART_InitTypeDef* UART_InitStructure, struct __serial_option *serial, uint8_t channel);
+void serial_info_init(UART_InitTypeDef* UART_InitStructure, uint8_t channel);
 // #1 XON/XOFF Software flow control: Check the Buffer usage and Send the start/stop commands
 void check_uart_flow_control(uint8_t socket, uint8_t flow_ctrl);
 void Chip_UART_TXIntHandlerRB(UART_TypeDef *pUART, RINGBUFF_T *pTXRB);

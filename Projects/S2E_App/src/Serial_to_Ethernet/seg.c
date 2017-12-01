@@ -476,7 +476,8 @@ void proc_SEG_tcp_client(uint8_t channel)
 #ifdef _SEG_DEBUG_
 			printf(" > [%d]TCP CLIENT: client_any_port = %d\r\n", channel, client_any_port[channel]);
 #endif		
-			if(socket(channel, Sn_MR_TCP, source_port, Sn_MR_ND) == channel)
+			//if(socket(channel, Sn_MR_TCP, source_port, Sn_MR_ND) == channel)
+            if(socket(channel, Sn_MR_TCP, source_port, 0) == channel)
 			{
 				// Replace the command mode switch code GAP time (default: 500ms)
 				if((serial_command->serial_command == SEG_ENABLE) && serial_data_packing[0].packing_time) 

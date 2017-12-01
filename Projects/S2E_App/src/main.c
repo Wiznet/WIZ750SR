@@ -115,14 +115,12 @@ int main(void)
 	Mac_Conf();
 	
 	/* UART Initialization */
-	//S2E_UART_Configuration();
-    //S2E_UART1_Configuration();
-    UART0_Configuration();
-    UART1_Configuration();
-
+    for(i=0; i<DEVICE_UART_CNT; i++)
+    {
+        S2E_UART_Configuration(i);
+    }
     
-	uart_puts(SEG_DATA_UART0, (uint8_t *)"Test UART0\r\n", sizeof("Test UART0\r\n"));
-    
+	uart_puts(SEG_DATA_UART0, (uint8_t *)"Test UART0\r\n", sizeof("Test UART0\r\n")); 
     uart_puts(SEG_DATA_UART1, (uint8_t *)"Test UART1\r\n", sizeof("Test UART1\r\n"));
     
 	/* GPIO Initialization*/

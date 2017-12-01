@@ -19,10 +19,10 @@ RINGBUFF_T rxring[DEVICE_UART_CNT];
 extern void delay(__IO uint32_t nCount);
 
 /* Private functions ---------------------------------------------------------*/
-int32_t uart_putc(uint8_t uartNum, uint8_t ch);
-int32_t uart_puts(uint8_t uartNum, uint8_t* buf, uint16_t reqSize);
-int32_t uart_getc(uint8_t uartNum);
-int32_t uart_getc_nonblk(uint8_t uartNum);
+//int32_t uart_putc(uint8_t uartNum, uint8_t ch);
+//int32_t uart_puts(uint8_t uartNum, uint8_t* buf, uint16_t reqSize);
+//int32_t uart_getc(uint8_t uartNum);
+//int32_t uart_getc_nonblk(uint8_t uartNum);
 //int32_t uart_gets(uint8_t uartNum, uint8_t* buf, uint16_t reqSize);
 
 /* Private macro -------------------------------------------------------------*/
@@ -121,49 +121,53 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * s2e_uart)
 	// Does not use: UART Tx interrupt
 	if(UART_GetITStatus(s2e_uart, UART_IT_FLAG_TXI)) 
 	{
-        Chip_UART_TXIntHandlerRB(s2e_uart, &txring[channel]);
+        UART_TX_IRQ_Handler_RB(s2e_uart, &txring[channel]);
 		UART_ClearITPendingBit(s2e_uart, UART_IT_FLAG_TXI);
 	}
 
 }
-void Chip_UART_TXIntHandlerRB(UART_TypeDef *pUART, RINGBUFF_T *pTXRB)
+void UART_TX_IRQ_Handler_RB(UART_TypeDef* UARTx, RINGBUFF_T *pTXRB)
 {
     uint8_t ch_tx;
     
     if(RingBuffer_Pop(pTXRB, &ch_tx))
     {
-        UART_SendData(pUART, ch_tx);
+        UART_SendData(UARTx, ch_tx);
     }
     else												// RingBuffer Empty
     {
-        UART_ITConfig(pUART, UART_IT_FLAG_TXI, DISABLE);
+        UART_ITConfig(UARTx, UART_IT_FLAG_TXI, DISABLE);
     }    
 }
-uint32_t Chip_UART_SendRB(UART_TypeDef *pUART, RINGBUFF_T *pRB, const void *data, uint16_t bytes)
+uint32_t UART_Send_RB(UART_TypeDef* UARTx, RINGBUFF_T *pRB, const void *data, int bytes)
 {
 	uint32_t ret;
 	uint8_t *p8 = (uint8_t *) data;
 	uint8_t ch;
 
 	/* Don't let UART transmit ring buffer change in the UART IRQ handler */
-	//UART_ITConfig(pUART, UART_IT_FLAG_TXI, DISABLE);
+	UART_ITConfig(UARTx, UART_IT_FLAG_TXI, DISABLE);
 
 	/* Move as much data as possible into transmit ring buffer */
 	ret = RingBuffer_InsertMult(pRB, p8, bytes);
 
 	/* Enable UART transmit interrupt */
     
-	UART_ITConfig(pUART, UART_IT_FLAG_TXI, ENABLE);
+	UART_ITConfig(UARTx, UART_IT_FLAG_TXI, ENABLE);
 
 	if(RingBuffer_Pop(pRB, &ch))
 	{
-		UART_SendData(pUART, ch);
+		UART_SendData(UARTx, ch);
 	}
 	//UART_SendData(pUART, 0x0a);
 
 	return ret;
 }
-void UART_buffer_flush(RINGBUFF_T *buf)
+int UART_Read_RB(RINGBUFF_T *pRB, void *data, int bytes)
+{
+	return RingBuffer_PopMult(pRB, (uint8_t *) data, bytes);
+}
+void UART_Buffer_Flush(RINGBUFF_T *buf)
 {
 	RingBuffer_Flush(buf);
 }
@@ -399,6 +403,7 @@ void check_uart_flow_control(uint8_t channel, uint8_t flow_ctrl)
 	}
 }
 
+/*
 int32_t uart_putc(uint8_t uartNum, uint8_t ch)
 {
 	//DevConfig *value = get_DevConfig_pointer();
@@ -417,7 +422,9 @@ int32_t uart_putc(uint8_t uartNum, uint8_t ch)
 	}
 	return RET_OK;
 }
+*/
 
+/*
 int32_t uart_puts(uint8_t uartNum, uint8_t* buf, uint16_t reqSize)
 {
 	uint16_t lentot = 0;
@@ -441,28 +448,29 @@ int32_t uart_puts(uint8_t uartNum, uint8_t* buf, uint16_t reqSize)
 
 	return lentot;
 }
-
+*/
+/*
 int32_t uart_getc(uint8_t uartNum)
 {
 	int32_t ch;
 
 	if(uartNum == SEG_DATA_UART0)
 	{
-		/*
-        while(IS_BUFFER_EMPTY(data_rx_0));
-		ch = (int32_t)BUFFER_OUT(data_rx_0);
-		BUFFER_OUT_MOVE(data_rx_0, 1);
-        */
+		
+        //while(IS_BUFFER_EMPTY(data_rx_0));
+		//ch = (int32_t)BUFFER_OUT(data_rx_0);
+		//BUFFER_OUT_MOVE(data_rx_0, 1);
+        
         while(RingBuffer_IsEmpty(&rxring[uartNum]));
 		RingBuffer_Pop(&rxring[uartNum], &ch);
 	}
     else if(uartNum == SEG_DATA_UART1)
 	{
-        /*
-		while(IS_BUFFER_EMPTY(data_rx_1));
-		ch = (int32_t)BUFFER_OUT(data_rx_1);
-		BUFFER_OUT_MOVE(data_rx_1, 1);
-        */
+        
+		//while(IS_BUFFER_EMPTY(data_rx_1));
+		//ch = (int32_t)BUFFER_OUT(data_rx_1);
+		//BUFFER_OUT_MOVE(data_rx_1, 1);
+        
         while(RingBuffer_IsEmpty(&rxring[uartNum]));
 		RingBuffer_Pop(&rxring[uartNum], &ch);
 	}
@@ -475,28 +483,29 @@ int32_t uart_getc(uint8_t uartNum)
 
 	return ch;
 }
-
+*/
+/*
 int32_t uart_getc_nonblk(uint8_t uartNum)
 {
 	int32_t ch;
 
 	if(uartNum == SEG_DATA_UART0)
 	{
-        /*
-		if(IS_BUFFER_EMPTY(data_rx_0)) return RET_NOK;
-		ch = (int32_t)BUFFER_OUT(data_rx_0);
-		BUFFER_OUT_MOVE(data_rx_0,1);
-        */
+        
+		//if(IS_BUFFER_EMPTY(data_rx_0)) return RET_NOK;
+		//ch = (int32_t)BUFFER_OUT(data_rx_0);
+		//BUFFER_OUT_MOVE(data_rx_0,1);
+        
         if(RingBuffer_IsEmpty(&rxring[uartNum]))return RET_NOK;
 		RingBuffer_Pop(&rxring[uartNum], &ch);
 	}
     else if(uartNum == SEG_DATA_UART1)
 	{
-        /*
-		if(IS_BUFFER_EMPTY(data_rx_1)) return RET_NOK;
-		ch = (int32_t)BUFFER_OUT(data_rx_1);
-		BUFFER_OUT_MOVE(data_rx_1,1);
-        */
+        
+		//if(IS_BUFFER_EMPTY(data_rx_1)) return RET_NOK;
+		//ch = (int32_t)BUFFER_OUT(data_rx_1);
+		//BUFFER_OUT_MOVE(data_rx_1,1);
+        
         if(RingBuffer_IsEmpty(&rxring[uartNum]))return RET_NOK;
 		RingBuffer_Pop(&rxring[uartNum], &ch);
 	}
@@ -509,6 +518,7 @@ int32_t uart_getc_nonblk(uint8_t uartNum)
 
 	return ch;
 }
+*/
 /*
 int32_t uart_gets(uint8_t uartNum, uint8_t* buf, uint16_t reqSize)
 {
@@ -546,9 +556,9 @@ int32_t uart_gets(uint8_t uartNum, uint8_t* buf, uint16_t reqSize)
 	return lentot;
 }
 */
-void uart_rx_flush(uint8_t uartNum)
+/*void uart_rx_flush(uint8_t uartNum)
 {
-    /*
+    
 	if(uartNum == SEG_DATA_UART0)
 	{
 		BUFFER_CLEAR(data_rx_0);
@@ -557,9 +567,10 @@ void uart_rx_flush(uint8_t uartNum)
 	{
 		BUFFER_CLEAR(data_rx_1);
 	}
-    */
+    
     RingBuffer_Flush(&rxring[uartNum]);
 }
+*/
 
 uint8_t get_uart_rs485_sel(uint8_t uartNum)
 {

@@ -161,7 +161,8 @@ void do_seg(void)
 		// Mode switch flag disabled
 		sw_modeswitch_at_mode_on = SEG_DISABLE;
         
-        UART_buffer_flush(&txring[i]);
+        UART_Buffer_Flush(&txring[i]);
+        UART_Buffer_Flush(&rxring[i]);
 	}
 	
 	if(opmode == DEVICE_GW_MODE) 
@@ -1153,6 +1154,7 @@ uint16_t get_serial_data(uint8_t channel)
     
 	uint16_t i;
 	uint16_t len;
+    int32_t ch;
 	
 	//len = M_BUFFER_USED_SIZE(channel);
     len = RingBuffer_GetCount(&rxring[channel]);
@@ -1162,7 +1164,11 @@ uint16_t get_serial_data(uint8_t channel)
 		/* Checking Data packing option: charactor delimiter */
 		if((serial_data_packing[channel].packing_delimiter[0] != 0x00) && (len == 1))
 		{
-			g_send_buf[channel][u2e_size[channel]] = (uint8_t)uart_getc(channel);
+			//g_send_buf[channel][u2e_size[channel]] = (uint8_t)uart_getc(channel);
+            //UART_Read_RB(&rxring[channel], &ch, 1);
+            if(UART_Read_RB(&rxring[channel], &ch, 1))
+                g_send_buf[channel][u2e_size[channel]] = (uint8_t)ch;
+            
 			if(serial_data_packing[channel].packing_delimiter[0] == g_send_buf[channel][u2e_size[channel]])
 			{
 				return u2e_size[channel];
@@ -1186,7 +1192,9 @@ uint16_t get_serial_data(uint8_t channel)
 		// ## 20150427 bugfix: Incorrect serial data storing (UART ring buffer to g_send_buf)
 		for(i = 0; i < len; i++)
 		{
-			g_send_buf[channel][u2e_size[channel]++] = (uint8_t)uart_getc(channel);
+			//g_send_buf[channel][u2e_size[channel]++] = (uint8_t)uart_getc(channel);
+            if(UART_Read_RB(&rxring[channel], &ch, 1))
+                g_send_buf[channel][u2e_size[channel]++] = (uint8_t)ch;
 		}
 		
 		return u2e_size[channel];
@@ -1196,7 +1204,10 @@ uint16_t get_serial_data(uint8_t channel)
 		/* Checking Data packing options */
 		for(i = 0; i < len; i++)
 		{
-			g_send_buf[channel][u2e_size[channel]++] = (uint8_t)uart_getc(channel);
+			//g_send_buf[channel][u2e_size[channel]++] = (uint8_t)uart_getc(channel);
+            //UART_Read_RB(&rxring[channel], &ch, 1);
+            if(UART_Read_RB(&rxring[channel], &ch, 1))
+                g_send_buf[channel][u2e_size[channel]++] = (uint8_t)ch;
 			
 			// Packing delimiter: character option
 			if((serial_data_packing[channel].packing_delimiter[0] != 0x00) && (serial_data_packing[channel].packing_delimiter[0] == g_send_buf[channel][u2e_size[channel] - 1]))
@@ -1351,9 +1362,20 @@ void ether_to_uart(uint8_t channel)
 		{
 			uart_rs485_enable(channel);
 			//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
+            /*
 			for(i = 0; i < e2u_size[channel]; i++) 
             {
                 uart_putc(channel, g_recv_buf[channel][i]);
+            }
+            */
+            if(channel)
+            {
+                UART_Send_RB(UART1, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
+                //Chip_UART_SendRB(UART1, &txring[channel], g_recv_buf[channel], len);
+            }
+            else
+            {
+                UART_Send_RB(UART0, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
             }
             
             for(i = 0; i < 65535; i++)  ; //wait
@@ -1370,9 +1392,20 @@ void ether_to_uart(uint8_t channel)
             //if(isXON == SEG_ENABLE)
 			{
 				//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
+                /*
 				for(i = 0; i < e2u_size[channel]; i++) 
                 {  
                     uart_putc(channel, g_recv_buf[channel][i]);
+                }
+                */
+                if(channel)
+                {
+                    UART_Send_RB(UART1, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
+                    //Chip_UART_SendRB(UART1, &txring[channel], g_recv_buf[channel], len);
+                }
+                else
+                {
+                    UART_Send_RB(UART0, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
                 }
 				add_data_transfer_bytecount(channel, SEG_ETHER_TX, e2u_size[channel]);
 				e2u_size[channel] = 0;
@@ -1393,12 +1426,12 @@ void ether_to_uart(uint8_t channel)
             }*/
             if(channel)
             {
-                Chip_UART_SendRB(UART1, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
+                UART_Send_RB(UART1, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
                 //Chip_UART_SendRB(UART1, &txring[channel], g_recv_buf[channel], len);
             }
             else
             {
-                Chip_UART_SendRB(UART0, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
+                UART_Send_RB(UART0, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
             }
             
 			//Timer1_Stop();
@@ -1513,7 +1546,8 @@ void init_trigger_modeswitch(uint8_t mode)
 		if(serial_common->serial_debug_en)
 		{
 			printf(" > SEG:AT Mode\r\n");
-			uart_puts(SEG_DATA_UART0, (uint8_t *)"SEG:AT Mode\r\n", sizeof("SEG:AT Mode\r\n"));
+			//uart_puts(SEG_DATA_UART0, (uint8_t *)"SEG:AT Mode\r\n", sizeof("SEG:AT Mode\r\n"));
+            UART_Send_RB(UART0, &txring[0], (uint8_t *)"SEG:AT Mode\r\n", sizeof("SEG:AT Mode\r\n"));
 		}
 	}
 	else // DEVICE_GW_MODE
@@ -1530,7 +1564,8 @@ void init_trigger_modeswitch(uint8_t mode)
 		if(serial_common->serial_debug_en)
 		{
 			printf(" > SEG:GW Mode\r\n");
-			uart_puts(SEG_DATA_UART0, (uint8_t *)"SEG:GW Mode\r\n", sizeof("SEG:GW Mode\r\n"));
+			//uart_puts(SEG_DATA_UART0, (uint8_t *)"SEG:GW Mode\r\n", sizeof("SEG:GW Mode\r\n"));
+            UART_Send_RB(UART0, &txring[0], (uint8_t *)"SEG:GW Mode\r\n", sizeof("SEG:GW Mode\r\n"));
 		}
 	}
 	

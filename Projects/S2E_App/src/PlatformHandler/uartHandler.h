@@ -116,12 +116,14 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * s2e_uart);
 void S2E_UART_Configuration(uint8_t channel);
 void UART2_Configuration(void);
 
-void serial_info_init(UART_InitTypeDef* UART_InitStructure, uint8_t channel);
+
 // #1 XON/XOFF Software flow control: Check the Buffer usage and Send the start/stop commands
 void check_uart_flow_control(uint8_t socket, uint8_t flow_ctrl);
-void Chip_UART_TXIntHandlerRB(UART_TypeDef *pUART, RINGBUFF_T *pTXRB);
-uint32_t Chip_UART_SendRB(UART_TypeDef *pUART, RINGBUFF_T *pRB, const void *data, uint16_t bytes);
-void UART_buffer_flush(RINGBUFF_T *buf);
+void UART_TX_IRQ_Handler_RB(UART_TypeDef *pUART, RINGBUFF_T *pTXRB);
+void serial_info_init(UART_InitTypeDef* UART_InitStructure, uint8_t channel);
+uint32_t UART_Send_RB(UART_TypeDef* UARTx, RINGBUFF_T *pRB, const void *data, int bytes);
+int UART_Read_RB(RINGBUFF_T *pRB, void *data, int bytes);
+void UART_Buffer_Flush(RINGBUFF_T *buf);
 // Hardware flow control by GPIOs (RTS/CTS)
 #ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
 uint8_t get_uart_cts_pin(uint8_t uartNum);
@@ -134,12 +136,12 @@ void set_uart_rts_pin_low(uint8_t uartNum);
 // Defines: W7500x UART Ring buffer 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-int32_t uart_putc(uint8_t uartNum, uint8_t ch);
-int32_t uart_getc(uint8_t uartNum);
-int32_t uart_puts(uint8_t uartNum, uint8_t* buf, uint16_t reqSize);
+//int32_t uart_putc(uint8_t uartNum, uint8_t ch);
+//int32_t uart_getc(uint8_t uartNum);
+//int32_t uart_puts(uint8_t uartNum, uint8_t* buf, uint16_t reqSize);
 //int32_t uart_gets(uint8_t uartNum, uint8_t* buf, uint16_t reqSize);
 
-void uart_rx_flush(uint8_t uartNum);
+//void uart_rx_flush(uint8_t uartNum);
 
 uint8_t get_uart_rs485_sel(uint8_t uartNum);
 void uart_rs485_rs422_init(uint8_t uartNum);

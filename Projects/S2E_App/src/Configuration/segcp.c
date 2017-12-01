@@ -217,7 +217,11 @@ void do_segcp(void)
 		{
 			if(opmode == DEVICE_AT_MODE) 
 			{
-				if(dev_config->serial_common.serial_debug_en == SEGCP_ENABLE) uart_puts(SEG_DATA_UART0, "REBOOT\r\n", 8);
+				if(dev_config->serial_common.serial_debug_en == SEGCP_ENABLE) 
+                {
+                    //uart_puts(SEG_DATA_UART0, "REBOOT\r\n", 8);
+                    UART_Send_RB(UART0, &txring[0], (uint8_t *)"REBOOT\r\n", sizeof("REBOOT\r\n"));
+                }
 			}
 			
 			device_reboot();
@@ -589,8 +593,11 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // UART Rx flush
 					case SEGCP_RX:
-						uart_rx_flush(SEG_DATA_UART0);
-                        uart_rx_flush(SEG_DATA_UART1);
+                        
+						//uart_rx_flush(SEG_DATA_UART0);
+                        //uart_rx_flush(SEG_DATA_UART1);
+                        UART_Buffer_Flush(&rxring[0]);
+                        UART_Buffer_Flush(&rxring[1]);
 						sprintf(trep, "%s", "FLUSH");
 						//ret |= SEGCP_RET_ERR_NOTAVAIL;
 						break;
@@ -1383,7 +1390,9 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 #ifdef _SEGCP_DEBUG_
 			printf("ERROR : %s\r\n",trep);
 #endif
-			uart_rx_flush(SEG_DATA_UART0);
+			//uart_rx_flush(SEG_DATA_UART0);
+            UART_Buffer_Flush(&rxring[0]);
+            UART_Buffer_Flush(&rxring[1]);
 			return ret;
 		}
 		
@@ -1601,7 +1610,7 @@ uint16_t proc_SEGCP_uart(uint8_t * segcp_rep)
 	uint8_t segcp_req[SEGCP_PARAM_MAX*2];
 	
 	//if(BUFFER_USED_SIZE(data_rx_0))
-    if(RingBuffer_GetSize(&rxring[0]))
+    if(RingBuffer_GetCount(&rxring[0]))
 	{
 		len = uart_get_commandline(SEG_DATA_UART0, segcp_req, (sizeof(segcp_req) - 1));
 		
@@ -1616,8 +1625,8 @@ uint16_t proc_SEGCP_uart(uint8_t * segcp_rep)
 					printf("%s",segcp_rep);
 				}
 				
-				uart_puts(SEG_DATA_UART0, segcp_rep, strlen(segcp_rep));
-				
+				//uart_puts(SEG_DATA_UART0, segcp_rep, strlen(segcp_rep));
+                UART_Send_RB(UART0, &txring[0], segcp_rep, strlen(segcp_rep));
 			}
 		}
 	}
@@ -1629,15 +1638,18 @@ uint16_t uart_get_commandline(uint8_t uartNum, uint8_t* buf, uint16_t maxSize)
 	DevConfig *dev_config = get_DevConfig_pointer();
 	
 	uint16_t i;
+    int32_t ch;
 	//uint16_t j;
 	//uint16_t len = BUFFER_USED_SIZE(data_rx_0);
-    uint16_t len = RingBuffer_GetSize(&rxring[0]);
+    uint16_t len = RingBuffer_GetCount(&rxring[uartNum]);
 	
 	if(len >= 4) // Minimum of command: 4-bytes, e.g., MC\r\n (MC$0d$0a)
 	{
 		for(i = 0; i < maxSize; i++)
 		{
-			buf[i] = uart_getc(uartNum);
+			//buf[i] = uart_getc(uartNum);
+            if(UART_Read_RB(&rxring[uartNum], &ch, 1))
+                buf[i] = ch;
 			//if(buf[i] == '\n') break;	// [\n]: end of command
 			if(buf[i] == 0x0a) break;	// [0x0a]: end of command (Line feed)
 		}
@@ -1654,7 +1666,9 @@ uint16_t uart_get_commandline(uint8_t uartNum, uint8_t* buf, uint16_t maxSize)
 		if(dev_config->serial_command.serial_command_echo == SEGCP_ENABLE)
 		{
 			//for(j = 0; j < i; j++) uart_putc(uartNum, buf[j]);
-			uart_puts(uartNum, buf, i);
+			//uart_puts(uartNum, buf, i);
+            //if(uartNum)
+            UART_Send_RB(UART0, &txring[0], buf, i);
 		}
 	}
 	else

@@ -54,7 +54,8 @@
 
 
 /* Private typedef -----------------------------------------------------------*/
-
+extern RINGBUFF_T txring[DEVICE_UART_CNT];
+extern RINGBUFF_T rxring[DEVICE_UART_CNT];
 /* Private define ------------------------------------------------------------*/
 #define _MAIN_DEBUG_	// debugging message enable
 
@@ -120,8 +121,10 @@ int main(void)
         S2E_UART_Configuration(i);
     }
     
-	uart_puts(SEG_DATA_UART0, (uint8_t *)"Test UART0\r\n", sizeof("Test UART0\r\n")); 
-    uart_puts(SEG_DATA_UART1, (uint8_t *)"Test UART1\r\n", sizeof("Test UART1\r\n"));
+	//uart_puts(SEG_DATA_UART0, (uint8_t *)"Test UART0\r\n", sizeof("Test UART0\r\n")); 
+    //uart_puts(SEG_DATA_UART1, (uint8_t *)"Test UART1\r\n", sizeof("Test UART1\r\n"));
+    UART_Send_RB(UART0, &txring[0], (uint8_t *)"Test UART0\r\n", sizeof("Test UART0\r\n")); 
+    UART_Send_RB(UART1, &txring[1], (uint8_t *)"Test UART1\r\n", sizeof("Test UART1\r\n"));
     
 	/* GPIO Initialization*/
 	IO_Configuration();

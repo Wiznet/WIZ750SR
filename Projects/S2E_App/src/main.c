@@ -136,6 +136,8 @@ int main(void)
 		display_Dev_Info_main();
 	}
 	
+    printf("PHY Link status: %x\r\n", get_phylink());
+    printf("%s\r\n", STR_BAR);
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// W7500x Application: DHCP client / DNS client handler
 	////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -197,8 +199,8 @@ int main(void)
 		flag_hw_trig_enable = 0;
 	}
 	
-	printf("PHY Link status: %x\r\n", get_phylink());
-	
+	//printf("PHY Link status: %x\r\n", get_phylink());
+	printf("%s\r\n", STR_BAR);
 	//link();
 	while(1) // main loop
 	{
@@ -216,7 +218,8 @@ int main(void)
 		if(flag_check_phylink)
 		{
 			//printf("PHY Link status: %x\r\n", GPIO_ReadInputDataBit(PHYLINK_IN_PORT, PHYLINK_IN_PIN));
-			flag_check_phylink = 0;	// flag clear
+			//printf("PHY Link status: %x\r\n", get_phylink());
+            flag_check_phylink = 0;	// flag clear
 		}
 		
 		for(i=0; i<DEVICE_UART_CNT; i++)
@@ -462,56 +465,46 @@ void display_Dev_Info_header(void)
 
 void display_Dev_Info_main(void)
 {
-	uint8_t i;
 	DevConfig *dev_config = get_DevConfig_pointer();
+    
+    uint8_t i;
 	uint32_t baud_table[] = {300, 600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400};
 	    
 	printf(" - Device name: %s\r\n", dev_config->device_common.module_name);
-    
-    for(i=0; i<DEVICE_UART_CNT; i++)
-    {
-    printf(" - [%d] Channel mode: %s\r\n", i, str_working[dev_config->network_connection[i].working_mode]);
-    }
-    
 	printf(" - Network settings: \r\n");
 		printf("\t- Obtaining IP settings: [%s]\r\n", (dev_config->network_option.dhcp_use == 1)?"Automatic - DHCP":"Static");
-		printf("\t- TCP/UDP ports\r\n");
+		
+    printf(" - Search ID code: \r\n");
+		printf("\t- %s: [%s]\r\n", (dev_config->config_common.pw_search[0] != 0)?"Enabled":"Disabled", (dev_config->config_common.pw_search[0] != 0)?dev_config->config_common.pw_search:"None");
     
     for(i=0; i<DEVICE_UART_CNT; i++)
     {
+    printf("%s\r\n", STR_BAR);
+    printf(" - [%d] Channel mode: %s\r\n", i, str_working[dev_config->network_connection[i].working_mode]);
+    
+        printf("\t- TCP/UDP ports\r\n");
+    
+
 		printf("\t   + [%d] Channel S2E data port: [%d]\r\n", 0, dev_config->network_connection[i].local_port);
-    }
+    
 		printf("\t   + TCP/UDP setting port: [%d]\r\n", DEVICE_SEGCP_PORT);
 		printf("\t   + Firmware update port: [%d]\r\n", DEVICE_FWUP_PORT);
 	
-	printf(" - Search ID code: \r\n");
-		printf("\t- %s: [%s]\r\n", (dev_config->config_common.pw_search[0] != 0)?"Enabled":"Disabled", (dev_config->config_common.pw_search[0] != 0)?dev_config->config_common.pw_search:"None");
-	
-    for(i=0; i<DEVICE_UART_CNT; i++)
-    {
 	printf(" - [%d] Channel Ethernet connection password: \r\n", i);
 		printf("\t- %s %s\r\n", (dev_config->tcp_option[i].pw_connect_en == 1)?"Enabled":"Disabled", "(TCP server / mixed mode only)");
-    }
-     
+    
 	printf(" - Connection timer settings: \r\n");
-    for(i=0; i<DEVICE_UART_CNT; i++)
-    {
+
 		printf("\t- [%d] Channel Inactivity timer: ", i);
 			if(dev_config->tcp_option[i].inactivity) printf("[%d] (sec)\r\n", dev_config->tcp_option[i].inactivity);
 			else printf("%s\r\n", STR_DISABLED);
-    }
-       
-    for(i=0; i<DEVICE_UART_CNT; i++)
-    {    
+    
 		printf("\t- [%d] Channel Reconnect interval: ", i);
 			if(dev_config->tcp_option[i].reconnection) printf("[%d] (msec)\r\n", dev_config->tcp_option[i].reconnection);
 			else printf("%s\r\n", STR_DISABLED);
-    }
-
-	
+    
 	printf(" - Serial settings: \r\n");
-    for(i=0; i<DEVICE_UART_CNT; i++)
-    {
+
 		printf("\t- [%d] Channel Data %s port:  [%s%d]\r\n", i, STR_UART, STR_UART, i);
 		printf("\t   + UART IF: [%s]\r\n", uart_if_table[dev_config->serial_option[i].uart_interface]);
 		printf("\t   + %d-", baud_table[dev_config->serial_option[i].baud_rate]);
@@ -522,12 +515,11 @@ void display_Dev_Info_main(void)
 			printf("Flow control: %s\r\n", flow_ctrl_table[dev_config->serial_option[i].flow_control]);
 		else
 			printf("Flow control: %s\r\n", flow_ctrl_table[0]); // RS-422/485; flow control - NONE only
-    }
+
 		printf("\t- Debug %s port: [%s%d]\r\n", STR_UART, STR_UART, SEG_DEBUG_UART);
 		printf("\t   + %s / %s %s\r\n", "115200-8-N-1", "NONE", "(fixed)");
 		
-    for(i=0; i<DEVICE_UART_CNT; i++)
-    {
+
 	printf(" - [%d] Channel Serial data packing options:\r\n", i);
 		printf("\t- Time: ");
 			if(dev_config->serial_data_packing[i].packing_time) printf("[%d] (msec)\r\n", dev_config->serial_data_packing[i].packing_time);
@@ -538,8 +530,9 @@ void display_Dev_Info_main(void)
 		printf("\t- Char: ");
 			if(dev_config->serial_data_packing[i].packing_delimiter_length == 1) printf("[%.2X] (hex only)\r\n", dev_config->serial_data_packing[i].packing_delimiter[0]);
 			else printf("%s\r\n", STR_DISABLED);
+        
     }
-		
+		printf("%s\r\n", STR_BAR);
 		printf(" - Serial command mode swtich code:\r\n");
 		printf("\t- %s\r\n", (dev_config->serial_command.serial_command == 1)?STR_ENABLED:STR_DISABLED);
 		printf("\t- [%.2X][%.2X][%.2X] (Hex only)\r\n", dev_config->serial_command.serial_trigger[0], dev_config->serial_command.serial_trigger[1], dev_config->serial_command.serial_trigger[2]);

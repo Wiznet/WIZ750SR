@@ -19,14 +19,7 @@ RINGBUFF_T rxring[DEVICE_UART_CNT];
 extern void delay(__IO uint32_t nCount);
 
 /* Private functions ---------------------------------------------------------*/
-//int32_t uart_putc(uint8_t uartNum, uint8_t ch);
-//int32_t uart_puts(uint8_t uartNum, uint8_t* buf, uint16_t reqSize);
-//int32_t uart_getc(uint8_t uartNum);
-//int32_t uart_getc_nonblk(uint8_t uartNum);
-//int32_t uart_gets(uint8_t uartNum, uint8_t* buf, uint16_t reqSize);
-
 /* Private macro -------------------------------------------------------------*/
-
 /* Private variables ---------------------------------------------------------*/
 uint8_t flag_ringbuf_full[DEVICE_UART_CNT] = {0,};
 
@@ -39,7 +32,6 @@ uint8_t stop_bit_table[] = {1, 2};
 uint8_t * flow_ctrl_table[] = {(uint8_t *)"NONE", (uint8_t *)"XON/XOFF", (uint8_t *)"RTS/CTS", (uint8_t *)"RTS Only"};
 uint8_t * uart_if_table[] = {(uint8_t *)UART_IF_STR_RS232_TTL, (uint8_t *)UART_IF_STR_RS422_485};
 
-// XON/XOFF Status; 
 static uint8_t xonoff_status[DEVICE_UART_CNT] = {UART_XON,};
 
 // RTS Status; __USE_GPIO_HARDWARE_FLOWCONTROL__ defined
@@ -51,7 +43,6 @@ static uint8_t xonoff_status[DEVICE_UART_CNT] = {UART_XON,};
 static uint8_t uart_if_mode[DEVICE_UART_CNT] = {UART_IF_RS422,};
 
 /* Public functions ----------------------------------------------------------*/
-
 void S2E_UART_IRQ_Handler(UART_TypeDef * s2e_uart)
 {
     struct __serial_option *serial_option = (struct __serial_option *)get_DevConfig_pointer()->serial_option;
@@ -128,11 +119,11 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * s2e_uart)
 }
 void UART_TX_IRQ_Handler_RB(UART_TypeDef* UARTx, RINGBUFF_T *pTXRB)
 {
-    uint8_t ch_tx;
+    uint8_t ch;
     
-    if(RingBuffer_Pop(pTXRB, &ch_tx))
+    if(RingBuffer_Pop(pTXRB, &ch))
     {
-        UART_SendData(UARTx, ch_tx);
+        UART_SendData(UARTx, ch);
     }
     else												// RingBuffer Empty
     {
@@ -159,7 +150,6 @@ uint32_t UART_Send_RB(UART_TypeDef* UARTx, RINGBUFF_T *pRB, const void *data, in
 	{
 		UART_SendData(UARTx, ch);
 	}
-	//UART_SendData(pUART, 0x0a);
 
 	return ret;
 }
@@ -167,9 +157,10 @@ int UART_Read_RB(RINGBUFF_T *pRB, void *data, int bytes)
 {
 	return RingBuffer_PopMult(pRB, (uint8_t *) data, bytes);
 }
-void UART_Buffer_Flush(RINGBUFF_T *buf)
+
+void UART_Buffer_Flush(RINGBUFF_T *pRB)
 {
-	RingBuffer_Flush(buf);
+	RingBuffer_Flush(pRB);
 }
 
 void S2E_UART_Configuration(uint8_t channel)
@@ -402,175 +393,6 @@ void check_uart_flow_control(uint8_t channel, uint8_t flow_ctrl)
 #endif
 	}
 }
-
-/*
-int32_t uart_putc(uint8_t uartNum, uint8_t ch)
-{
-	//DevConfig *value = get_DevConfig_pointer();
-	
-	if(uartNum == SEG_DATA_UART0)
-	{
-		UartPutc(UART0, ch); 
-	}
-    else if(uartNum == SEG_DATA_UART1)
-	{
-		UartPutc(UART1, ch); 
-	}
-	else if(uartNum == SEG_DEBUG_UART)
-	{
-		S_UartPutc(ch);
-	}
-	return RET_OK;
-}
-*/
-
-/*
-int32_t uart_puts(uint8_t uartNum, uint8_t* buf, uint16_t reqSize)
-{
-	uint16_t lentot = 0;
-
-	while(*buf != '\0' && lentot < reqSize)
-	{
-		if((uartNum == SEG_DATA_UART0)||(uartNum == SEG_DATA_UART1))
-		{
-			uart_putc(uartNum, *buf);
-		}
-		else if(uartNum == SEG_DEBUG_UART)
-		{
-			S_UartPutc(*buf);
-		}
-		else
-			return 0;
-		
-		buf++;
-		lentot++;
-	}
-
-	return lentot;
-}
-*/
-/*
-int32_t uart_getc(uint8_t uartNum)
-{
-	int32_t ch;
-
-	if(uartNum == SEG_DATA_UART0)
-	{
-		
-        //while(IS_BUFFER_EMPTY(data_rx_0));
-		//ch = (int32_t)BUFFER_OUT(data_rx_0);
-		//BUFFER_OUT_MOVE(data_rx_0, 1);
-        
-        while(RingBuffer_IsEmpty(&rxring[uartNum]));
-		RingBuffer_Pop(&rxring[uartNum], &ch);
-	}
-    else if(uartNum == SEG_DATA_UART1)
-	{
-        
-		//while(IS_BUFFER_EMPTY(data_rx_1));
-		//ch = (int32_t)BUFFER_OUT(data_rx_1);
-		//BUFFER_OUT_MOVE(data_rx_1, 1);
-        
-        while(RingBuffer_IsEmpty(&rxring[uartNum]));
-		RingBuffer_Pop(&rxring[uartNum], &ch);
-	}
-	else if(uartNum == SEG_DEBUG_UART)
-	{
-		;//ch = (uint8_t)S_UartGetc();
-	}
-	else
-		return RET_NOK;
-
-	return ch;
-}
-*/
-/*
-int32_t uart_getc_nonblk(uint8_t uartNum)
-{
-	int32_t ch;
-
-	if(uartNum == SEG_DATA_UART0)
-	{
-        
-		//if(IS_BUFFER_EMPTY(data_rx_0)) return RET_NOK;
-		//ch = (int32_t)BUFFER_OUT(data_rx_0);
-		//BUFFER_OUT_MOVE(data_rx_0,1);
-        
-        if(RingBuffer_IsEmpty(&rxring[uartNum]))return RET_NOK;
-		RingBuffer_Pop(&rxring[uartNum], &ch);
-	}
-    else if(uartNum == SEG_DATA_UART1)
-	{
-        
-		//if(IS_BUFFER_EMPTY(data_rx_1)) return RET_NOK;
-		//ch = (int32_t)BUFFER_OUT(data_rx_1);
-		//BUFFER_OUT_MOVE(data_rx_1,1);
-        
-        if(RingBuffer_IsEmpty(&rxring[uartNum]))return RET_NOK;
-		RingBuffer_Pop(&rxring[uartNum], &ch);
-	}
-	else if(uartNum == SEG_DEBUG_UART)
-	{
-		;
-	}
-	else
-		return RET_NOK;
-
-	return ch;
-}
-*/
-/*
-int32_t uart_gets(uint8_t uartNum, uint8_t* buf, uint16_t reqSize)
-{
-	uint16_t lentot = 0, len1st = 0;
-
-	if(uartNum == SEG_DATA_UART0)
-	{
-		lentot = reqSize = MIN(BUFFER_USED_SIZE(data_rx_0), reqSize);
-		if(IS_BUFFER_OUT_SEPARATED(data_rx_0) && (len1st = BUFFER_OUT_1ST_SIZE(data_rx_0)) < reqSize) {
-			memcpy(buf, &BUFFER_OUT(data_rx_0), len1st);
-			BUFFER_OUT_MOVE(data_rx_0, len1st);
-			reqSize -= len1st;
-		}
-		memcpy(buf+len1st, &BUFFER_OUT(data_rx_0), reqSize);
-		BUFFER_OUT_MOVE(data_rx_0,reqSize);
-	}
-    else if(uartNum == SEG_DATA_UART1)
-	{
-		lentot = reqSize = MIN(BUFFER_USED_SIZE(data_rx_1), reqSize);
-		if(IS_BUFFER_OUT_SEPARATED(data_rx_1) && (len1st = BUFFER_OUT_1ST_SIZE(data_rx_1)) < reqSize) {
-			memcpy(buf, &BUFFER_OUT(data_rx_1), len1st);
-			BUFFER_OUT_MOVE(data_rx_1, len1st);
-			reqSize -= len1st;
-		}
-		memcpy(buf+len1st, &BUFFER_OUT(data_rx_1), reqSize);
-		BUFFER_OUT_MOVE(data_rx_1,reqSize);
-	}
-	else if(uartNum == SEG_DEBUG_UART)
-	{
-		;
-	}
-	else
-		return RET_NOK;
-
-	return lentot;
-}
-*/
-/*void uart_rx_flush(uint8_t uartNum)
-{
-    
-	if(uartNum == SEG_DATA_UART0)
-	{
-		BUFFER_CLEAR(data_rx_0);
-	}
-    else if(uartNum == SEG_DATA_UART1)
-	{
-		BUFFER_CLEAR(data_rx_1);
-	}
-    
-    RingBuffer_Flush(&rxring[uartNum]);
-}
-*/
 
 uint8_t get_uart_rs485_sel(uint8_t uartNum)
 {

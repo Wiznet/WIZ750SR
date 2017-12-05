@@ -266,7 +266,7 @@ void display_Net_Info(void)
 			}
 		}	
 	}
-	printf("\r\n");
+	//printf("\r\n");
 }
 
 void Mac_Conf(void)

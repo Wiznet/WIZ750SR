@@ -57,7 +57,6 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * s2e_uart)
 			UART_ReceiveData(s2e_uart);
 			
 			flag_ringbuf_full[channel] = 1;
-
 		}
 		else
 		{
@@ -143,7 +142,6 @@ uint32_t UART_Send_RB(UART_TypeDef* UARTx, RINGBUFF_T *pRB, const void *data, in
 	ret = RingBuffer_InsertMult(pRB, p8, bytes);
 
 	/* Enable UART transmit interrupt */
-    
 	UART_ITConfig(UARTx, UART_IT_FLAG_TXI, ENABLE);
 
 	if(RingBuffer_Pop(pRB, &ch))
@@ -166,37 +164,24 @@ void UART_Buffer_Flush(RINGBUFF_T *pRB)
 void S2E_UART_Configuration(uint8_t channel)
 {
     UART_InitTypeDef UART_InitStructure;
- 
-    if(channel)
-    {
-        /* Ring Buffer */
-        RingBuffer_Init(&rxring[channel], rxbuff[channel], 1, UART_RRB_SIZE);
-        RingBuffer_Init(&txring[channel], txbuff[channel], 1, UART_SRB_SIZE);
-        /* Configure the UART1 */
-        serial_info_init(&UART_InitStructure, channel);
-        UART_Init(UART1,&UART_InitStructure);
-        /* Configure UART1 Interrupt Enable */
-        UART_ITConfig(UART1, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
-        /* NVIC configuration */
-        NVIC_ClearPendingIRQ(UART1_IRQn);
-        NVIC_SetPriority(UART1_IRQn, 1);
-        NVIC_EnableIRQ(UART1_IRQn);
-    }
-    else
-    {
-        /* Ring Buffer */
-        RingBuffer_Init(&rxring[channel], rxbuff[channel], 1, UART_RRB_SIZE);
-        RingBuffer_Init(&txring[channel], txbuff[channel], 1, UART_SRB_SIZE);
-        /* Configure the UART0 */
-        serial_info_init(&UART_InitStructure, channel);
-        UART_Init(UART0,&UART_InitStructure);
-        /* Configure UART0 Interrupt Enable */
-        UART_ITConfig(UART0, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
-        /* NVIC configuration */
-        NVIC_ClearPendingIRQ(UART0_IRQn);
-        NVIC_SetPriority(UART0_IRQn, 1);
-        NVIC_EnableIRQ(UART0_IRQn);
-    }
+    
+    UART_TypeDef* UART = (channel==0)?UART0:UART1;
+    IRQn_Type UART_IRQn = (channel==0)?UART0_IRQn:UART1_IRQn;
+    
+    /* Ring Buffer */
+    RingBuffer_Init(&rxring[channel], rxbuff[channel], 1, UART_RRB_SIZE);
+    RingBuffer_Init(&txring[channel], txbuff[channel], 1, UART_SRB_SIZE);
+    /* Configure the UART */
+    serial_info_init(&UART_InitStructure, channel);
+    UART_Init(UART,&UART_InitStructure);
+    /* Configure UART Interrupt Enable */
+    UART_ITConfig(UART, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
+    /* Configure UART FIFO Enable */
+    //UART_FIFO_Enable(UART,4,4);
+    /* NVIC configuration */
+    NVIC_ClearPendingIRQ(UART_IRQn);
+    NVIC_SetPriority(UART_IRQn, 1);
+    NVIC_EnableIRQ(UART_IRQn);
 }
 
 void UART2_Configuration(void)

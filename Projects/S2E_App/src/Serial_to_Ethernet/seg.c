@@ -579,8 +579,9 @@ void proc_SEG_tcp_server(uint8_t channel)
                     BUFFER_CLEAR(data_rx_0);
                 }
 				*/
-                RingBuffer_Flush(&rxring[channel]);
-				
+                //RingBuffer_Flush(&rxring[channel]);
+                UART_Buffer_Flush(&rxring[channel]);
+				UART_Buffer_Flush(&txring[channel]);
 				setSn_IR(channel, Sn_IR_CON);
 			}
 			
@@ -1190,12 +1191,19 @@ uint16_t get_serial_data(uint8_t channel)
 		//return (uint16_t)ret;
 		
 		// ## 20150427 bugfix: Incorrect serial data storing (UART ring buffer to g_send_buf)
+        /*
 		for(i = 0; i < len; i++)
 		{
 			//g_send_buf[channel][u2e_size[channel]++] = (uint8_t)uart_getc(channel);
             if(UART_Read_RB(&rxring[channel], &ch, 1))
+            {
                 g_send_buf[channel][u2e_size[channel]++] = (uint8_t)ch;
+            }
 		}
+        */
+        UART_Read_RB(&rxring[channel], g_send_buf[channel], len);
+        u2e_size[channel] = u2e_size[channel] + len;
+        
 		
 		return u2e_size[channel];
 	}
@@ -1249,6 +1257,8 @@ void ether_to_uart(uint8_t channel)
 
 	uint16_t len;
 	uint16_t i;
+    uint8_t sock_state;
+    
 
     //printf("ether_to_uart");
     //Timer1_Start();
@@ -1277,20 +1287,33 @@ void ether_to_uart(uint8_t channel)
 
 
 	// H/W Socket buffer -> User's buffer
-	len = getSn_RX_RSR(channel);
+	//len = getSn_RX_RSR(channel);
+    getsockopt(channel, SO_RECVBUF, &len);
 	//if(len > DATA_BUF_SIZE) 
+    /*
     if(len > UART_SRB_SIZE) 
     {
         //len = DATA_BUF_SIZE; // avoiding buffer overflow
         len = UART_SRB_SIZE; // avoiding buffer overflow
     }
+    */
+    if(len > RingBuffer_GetFree(&txring[channel])) 
+    {
+        len = RingBuffer_GetFree(&txring[channel]);
+    }
 	
 	//printf("ether_to_uart: %d\r\n", len); // ## for debugging
 	//printf("getSn_SR(%d), 0x%x", channel, getSn_SR(channel));
-	//if(len > 0)
-    if((len > 0) && len <= RingBuffer_GetFree(&txring[channel])) 
+	
+    
+    
+    
+    if(len > 0)
+    //if((len > 0) && len <= RingBuffer_GetFree(&txring[channel])) 
 	{
-		switch(getSn_SR(channel))
+        getsockopt(channel, SO_STATUS, &sock_state);
+		//switch(getSn_SR(channel))
+        switch(sock_state)
 		{
 			case SOCK_UDP: // UDP_MODE
 				e2u_size[channel] = recvfrom(channel, g_recv_buf[channel], len, peerip, &peerport);
@@ -1407,7 +1430,7 @@ void ether_to_uart(uint8_t channel)
                 {
                     UART_Send_RB(UART0, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
                 }
-				add_data_transfer_bytecount(channel, SEG_ETHER_TX, e2u_size[channel]);
+				add_data_transfer_bytecount(channel, SEG_UART_TX, e2u_size[channel]);
 				e2u_size[channel] = 0;
 			}
 			//else

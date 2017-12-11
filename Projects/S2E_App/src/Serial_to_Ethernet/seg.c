@@ -579,7 +579,7 @@ void proc_SEG_tcp_server(uint8_t channel)
 			if(getSn_RX_RSR(channel) || e2u_size[channel])	
             {
                 //ForDebugging
-                printf("getSn_RX_RSR(%d) : %d, e2u_size[%d] : %d\r\n", channel, getSn_RX_RSR(channel), channel, e2u_size[channel]);
+                //printf("proc_SEG_tcp_server : getSn_RX_RSR(%d) : %d, e2u_size[%d] : %d\r\n", channel, getSn_RX_RSR(channel), channel, e2u_size[channel]);
                 ether_to_uart(channel);
             }
 			
@@ -1270,13 +1270,14 @@ void ether_to_uart(uint8_t channel)
     {
         len = UART_SRB_SIZE; // avoiding buffer overflow
     }
-    
+    //For Debugging
+    //printf("ether_to_uart RingBuffer_GetFree(%d) : %d\r\n", channel, RingBuffer_GetFree(&txring[channel]));
     if((len > 0) && len <= RingBuffer_GetFree(&txring[channel])) 
 	{
 		switch(getSn_SR(channel))
 		{
             //For Debugging
-            printf("getSn_SR(%d) : %d\r\n", channel, getSn_SR(channel));
+            //printf("ether_to_uart get Sn_SR(%d) : %d\r\n", channel, getSn_SR(channel));
 			case SOCK_UDP: // UDP_MODE
 				e2u_size[channel] = recvfrom(channel, g_recv_buf[channel], len, peerip, &peerport);
 				
@@ -1294,8 +1295,8 @@ void ether_to_uart(uint8_t channel)
 			case SOCK_CLOSE_WAIT:
 				//e2u_size[channel] = recv(channel, g_recv_buf[channel], len);
                 //e2u_size[channel] = recv(channel, g_recv_buf[channel], sizeof(g_recv_buf[channel]));
-                printf("e2u_size[%d] : %d\r\n", channel, e2u_size[channel]);
-                //e2u_size[channel] = e2u_size[channel] + recv(channel, g_recv_buf[channel], sizeof(g_recv_buf[channel]));
+                e2u_size[channel] = e2u_size[channel] + recv(channel, g_recv_buf[channel], sizeof(g_recv_buf[channel]));
+                //printf("ether_to_uart e2u_size[%d] : %d\r\n", channel, e2u_size[channel]);
 				break;
 			default:
 				break;
@@ -1374,12 +1375,12 @@ void ether_to_uart(uint8_t channel)
             //__disable_irq();
             stored_size = UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
             //For Debugging
-            printf("[%d]stored_size : %d\r\n", channel, stored_size);
+            //printf("[%d]stored_size : %d\r\n", channel, stored_size);
             //UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
             //__enable_irq();
             add_data_transfer_bytecount(channel, SEG_ETHER_TX, e2u_size[channel]);
-            e2u_size[channel] = 0;
-            //e2u_size[channel] = e2u_size[channel] - stored_size;
+            //e2u_size[channel] = 0;
+            e2u_size[channel] = e2u_size[channel] - stored_size;
 		}
 	}
 }

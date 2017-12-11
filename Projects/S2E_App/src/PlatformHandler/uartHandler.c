@@ -54,6 +54,7 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx)
     //UART Rx interrupt
 	if(UART_GetITStatus(UARTx,  UART_IT_FLAG_RXI))
 	{
+        UART_ClearITPendingBit(UARTx, UART_IT_FLAG_RXI);
         if(RingBuffer_IsFull(&rxring[channel]))
 		{
 			UART_ReceiveData(UARTx);
@@ -100,13 +101,15 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx)
 			}
 		}
 		init_time_delimiter_timer(channel);
-		UART_ClearITPendingBit(UARTx, UART_IT_FLAG_RXI);
+		//UART_ClearITPendingBit(UARTx, UART_IT_FLAG_RXI);
 	}
 
 	//UART Tx interrupt
 	if(UART_GetITStatus(UARTx, UART_IT_FLAG_TXI) != RESET) 
 	{
+        UART_ClearITPendingBit(UARTx, UART_IT_FLAG_TXI);
         //UART_TX_IRQ_Handler_RB(s2e_uart, &txring[channel]);
+        //printf(".");
         if(RingBuffer_Pop(&txring[channel], &ch_tx))
         {
             //while((UARTx->FR & UART_FR_TXFE));
@@ -120,7 +123,7 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx)
         {
             UART_ITConfig(UARTx, UART_IT_FLAG_TXI, DISABLE);
         }
-		UART_ClearITPendingBit(UARTx, UART_IT_FLAG_TXI);
+		//UART_ClearITPendingBit(UARTx, UART_IT_FLAG_TXI);
 	}
 }
 
@@ -151,6 +154,7 @@ uint32_t UART_Send_RB(UART_TypeDef* UARTx, RINGBUFF_T *pRB, const void *data, in
 	}
     UART_ITConfig(UARTx, UART_IT_FLAG_TXI, ENABLE);
     __enable_irq();
+    
 	return ret;
 }
 int UART_Read_RB(RINGBUFF_T *pRB, void *data, int bytes)
@@ -182,7 +186,15 @@ void S2E_UART_Configuration(uint8_t channel)
     //UART_FIFO_Enable(UART,4,4);
     /* NVIC configuration */
     NVIC_ClearPendingIRQ(UARTx_IRQn);
-    NVIC_SetPriority(UARTx_IRQn, 1);
+    if(channel==0)
+    {
+        NVIC_SetPriority(UARTx_IRQn, 1);
+    }
+    else
+    {
+        NVIC_SetPriority(UARTx_IRQn, 2);
+    }
+    //NVIC_SetPriority(UARTx_IRQn, 1);
     NVIC_EnableIRQ(UARTx_IRQn);
 }
 

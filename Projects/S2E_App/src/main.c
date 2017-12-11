@@ -123,8 +123,8 @@ int main(void)
     
 	//uart_puts(SEG_DATA_UART0, (uint8_t *)"Test UART0\r\n", sizeof("Test UART0\r\n")); 
     //uart_puts(SEG_DATA_UART1, (uint8_t *)"Test UART1\r\n", sizeof("Test UART1\r\n"));
-    UART_Send_RB(UART0, &txring[0], (uint8_t *)"Test UART0\r\n", sizeof("Test UART0\r\n")); 
-    UART_Send_RB(UART1, &txring[1], (uint8_t *)"Test UART1\r\n", sizeof("Test UART1\r\n"));
+    //UART_Send_RB(UART0, &txring[0], (uint8_t *)"Test UART0\r\n", sizeof("Test UART0\r\n")); 
+    //UART_Send_RB(UART1, &txring[1], (uint8_t *)"Test UART1\r\n", sizeof("Test UART1\r\n"));
     
 	/* GPIO Initialization*/
 	IO_Configuration();
@@ -201,6 +201,36 @@ int main(void)
 	
 	//printf("PHY Link status: %x\r\n", get_phylink());
 	printf("%s\r\n", STR_BAR);
+    
+    #if 0
+    typedef enum IRQn
+{
+/******  Cortex-M0 Processor Exceptions Numbers ***************************************************/
+
+/* ToDo: use this Cortex interrupt numbers if your device is a CORTEX-M0 device                   */
+  NonMaskableInt_IRQn          = -14,      /*!<  2 Cortex-M0 Non Maskable Interrupt               */
+  HardFault_IRQn               = -13,      /*!<  3 Cortex-M0 Hard Fault Interrupt                 */
+  SVCall_IRQn                  = -5,       /*!< 11 Cortex-M0 SV Call Interrupt                    */
+  PendSV_IRQn                  = -2,       /*!< 14 Cortex-M0 Pend SV Interrupt                    */
+  SysTick_IRQn                 = -1,       /*!< 15 Cortex-M0 System Tick Interrupt                */
+/******  W7500x Specific Interrupt Numbers ********************************************************/
+  SSP0_IRQn                    = 0,        /*!< SSP 0 Interrupt                                   */ 
+  SSP1_IRQn                    = 1,        /*!< SSP 1 Interrupt                                   */ 
+  UART0_IRQn                   = 2,        /*!< UART 0 Interrupt                                  */
+  UART1_IRQn                   = 3,        /*!< UART 1 Interrupt                                  */
+  UART2_IRQn                   = 4,        /*!< UART 2 Interrupt                                  */
+    #endif
+    
+    printf("NVIC_GetPriority NonMaskableInt_IRQn : %+d\r\n", NVIC_GetPriority(NonMaskableInt_IRQn));
+    printf("NVIC_GetPriority HardFault_IRQn : %+d\r\n", NVIC_GetPriority(HardFault_IRQn));
+    printf("NVIC_GetPriority SVCall_IRQn : %+d\r\n", NVIC_GetPriority(SVCall_IRQn));
+    printf("NVIC_GetPriority PendSV_IRQn : %+d\r\n", NVIC_GetPriority(PendSV_IRQn));
+    printf("NVIC_GetPriority SysTick_IRQn : %+d\r\n", NVIC_GetPriority(SysTick_IRQn));
+    printf("NVIC_GetPriority UART0_IRQn : %+d\r\n", NVIC_GetPriority(UART0_IRQn));
+    printf("NVIC_GetPriority UART1_IRQn : %+d\r\n", NVIC_GetPriority(UART1_IRQn));
+    printf("NVIC_GetPriority UART2_IRQn : %+d\r\n", NVIC_GetPriority(UART2_IRQn));
+    
+    printf("%s\r\n", STR_BAR);
 	//link();
 	while(1) // main loop
 	{
@@ -278,8 +308,8 @@ static void W7500x_WZTOE_Init(void)
 	////////////////////////////////////////////////////
 	
 	/* Set Network Configuration: HW Socket Tx/Rx buffer size */
-	uint8_t tx_size[8] = { 2, 2, 2, 2, 2, 2, 0, 0 }; // default: { 2, 2, 2, 2, 2, 2, 2, 2 }
-	uint8_t rx_size[8] = { 2, 2, 2, 2, 2, 2, 0, 0 }; // default: { 2, 2, 2, 2, 2, 2, 2, 2 }
+	uint8_t tx_size[8] = { 1, 1, 2, 2, 2, 2, 0, 0 }; // default: { 2, 2, 2, 2, 2, 2, 2, 2 }
+	uint8_t rx_size[8] = { 1, 1, 2, 2, 2, 2, 0, 0 }; // default: { 2, 2, 2, 2, 2, 2, 2, 2 }
 	
 	/* Structure for TCP timeout control: RTR, RCR */
 	//wiz_NetTimeout * net_timeout;

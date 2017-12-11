@@ -11,7 +11,7 @@
 #define _UART_DEBUG_
 
 #ifndef DATA_BUF_SIZE
-	#define DATA_BUF_SIZE 2048
+	#define DATA_BUF_SIZE 1024
 #endif
 
 #define UART_SRB_SIZE 1024	/* Send */
@@ -112,9 +112,12 @@ extern uint8_t * parity_table[];
 extern uint8_t * flow_ctrl_table[];
 extern uint8_t * uart_if_table[];
 
-void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx);
-//void S2E_UART0_IRQ_Handler(uint8_t channel);
-//void S2E_UART1_IRQ_Handler(uint8_t channel);
+#if 1
+void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx, uint8_t channel);
+#else
+void S2E_UART0_IRQ_Handler();
+void S2E_UART1_IRQ_Handler();
+#endif
 void S2E_UART_Configuration(uint8_t channel);
 void UART2_Configuration(void);
 

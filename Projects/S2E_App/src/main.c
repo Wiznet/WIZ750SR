@@ -308,8 +308,8 @@ static void W7500x_WZTOE_Init(void)
 	////////////////////////////////////////////////////
 	
 	/* Set Network Configuration: HW Socket Tx/Rx buffer size */
-	uint8_t tx_size[8] = { 1, 1, 2, 2, 2, 2, 0, 0 }; // default: { 2, 2, 2, 2, 2, 2, 2, 2 }
-	uint8_t rx_size[8] = { 1, 1, 2, 2, 2, 2, 0, 0 }; // default: { 2, 2, 2, 2, 2, 2, 2, 2 }
+	uint8_t tx_size[8] = { 2, 2, 2, 2, 2, 2, 0, 0 }; // default: { 2, 2, 2, 2, 2, 2, 2, 2 }
+	uint8_t rx_size[8] = { 2, 2, 2, 2, 2, 2, 0, 0 }; // default: { 2, 2, 2, 2, 2, 2, 2, 2 }
 	
 	/* Structure for TCP timeout control: RTR, RCR */
 	//wiz_NetTimeout * net_timeout;

@@ -1272,7 +1272,7 @@ void ether_to_uart(uint8_t channel)
     }
     //For Debugging
     //printf("ether_to_uart RingBuffer_GetFree(%d) : %d\r\n", channel, RingBuffer_GetFree(&txring[channel]));
-    if((len > 0) && len <= RingBuffer_GetFree(&txring[channel])) 
+    if((len > 0) && (len <= RingBuffer_GetFree(&txring[channel]))) 
 	{
 		switch(getSn_SR(channel))
 		{

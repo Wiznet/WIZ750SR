@@ -566,35 +566,20 @@ void proc_SEG_tcp_server(uint8_t channel)
 					printf(" > SEG[%d]:CONNECTED FROM - %d.%d.%d.%d : %d\r\n", channel, destip[0], destip[1], destip[2], destip[3], destport);
 				}
 				
-				// UART Ring buffer clear
-                //(channel==0)?BUFFER_CLEAR(data_rx_0):BUFFER_CLEAR(data_rx_1);
-                
-                /*
-                if(channel)
-                {
-                    BUFFER_CLEAR(data_rx_1);
-                }
-                else
-                {
-                    BUFFER_CLEAR(data_rx_0);
-                }
-				*/
-                //RingBuffer_Flush(&rxring[channel]);
                 UART_Buffer_Flush(&rxring[channel]);
 				UART_Buffer_Flush(&txring[channel]);
 				setSn_IR(channel, Sn_IR_CON);
 			}
 			
-			// Serial to Ethernet process
-			//if(M_BUFFER_USED_SIZE(channel) || u2e_size[channel])	
-            
+			// Serial to Ethernet process        
             if(RingBuffer_GetCount(&rxring[channel]) || u2e_size[channel]) 
             {
                 uart_to_ether(channel);
             }
 			if(getSn_RX_RSR(channel) || e2u_size[channel])	
             {
-                //printf("getSn_RX_RSR(%d) : %d, e2u_size[%d] : %d\r\n", channel, getSn_RX_RSR(channel), channel, e2u_size[channel]);
+                //ForDebugging
+                printf("getSn_RX_RSR(%d) : %d, e2u_size[%d] : %d\r\n", channel, getSn_RX_RSR(channel), channel, e2u_size[channel]);
                 ether_to_uart(channel);
             }
 			
@@ -1260,10 +1245,9 @@ void ether_to_uart(uint8_t channel)
 	uint16_t len;
 	uint16_t i;
     uint8_t sock_state;
+    uint16_t stored_size;
     
-    UART_TypeDef* UART = (channel==0)?UART0:UART1;
-    //printf("ether_to_uart");
-    //Timer1_Start();
+    UART_TypeDef* UARTx = (channel==0)?UART0:UART1;
     
 	if(serial_option[channel].flow_control == flow_rts_cts)
 	{
@@ -1273,55 +1257,26 @@ void ether_to_uart(uint8_t channel)
             return;
         }
 #else
-		//; // check the CTS reg
-        /*
-        if(channel)
-        {
-            if((UART1->FR &UART_FR_CTS )!=0)
-                return;
-        }
-        else
-        {
-            if((UART0->FR &UART_FR_CTS )!=0)
-                return;
-        }
-        */
-        if((UART->FR &UART_FR_CTS )!=0)
+        if((UARTx->FR &UART_FR_CTS )!=0)
             return;
 #endif
 	}
 
 
 	// H/W Socket buffer -> User's buffer
-	//len = getSn_RX_RSR(channel);
-    getsockopt(channel, SO_RECVBUF, &len);
-	//if(len > DATA_BUF_SIZE) 
+	len = getSn_RX_RSR(channel);
     
     if(len > UART_SRB_SIZE) 
     {
-        //len = DATA_BUF_SIZE; // avoiding buffer overflow
         len = UART_SRB_SIZE; // avoiding buffer overflow
     }
-    //printf("[%d]ether_to_uart len : %d\r\n", channel, len); // ## for debugging
-    /*
-    if(len > RingBuffer_GetFree(&txring[channel])) 
-    {
-        len = RingBuffer_GetFree(&txring[channel]);
-    }
-	*/
-	//printf("ether_to_uart: %d\r\n", len); // ## for debugging
-	//printf("getSn_SR(%d), 0x%x", channel, getSn_SR(channel));
-	
     
-    
-    
-    //if(len > 0)
     if((len > 0) && len <= RingBuffer_GetFree(&txring[channel])) 
 	{
-        getsockopt(channel, SO_STATUS, &sock_state);
-		//switch(getSn_SR(channel))
-        switch(sock_state)
+		switch(getSn_SR(channel))
 		{
+            //For Debugging
+            printf("getSn_SR(%d) : %d\r\n", channel, getSn_SR(channel));
 			case SOCK_UDP: // UDP_MODE
 				e2u_size[channel] = recvfrom(channel, g_recv_buf[channel], len, peerip, &peerport);
 				
@@ -1338,18 +1293,16 @@ void ether_to_uart(uint8_t channel)
 			case SOCK_ESTABLISHED: // TCP_SERVER_MODE, TCP_CLIENT_MODE, TCP_MIXED_MODE
 			case SOCK_CLOSE_WAIT:
 				//e2u_size[channel] = recv(channel, g_recv_buf[channel], len);
-                e2u_size[channel] = recv(channel, g_recv_buf[channel], sizeof(g_recv_buf[channel]));
-                //printf("[%d]recv size : %d\r\n", channel, e2u_size[channel]); // ## for debugging
+                //e2u_size[channel] = recv(channel, g_recv_buf[channel], sizeof(g_recv_buf[channel]));
+                printf("e2u_size[%d] : %d\r\n", channel, e2u_size[channel]);
+                //e2u_size[channel] = e2u_size[channel] + recv(channel, g_recv_buf[channel], sizeof(g_recv_buf[channel]));
 				break;
-			
 			default:
 				break;
 		}
-		
 		inactivity_time[channel] = 0;
 		keepalive_time[channel] = 0;
 		flag_sent_first_keepalive[channel] = DISABLE;
-		
 		add_data_transfer_bytecount(channel, SEG_ETHER_RX, e2u_size[channel]);
 	}
 	
@@ -1377,8 +1330,7 @@ void ether_to_uart(uint8_t channel)
 			}
 		}
 	}
-	
-	// Ethernet data transfer to DATA UART
+	// Ethernet data transfer to DATA UARTx
 	if(e2u_size[channel] != 0)
 	{
 		if(serial_option[channel].dsr_en == SEG_ENABLE) // DTR / DSR handshake (flowcontrol)
@@ -1392,26 +1344,8 @@ void ether_to_uart(uint8_t channel)
 		if(serial_option[channel].uart_interface == UART_IF_RS422_485)
 		{
 			uart_rs485_enable(channel);
-			//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
-            /*
-			for(i = 0; i < e2u_size[channel]; i++) 
-            {
-                uart_putc(channel, g_recv_buf[channel][i]);
-            }
-            */
-            /*
-            if(channel)
-            {
-                UART_Send_RB(UART1, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
-                //Chip_UART_SendRB(UART1, &txring[channel], g_recv_buf[channel], len);
-            }
-            else
-            {
-                UART_Send_RB(UART0, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
-            }
-            */
             
-            UART_Send_RB(UART, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
+            UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
             
             for(i = 0; i < 65535; i++)  ; //wait
             
@@ -1424,30 +1358,11 @@ void ether_to_uart(uint8_t channel)
 		else if(serial_option[channel].flow_control == flow_xon_xoff) 
 		{
 			if(isXON[channel] == SEG_ENABLE)
-            //if(isXON == SEG_ENABLE)
 			{
-				//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
-                /*
-				for(i = 0; i < e2u_size[channel]; i++) 
-                {  
-                    uart_putc(channel, g_recv_buf[channel][i]);
-                }
-                */
-                /*
-                if(channel)
-                {
-                    UART_Send_RB(UART1, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
-                    //Chip_UART_SendRB(UART1, &txring[channel], g_recv_buf[channel], len);
-                }
-                else
-                {
-                    UART_Send_RB(UART0, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
-                }
-                */
-                UART_Send_RB(UART, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
+                stored_size = UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
                 
 				add_data_transfer_bytecount(channel, SEG_UART_TX, e2u_size[channel]);
-				e2u_size[channel] = 0;
+				e2u_size[channel] = e2u_size[channel] - stored_size;
 			}
 			//else
 			//{
@@ -1456,37 +1371,18 @@ void ether_to_uart(uint8_t channel)
 		}
 		else
 		{
-            //Timer1_Start();
-            
-			//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
-			/*for(i = 0; i < e2u_size[channel]; i++) 
-            {   
-                uart_putc(channel, g_recv_buf[channel][i]);
-            }*/
-            /*
-            if(channel)
-            {
-                UART_Send_RB(UART1, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
-                //Chip_UART_SendRB(UART1, &txring[channel], g_recv_buf[channel], len);
-            }
-            else
-            {
-                UART_Send_RB(UART0, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
-            }
-            */
-            //UART_ITConfig(UART, UART_IT_FLAG_TXI, DISABLE);
-            UART_Send_RB(UART, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
-            //printf("");
-			//Timer1_Stop();
-            
-			add_data_transfer_bytecount(channel, SEG_ETHER_TX, e2u_size[channel]);
-			e2u_size[channel] = 0;
+            //__disable_irq();
+            stored_size = UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
+            //For Debugging
+            printf("[%d]stored_size : %d\r\n", channel, stored_size);
+            //UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
+            //__enable_irq();
+            add_data_transfer_bytecount(channel, SEG_ETHER_TX, e2u_size[channel]);
+            e2u_size[channel] = 0;
+            //e2u_size[channel] = e2u_size[channel] - stored_size;
 		}
 	}
-    
-    //Timer1_Stop();
 }
-
 
 uint16_t get_tcp_any_port(uint8_t channel)
 {
@@ -1501,13 +1397,11 @@ uint16_t get_tcp_any_port(uint8_t channel)
 			client_any_port[channel] = 0;
 		}
 	}
-	
 	if(client_any_port[channel] == 0)
 	{
 		srand(get_phylink_downtime());
 		client_any_port[channel] = (rand() % 10000) + 35000; // 35000 ~ 44999
 	}
-	
 	return client_any_port[channel];
 }
 

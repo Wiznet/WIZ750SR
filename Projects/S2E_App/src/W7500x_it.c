@@ -110,7 +110,9 @@ void SSP1_Handler(void)
   */
 void UART0_Handler(void)
 {
+    //__disable_irq();
 	S2E_UART_IRQ_Handler(UART0);
+    //__enable_irq();
 }
 
 
@@ -121,7 +123,9 @@ void UART0_Handler(void)
   */
 void UART1_Handler(void)
 {
+    //__disable_irq();
 	S2E_UART_IRQ_Handler(UART1);
+    //__enable_irq();
 }
 
 

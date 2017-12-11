@@ -112,7 +112,9 @@ extern uint8_t * parity_table[];
 extern uint8_t * flow_ctrl_table[];
 extern uint8_t * uart_if_table[];
 
-void S2E_UART_IRQ_Handler(UART_TypeDef * s2e_uart);
+void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx);
+//void S2E_UART0_IRQ_Handler(uint8_t channel);
+//void S2E_UART1_IRQ_Handler(uint8_t channel);
 void S2E_UART_Configuration(uint8_t channel);
 void UART2_Configuration(void);
 

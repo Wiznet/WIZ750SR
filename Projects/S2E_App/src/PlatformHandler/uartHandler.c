@@ -43,18 +43,20 @@ static uint8_t xonoff_status[DEVICE_UART_CNT] = {UART_XON,};
 static uint8_t uart_if_mode[DEVICE_UART_CNT] = {UART_IF_RS422,};
 
 /* Public functions ----------------------------------------------------------*/
-void S2E_UART_IRQ_Handler(UART_TypeDef * s2e_uart)
+void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx)
 {
     struct __serial_option *serial_option = (struct __serial_option *)get_DevConfig_pointer()->serial_option;
     
-	uint8_t ch; // 1-byte character variable for UART Interrupt request handler
-    uint8_t channel = (s2e_uart == UART0)? 0 : 1;
+	uint8_t ch_tx; 
+    uint8_t ch_rx; 
+    uint8_t channel = (UARTx == UART0)? 0 : 1;
 
-	if(UART_GetITStatus(s2e_uart,  UART_IT_FLAG_RXI))
+    //UART Rx interrupt
+	if(UART_GetITStatus(UARTx,  UART_IT_FLAG_RXI))
 	{
         if(RingBuffer_IsFull(&rxring[channel]))
 		{
-			UART_ReceiveData(s2e_uart);
+			UART_ReceiveData(UARTx);
 			
 			flag_ringbuf_full[channel] = 1;
 		}
@@ -74,81 +76,81 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * s2e_uart)
 			else
 #endif
 			{
-				//ch = UartGetc(s2e_uart);
-				ch = UART_ReceiveData(s2e_uart);
+				ch_rx = UART_ReceiveData(UARTx);
 #ifdef _SEG_DEBUG_
-				UART_SendData(s2e_uart, ch);	// ## UART echo; for debugging
+				UART_SendData(s2e_uart, ch_rx);	// ## UART echo; for debugging
 #endif
                 if(channel==0)
                 {
-                    if((check_modeswitch_trigger(ch))==0) // ret: [0] data / [1] trigger code
+                    if((check_modeswitch_trigger(ch_rx))==0) // ret: [0] data / [1] trigger code
                     {
-                        if(check_serial_store_permitted(channel, ch)==1) // ret: [0] not permitted / [1] permitted
+                        if(check_serial_store_permitted(channel, ch_rx)==1) // ret: [0] not permitted / [1] permitted
                         {
- 
-                            /*BUFFER_IN(data_rx_0)=ch;
-                            BUFFER_IN_MOVE(data_rx_0, 1);*/
-                            RingBuffer_Insert(&rxring[channel], &ch);
+                            RingBuffer_Insert(&rxring[channel], &ch_rx);
                         }
                     }
                 }
                 else
                 {
-                    if(check_serial_store_permitted(channel, ch)==1) // ret: [0] not permitted / [1] permitted
+                    if(check_serial_store_permitted(channel, ch_rx)==1) // ret: [0] not permitted / [1] permitted
                     {
-                        /*BUFFER_IN(data_rx_1)=ch;
-                        BUFFER_IN_MOVE(data_rx_1, 1);*/
-                        RingBuffer_Insert(&rxring[channel], &ch);
+                        RingBuffer_Insert(&rxring[channel], &ch_rx);
                     }
                 }
 			}
 		}
 		init_time_delimiter_timer(channel);
-		
-		UART_ClearITPendingBit(s2e_uart, UART_IT_FLAG_RXI);
+		UART_ClearITPendingBit(UARTx, UART_IT_FLAG_RXI);
 	}
 
-	// Does not use: UART Tx interrupt
-	if(UART_GetITStatus(s2e_uart, UART_IT_FLAG_TXI)) 
+	//UART Tx interrupt
+	if(UART_GetITStatus(UARTx, UART_IT_FLAG_TXI) != RESET) 
 	{
-        UART_TX_IRQ_Handler_RB(s2e_uart, &txring[channel]);
-		UART_ClearITPendingBit(s2e_uart, UART_IT_FLAG_TXI);
+        //UART_TX_IRQ_Handler_RB(s2e_uart, &txring[channel]);
+        if(RingBuffer_Pop(&txring[channel], &ch_tx))
+        {
+            //while((UARTx->FR & UART_FR_TXFE));
+            //while(UARTx->FR & UART_FR_TXFF);
+            UART_SendData(UARTx, ch_tx);
+            //UARTx->FR = UARTx->FR|UART_FR_TXFF;
+            //while(UARTx->FR & UART_FR_TXFE);
+        }
+        // RingBuffer Empty
+        else												
+        {
+            UART_ITConfig(UARTx, UART_IT_FLAG_TXI, DISABLE);
+        }
+		UART_ClearITPendingBit(UARTx, UART_IT_FLAG_TXI);
 	}
+}
 
-}
-void UART_TX_IRQ_Handler_RB(UART_TypeDef* UARTx, RINGBUFF_T *pTXRB)
-{
-    uint8_t ch;
-    
-    if(RingBuffer_Pop(pTXRB, &ch))
-    {
-        UART_SendData(UARTx, ch);
-    }
-    else												// RingBuffer Empty
-    {
-        UART_ITConfig(UARTx, UART_IT_FLAG_TXI, DISABLE);
-    }    
-}
 uint32_t UART_Send_RB(UART_TypeDef* UARTx, RINGBUFF_T *pRB, const void *data, int bytes)
 {
 	uint32_t ret;
 	uint8_t *p8 = (uint8_t *) data;
-	uint8_t ch;
+	uint8_t ch, i;
 
 	/* Don't let UART transmit ring buffer change in the UART IRQ handler */
-	UART_ITConfig(UARTx, UART_IT_FLAG_TXI, DISABLE);
+    __disable_irq();
+    UART_ITConfig(UARTx, UART_IT_FLAG_TXI, DISABLE);
 
-	/* Move as much data as possible into transmit ring buffer */
+	/* Move as much data as possible into transmit ring buffer */ 
 	ret = RingBuffer_InsertMult(pRB, p8, bytes);
 
-	/* Enable UART transmit interrupt */
-	UART_ITConfig(UARTx, UART_IT_FLAG_TXI, ENABLE);
-
+    /* Enable UART transmit interrupt */
+	//UART_ITConfig(UARTx, UART_IT_FLAG_TXI, ENABLE);
+    
+    
 	if(RingBuffer_Pop(pRB, &ch))
 	{
+        //while((UARTx->FR & UART_FR_TXFE));
+        while(UARTx->FR & UART_FR_TXFF);
 		UART_SendData(UARTx, ch);
+        //UARTx->FR = UARTx->FR|UART_FR_TXFF;
+        //while(UARTx->FR & UART_FR_BUSY);
 	}
-
+    UART_ITConfig(UARTx, UART_IT_FLAG_TXI, ENABLE);
+    __enable_irq();
 	return ret;
 }
 int UART_Read_RB(RINGBUFF_T *pRB, void *data, int bytes)
@@ -165,23 +167,23 @@ void S2E_UART_Configuration(uint8_t channel)
 {
     UART_InitTypeDef UART_InitStructure;
     
-    UART_TypeDef* UART = (channel==0)?UART0:UART1;
-    IRQn_Type UART_IRQn = (channel==0)?UART0_IRQn:UART1_IRQn;
+    UART_TypeDef* UARTx = (channel==0)?UART0:UART1;
+    IRQn_Type UARTx_IRQn = (channel==0)?UART0_IRQn:UART1_IRQn;
     
     /* Ring Buffer */
     RingBuffer_Init(&rxring[channel], rxbuff[channel], 1, UART_RRB_SIZE);
     RingBuffer_Init(&txring[channel], txbuff[channel], 1, UART_SRB_SIZE);
     /* Configure the UART */
     serial_info_init(&UART_InitStructure, channel);
-    UART_Init(UART,&UART_InitStructure);
+    UART_Init(UARTx,&UART_InitStructure);
     /* Configure UART Interrupt Enable */
-    UART_ITConfig(UART, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
+    UART_ITConfig(UARTx, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
     /* Configure UART FIFO Enable */
     //UART_FIFO_Enable(UART,4,4);
     /* NVIC configuration */
-    NVIC_ClearPendingIRQ(UART_IRQn);
-    NVIC_SetPriority(UART_IRQn, 1);
-    NVIC_EnableIRQ(UART_IRQn);
+    NVIC_ClearPendingIRQ(UARTx_IRQn);
+    NVIC_SetPriority(UARTx_IRQn, 1);
+    NVIC_EnableIRQ(UARTx_IRQn);
 }
 
 void UART2_Configuration(void)

@@ -172,8 +172,6 @@ void load_DevConfig_from_storage(void)
 	dev_config.device_common.fw_ver[0] = MAJOR_VER;
 	dev_config.device_common.fw_ver[1] = MINOR_VER;
 	dev_config.device_common.fw_ver[2] = MAINTENANCE_VER;
-	
-	
 }
 
 void save_DevConfig_to_storage(void)

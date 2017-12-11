@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-//#define _SEGCP_DEBUG_
+#define _SEGCP_DEBUG_
 
 #define DEVCONF_VALID				0xA55A
 #define DEVCONF_DOMAIN_MAX			32

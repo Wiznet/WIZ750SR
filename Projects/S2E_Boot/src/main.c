@@ -474,7 +474,8 @@ uint8_t check_mac_address(void)
 	
 	uint8_t i;
 	uint8_t mac_buf[6] = {0, };
-	uint8_t mac_str[MACSTR_SIZE] = {0, };
+	//uint8_t mac_str[MACSTR_SIZE] = {0, };
+    uint8_t mac_str[MACSTR_SIZE] = {"MC00:08:dc:50:37:71\r\n"};
 	uint8_t trep[MACSTR_SIZE] = {0, };
 	uint8_t ret = 0;
 	
@@ -495,12 +496,15 @@ uint8_t check_mac_address(void)
 			while(1)
 			{
 				printf("INPUT FIRST MAC?\r\n");
+                /*
+                for develop
 				for(i = 0; i < MACSTR_SIZE-1; i++)
 				{
 					mac_str[i] = S_UartGetc();
 					//S_UartPutc(mac_str[i]);
 				}
-				
+				*/
+                
 				if(!proc_SEGCP(mac_str, trep))
 				{
 					// Save the MAC address to PRIVATE SPACE for MAC address only

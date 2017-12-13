@@ -34,9 +34,13 @@ uint8_t flag_fw_from_network_timeout = SEGCP_DISABLE;
 uint8_t flag_fw_from_server_failed = SEGCP_DISABLE;
 static uint16_t any_port = 0;
 
-//extern uint8_t g_send_buf[DATA_BUF_SIZE]; // for dns query to HTTP server
+#if (BUFFER_TYPE==1)
 extern uint8_t g_recv_buf[DEVICE_UART_CNT][DATA_BUF_SIZE];
-
+#elif (BUFFER_TYPE==2)
+extern uint8_t g_recv_buf[DATA_BUF_SIZE];
+#elif (BUFFER_TYPE==3)
+extern uint8_t g_data_buf[DATA_BUF_SIZE];
+#endif
 
 void device_set_factory_default(void)
 {
@@ -64,11 +68,13 @@ void device_reboot(void)
 	uint8_t i;
 	device_socket_termination();
 	
+    /*
 	for(i=0; i<DEVICE_UART_CNT; i++)
 	{
 		clear_data_transfer_bytecount(i, SEG_ALL);
 	}
-	
+	*/
+    
 	NVIC_SystemReset();
 	while(1);
 }
@@ -112,7 +118,13 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 		if(firmware_update->fwup_server_port == 0)				return DEVICE_FWUP_RET_FAILED;
 		
 		// DNS Query to Firmware update server
-		if(process_dns_fw_server(server_ip, g_recv_buf[0]) != SEGCP_ENABLE)
+#if (BUFFER_TYPE==1)
+        if(process_dns_fw_server(server_ip, g_recv_buf[0]) != SEGCP_ENABLE)
+#elif (BUFFER_TYPE==2)
+        if(process_dns_fw_server(server_ip, g_recv_buf) != SEGCP_ENABLE)
+#elif (BUFFER_TYPE==3)
+        if(process_dns_fw_server(server_ip, g_data_buf) != SEGCP_ENABLE)
+#endif
 		{
 			if(serial_common->serial_debug_en == SEGCP_ENABLE)
 			{
@@ -149,12 +161,37 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 		{
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 			//recv_len = get_firmware_from_network(SOCK_FWUPDATE, (uint8_t *)&g_recv_buf);
-			if(stype == NETWORK_APP_BACKUP) 		recv_len = get_firmware_from_network(SOCK_FWUPDATE, g_recv_buf[0]);
-			else if(stype == SERVER_APP_BACKUP)		recv_len = get_firmware_from_server(SOCK_FWUPDATE, server_ip, g_recv_buf[0]);
+			if(stype == NETWORK_APP_BACKUP) 		
+            {
+#if (BUFFER_TYPE==1)
+                recv_len = get_firmware_from_network(SOCK_FWUPDATE, g_recv_buf[0]);
+#elif (BUFFER_TYPE==2)
+                recv_len = get_firmware_from_network(SOCK_FWUPDATE, g_recv_buf);
+#elif (BUFFER_TYPE==3)
+                recv_len = get_firmware_from_network(SOCK_FWUPDATE, g_data_buf);
+#endif
+                
+            }
+			else if(stype == SERVER_APP_BACKUP)		
+            {
+#if (BUFFER_TYPE==1)
+                recv_len = get_firmware_from_server(SOCK_FWUPDATE, server_ip, g_recv_buf[0]);
+#elif (BUFFER_TYPE==2)
+                recv_len = get_firmware_from_server(SOCK_FWUPDATE, server_ip, g_recv_buf);
+#elif (BUFFER_TYPE==3)
+                recv_len = get_firmware_from_server(SOCK_FWUPDATE, server_ip, g_data_buf);
+#endif
+            }
 			
 			if(recv_len > 0)
 			{
-				write_len = write_storage(STORAGE_APP_BACKUP, (DEVICE_APP_BACKUP_ADDR + write_fw_len), g_recv_buf, recv_len);
+#if (BUFFER_TYPE==1)
+                write_len = write_storage(STORAGE_APP_BACKUP, (DEVICE_APP_BACKUP_ADDR + write_fw_len), g_recv_buf[0], recv_len);
+#elif (BUFFER_TYPE==2)
+                write_len = write_storage(STORAGE_APP_BACKUP, (DEVICE_APP_BACKUP_ADDR + write_fw_len), g_recv_buf, recv_len);
+#elif (BUFFER_TYPE==3)
+                write_len = write_storage(STORAGE_APP_BACKUP, (DEVICE_APP_BACKUP_ADDR + write_fw_len), g_data_buf, recv_len);
+#endif
 				write_fw_len += write_len;
 				fw_update_time = 0; // Reset fw update timeout counter
 			}

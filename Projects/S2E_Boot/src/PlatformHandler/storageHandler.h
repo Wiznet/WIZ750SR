@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-//#define _STORAGE_DEBUG_
+#define _STORAGE_DEBUG_
 typedef enum{STORAGE_MAC, STORAGE_CONFIG, STORAGE_APP_MAIN, STORAGE_APP_BACKUP, NETWORK_APP_BACKUP, SERVER_APP_BACKUP} teDATASTORAGE;
 
 uint32_t read_storage(teDATASTORAGE stype, uint32_t addr, void *data, uint16_t size);

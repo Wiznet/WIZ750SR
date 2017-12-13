@@ -9,7 +9,7 @@
 /* Application Firmware Version */
 #define MAJOR_VER			1
 #define MINOR_VER			1
-#define MAINTENANCE_VER		9
+#define MAINTENANCE_VER		10
 
 #define STR_VERSION_STATUS	"Develop" // or "Stable"
 //#define STR_VERSION_STATUS	"Stable"
@@ -61,7 +61,8 @@
 /* Buffer size */
 #define DATA_BUF_SIZE		1024
 #define CONFIG_BUF_SIZE		512
-
+/* Buffer type */
+#define BUFFER_TYPE         1
 ////////////////////////////////
 // Available board list		  //
 ////////////////////////////////
@@ -71,7 +72,7 @@
 #define W7500P_S2E			3
 #define WIZ750MINI			4
 #define WIZ750JR			5
-#define WIZ750SR_2PORT		6	
+#define WIZ752SR    		6	
 #define UNKNOWN_DEVICE		0xff
 
 ////////////////////////////////
@@ -79,6 +80,7 @@
 ////////////////////////////////
 // Defines for S2E Status
 typedef enum{ST_BOOT, ST_OPEN, ST_CONNECT, ST_UPGRADE, ST_ATMODE, ST_UDP} teDEVSTATUS;   // for Device status
+//typedef enum{ST_BOOT, ST_OPEN, ST_CONNECT, ST_UPGRADE, ST_ATMODE, ST_UDP} teDEVSTATUS;   // for Device status
 
 #define DEVICE_AT_MODE		0
 #define DEVICE_GW_MODE		1

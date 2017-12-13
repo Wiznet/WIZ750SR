@@ -155,12 +155,20 @@ void erase_storage(teDATASTORAGE stype)
 	if((stype == STORAGE_APP_MAIN) || (stype == STORAGE_APP_BACKUP))
 	{
 		blocks = DEVICE_APP_SIZE / BLOCK_SIZE;
-		
+#ifdef _STORAGE_DEBUG_
+		printf(" > STORAGE:ERASE_block: - 0x%x, %d\r\n", working_address, working_address);
+#endif
 		if(DEVICE_APP_SIZE > (blocks * BLOCK_SIZE))
 		{
 			remainder = DEVICE_APP_SIZE - (blocks * BLOCK_SIZE);
 			sectors = (remainder / SECT_SIZE);
-			if(remainder > (sectors * SECT_SIZE)) sectors++;
+#ifdef _STORAGE_DEBUG_
+            printf(" > STORAGE:ERASE_remainder: - 0x%x, %d, sectors: - 0x%x, %d\r\n", remainder, remainder, sectors, sectors);
+#endif
+			if(remainder > (sectors * SECT_SIZE)) 
+            {
+                sectors++;
+            }
 		}
 		
 		working_address = address;
@@ -170,10 +178,10 @@ void erase_storage(teDATASTORAGE stype)
 		// Flash block erase operation
 		for(i = 0; i < blocks; i++)
 		{
-			erase_flash_block(working_address + (BLOCK_SIZE * i));
 #ifdef _STORAGE_DEBUG_
 			printf(" > STORAGE:BLOCK_ERASE:ADDR - 0x%x\r\n", working_address + (BLOCK_SIZE * i));
 #endif
+			erase_flash_block(working_address + (BLOCK_SIZE * i));
 		}
 		
 		working_address += (blocks * BLOCK_SIZE);
@@ -183,10 +191,10 @@ void erase_storage(teDATASTORAGE stype)
 		{
 			for(i = 0; i < sectors; i++)
 			{
-				erase_flash_sector(working_address + (SECT_SIZE * i));
 #ifdef _STORAGE_DEBUG_
 				printf(" > STORAGE:SECTOR_ERASE:ADDR - 0x%x\r\n", working_address + (SECT_SIZE * i));
 #endif
+				erase_flash_sector(working_address + (SECT_SIZE * i));
 			}
 			working_address += (sectors * SECT_SIZE);
 		}

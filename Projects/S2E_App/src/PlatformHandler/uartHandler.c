@@ -523,7 +523,7 @@ void set_uart_rts_pin_low(uint8_t uartNum)
 	if(uartNum == 0) // UART0
 	{
 		GPIO_ResetBits(UART0_RTS_PORT, UART0_RTS_PIN);
-	}
+	} 
 	else if(uartNum == 1) // UART1
 	{
 		GPIO_ResetBits(UART1_RTS_PORT, UART1_RTS_PIN);

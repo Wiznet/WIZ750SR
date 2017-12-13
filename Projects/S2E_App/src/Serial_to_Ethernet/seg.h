@@ -12,7 +12,7 @@
 #define SEG_DATA_UART1		1	// S2E Data UART selector, [0] UART0 or [1] UART1
 #define SEG_DEBUG_UART		2	// S2E Debug UART, fixed
 
-#define SEG_DATA_BUF_SIZE	1024	// UART Ring buffer size
+#define SEG_DATA_BUF_SIZE	DATA_BUF_SIZE	// UART Ring buffer size
 //#define SEG_DATA_BUF_SIZE	2048	// UART Ring buffer size
 //#define SEG_DATA_BUF_SIZE	3072	// UART Ring buffer size
 //#define SEG_DATA_BUF_SIZE	4096	// UART Ring buffer size
@@ -29,9 +29,11 @@
 #define MAX_CONNECTION_AUTH_TIME		5000 // 5000ms (5sec)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
+/*
 #ifndef DATA_BUF_SIZE
-	#define DATA_BUF_SIZE	1024
+	#define DATA_BUF_SIZE	2048
 #endif
+*/
 
 #define SEG_DISABLE			0
 #define SEG_ENABLE			1
@@ -43,7 +45,7 @@ extern uint8_t flag_process_dns_success;
 extern char * str_working[];
 
 
-typedef enum{SEG_UART_RX, SEG_UART_TX, SEG_ETHER_RX, SEG_ETHER_TX, SEG_ALL} teDATADIR;
+//typedef enum{SEG_UART_RX, SEG_UART_TX, SEG_ETHER_RX, SEG_ETHER_TX, SEG_ALL} teDATADIR;
 
 // Serial to Ethernet function handler; call by main loop
 void do_seg(void);
@@ -68,8 +70,8 @@ uint8_t check_modeswitch_trigger(uint8_t ch);	// Serial command mode switch trig
 void init_time_delimiter_timer(uint8_t chanel); 			// Serial data packing option [Time]: Timer enalble function for Time delimiter
 
 // UART tx/rx and Ethernet tx/rx data transfer bytes counter
-void clear_data_transfer_bytecount(uint8_t channel, teDATADIR dir);
-uint32_t get_data_transfer_bytecount(uint8_t channel, teDATADIR dir);
+//void clear_data_transfer_bytecount(uint8_t channel, teDATADIR dir);
+//uint32_t get_data_transfer_bytecount(uint8_t channel, teDATADIR dir);
 
 #endif /* SEG_H_ */
 

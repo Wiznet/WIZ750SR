@@ -20,7 +20,7 @@
   * FROM THE CONTENT OF SUCH FIRMWARE AND/OR THE USE MADE BY CUSTOMERS OF THE
   * CODING INFORMATION CONTAINED HEREIN IN CONNECTION WITH THEIR PRODUCTS.
   *
-  * <h2><center>&copy; COPYRIGHT 2016 WIZnet Co., Ltd.</center></h2>
+  * <h2><center>&copy; COPYRIGHT 2017 WIZnet Co., Ltd.</center></h2>
   ******************************************************************************
   */ 
 
@@ -79,9 +79,15 @@ static __IO uint32_t TimingDelay;
 
 /* Public variables ---------------------------------------------------------*/
 // Shared buffer declaration
+#if (BUFFER_TYPE==1)
 uint8_t g_send_buf[DEVICE_UART_CNT][DATA_BUF_SIZE];
 uint8_t g_recv_buf[DEVICE_UART_CNT][DATA_BUF_SIZE];
-
+#elif (BUFFER_TYPE==2)
+uint8_t g_send_buf[DATA_BUF_SIZE];
+uint8_t g_recv_buf[DATA_BUF_SIZE];
+#elif (BUFFER_TYPE==3)
+uint8_t g_data_buf[DATA_BUF_SIZE];
+#endif
 /**
   * @brief  Main program
   * @param  None
@@ -131,7 +137,7 @@ int main(void)
 		display_Dev_Info_main();
 	}
 	
-    printf("PHY Link status: %x\r\n", get_phylink());
+    printf(" - PHY Link status: %x\r\n", get_phylink());
     printf("%s\r\n", STR_BAR);
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// W7500x Application: DHCP client / DNS client handler
@@ -369,7 +375,15 @@ int8_t process_dhcp(void)
 #ifdef _MAIN_DEBUG_
 	printf(" - DHCP Client running\r\n");
 #endif
-	DHCP_init(SOCK_DHCP, g_send_buf[0]);
+    
+#if (BUFFER_TYPE==1)
+    DHCP_init(SOCK_DHCP, g_send_buf[0]);
+#elif (BUFFER_TYPE==2)
+    DHCP_init(SOCK_DHCP, g_send_buf);
+#elif (BUFFER_TYPE==3)
+    DHCP_init(SOCK_DHCP, g_data_buf);
+#endif
+
 	reg_dhcp_cbfunc(w7500x_dhcp_assign, w7500x_dhcp_assign, w7500x_dhcp_conflict);
 	
     for(i=0; i<DEVICE_UART_CNT; i++)
@@ -416,7 +430,6 @@ int8_t process_dhcp(void)
 	return ret;
 }
 
-
 int8_t process_dns(void)
 {
 	DevConfig *dev_config = get_DevConfig_pointer();
@@ -428,8 +441,14 @@ int8_t process_dns(void)
 #ifdef _MAIN_DEBUG_
 	printf(" - DNS Client running\r\n");
 #endif
-	
-	DNS_init(SOCK_DNS, g_send_buf[0]);
+
+#if (BUFFER_TYPE==1)
+    DNS_init(SOCK_DNS, g_send_buf[0]);
+#elif (BUFFER_TYPE==2)
+    DNS_init(SOCK_DNS, g_send_buf);
+#elif (BUFFER_TYPE==3)
+    DNS_init(SOCK_DNS, g_data_buf);
+#endif	
 	
 	dns_server_ip[0] = dev_config->network_option.dns_server_ip[0];
 	dns_server_ip[1] = dev_config->network_option.dns_server_ip[1];
@@ -514,9 +533,10 @@ void display_Dev_Info_main(void)
     printf(" - Search ID code: \r\n");
 		printf("\t- %s: [%s]\r\n", (dev_config->config_common.pw_search[0] != 0)?"Enabled":"Disabled", (dev_config->config_common.pw_search[0] != 0)?dev_config->config_common.pw_search:"None");
     
+    printf("%s\r\n", STR_BAR);
+    
     for(i=0; i<DEVICE_UART_CNT; i++)
     {
-    printf("%s\r\n", STR_BAR);
     printf(" - [%d] Channel mode: %s\r\n", i, str_working[dev_config->network_connection[i].working_mode]);
     
         printf("\t- TCP/UDP ports\r\n");
@@ -553,10 +573,6 @@ void display_Dev_Info_main(void)
 		else
 			printf("Flow control: %s\r\n", flow_ctrl_table[0]); // RS-422/485; flow control - NONE only
 
-		printf("\t- Debug %s port: [%s%d]\r\n", STR_UART, STR_UART, SEG_DEBUG_UART);
-		printf("\t   + %s / %s %s\r\n", "115200-8-N-1", "NONE", "(fixed)");
-		
-
 	printf(" - [%d] Channel Serial data packing options:\r\n", i);
 		printf("\t- Time: ");
 			if(dev_config->serial_data_packing[i].packing_time) printf("[%d] (msec)\r\n", dev_config->serial_data_packing[i].packing_time);
@@ -568,8 +584,15 @@ void display_Dev_Info_main(void)
 			if(dev_config->serial_data_packing[i].packing_delimiter_length == 1) printf("[%.2X] (hex only)\r\n", dev_config->serial_data_packing[i].packing_delimiter[0]);
 			else printf("%s\r\n", STR_DISABLED);
         
+    printf("%s\r\n", STR_BAR);
+        
     }
-		printf("%s\r\n", STR_BAR);
+
+    printf(" - Debug %s port: [%s%d]\r\n", STR_UART, STR_UART, SEG_DEBUG_UART);
+		printf("   + %s / %s %s\r\n", "115200-8-N-1", "NONE", "(fixed)");
+    
+    printf("%s\r\n", STR_BAR);
+    
 		printf(" - Serial command mode swtich code:\r\n");
 		printf("\t- %s\r\n", (dev_config->serial_command.serial_command == 1)?STR_ENABLED:STR_DISABLED);
 		printf("\t- [%.2X][%.2X][%.2X] (Hex only)\r\n", dev_config->serial_command.serial_trigger[0], dev_config->serial_command.serial_trigger[1], dev_config->serial_command.serial_trigger[2]);

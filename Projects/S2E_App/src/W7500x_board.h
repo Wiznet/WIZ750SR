@@ -15,7 +15,7 @@
 ////////////////////////////////
 
 /* Target Board Selector */
-#define DEVICE_BOARD_NAME	WIZ750SR_2PORT
+#define DEVICE_BOARD_NAME	WIZ752SR
 
 #ifdef DEVICE_BOARD_NAME
 	#if (DEVICE_BOARD_NAME == WIZ750SR)
@@ -68,7 +68,7 @@
 		#define DEVICE_TARGET_SYSTEM_CLOCK   SYSTEM_CLOCK_48MHz
 		#define DEVICE_ID_DEFAULT            "WIZ750Jr" // Device name
         #define DEVICE_UART_CNT		1 // Not used
-    #elif (DEVICE_BOARD_NAME == WIZ750SR_2PORT)  
+    #elif (DEVICE_BOARD_NAME == WIZ752SR)  
 		//#define __USE_UART_IF_SELECTOR__	// RS-232/TTL or RS-422/485 selector using UART IF selector pin
 		//#define __USE_EXT_EEPROM__			// External EEPROM or Internal Data flash (DAT0/1)
 		//#define __USE_BOOT_ENTRY__			// Application boot mode entry pin activated
@@ -78,7 +78,7 @@
 		#define DEVICE_CLOCK_SELECT	         CLOCK_SOURCE_EXTERNAL
 		#define DEVICE_PLL_SOURCE_CLOCK      PLL_SOURCE_12MHz
 		#define DEVICE_TARGET_SYSTEM_CLOCK   SYSTEM_CLOCK_48MHz
-		#define DEVICE_ID_DEFAULT            "WIZ750SR_2PORT" // Device name
+		#define DEVICE_ID_DEFAULT            "WIZ752SR" // Device name
         #define DEVICE_UART_CNT		2 // Not used
         //#define __USE_HW_TRIG_PIN__
         //#define __USE_PHYLINK_CHECK_PIN__
@@ -201,7 +201,7 @@
 	#define HW_TRIG_PORT				STATUS_TCPCONNECT_PORT
 	#define HW_TRIG_PAD_AF				STATUS_TCPCONNECT_PAD_AF
     
-#elif (DEVICE_BOARD_NAME == WIZ750SR_2PORT) // Original pins
+#elif (DEVICE_BOARD_NAME == WIZ752SR) // Original pins
 
 	// Connection status indicator pins
 	// Direction: Output

@@ -56,7 +56,7 @@ void set_DevConfig_to_factory_value(void)
 	dev_config.network_common.subnet[2] = 255;
 	dev_config.network_common.subnet[3] = 0;
 
-	for(i=0; i<2; i++)
+	for(i=0; i<DEVICE_UART_CNT; i++)
 	{
 		dev_config.network_connection[i].working_mode = TCP_SERVER_MODE; //UDP_MODE; //TCP_MIXED_MODE; 
 		dev_config.network_connection[i].working_state = ST_OPEN;
@@ -102,7 +102,7 @@ void set_DevConfig_to_factory_value(void)
 	
 	//memset(dev_config.options.pw_setting, 0x00, sizeof(dev_config.options.pw_setting));		// Added for WIZ107SR compatibility;
 	memset(dev_config.config_common.pw_search, 0x00, sizeof(dev_config.config_common.pw_search));		// Added for WIZ107SR compatibility;
-	for(i=0; i<2; i++)
+	for(i=0; i<DEVICE_UART_CNT; i++)
 	{
 		memset(dev_config.tcp_option[i].pw_connect, 0x00, sizeof(dev_config.tcp_option[i].pw_connect));
 		dev_config.tcp_option[i].pw_connect_en = SEGCP_DISABLE;
@@ -229,7 +229,7 @@ void display_Net_Info(void)
 	printf(" # SN : %d.%d.%d.%d\r\n", gWIZNETINFO.sn[0], gWIZNETINFO.sn[1], gWIZNETINFO.sn[2], gWIZNETINFO.sn[3]);
 	printf(" # DNS: %d.%d.%d.%d\r\n", gWIZNETINFO.dns[0], gWIZNETINFO.dns[1], gWIZNETINFO.dns[2], gWIZNETINFO.dns[3]);
 	
-	for(i=0; i<2; i++)
+	for(i=0; i<DEVICE_UART_CNT; i++)
 	{
 		if(value->network_connection[i].working_mode != TCP_SERVER_MODE)
 		{

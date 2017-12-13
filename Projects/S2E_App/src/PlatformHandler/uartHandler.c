@@ -43,7 +43,6 @@ static uint8_t xonoff_status[DEVICE_UART_CNT] = {UART_XON,};
 static uint8_t uart_if_mode[DEVICE_UART_CNT] = {UART_IF_RS422,};
 
 /* Public functions ----------------------------------------------------------*/
-#if 1
 void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx, uint8_t channel)
 {
     struct __serial_option *serial_option = (struct __serial_option *)get_DevConfig_pointer()->serial_option;
@@ -135,138 +134,6 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx, uint8_t channel)
 		//UART_ClearITPendingBit(UARTx, UART_IT_FLAG_TXI);
 	}
 }
-#else
-void S2E_UART0_IRQ_Handler()
-{
-    struct __serial_option *serial_option = (struct __serial_option *)get_DevConfig_pointer()->serial_option;
-    
-	uint8_t ch_tx; 
-    uint8_t ch_rx; 
-
-    //UART Rx interrupt
-	if(UART_GetITStatus(UART0,  UART_IT_FLAG_RXI))
-	{
-        UART_ClearITPendingBit(UART0, UART_IT_FLAG_RXI);
-        if(RingBuffer_IsFull(&rxring[0]))
-		{
-			UART_ReceiveData(UART0);
-			
-			flag_ringbuf_full[0] = 1;
-		}
-		else
-		{
-#ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
-			if(serial_option[0].flow_control == flow_rts_cts)
-			{
-				;
-			}
-#else
-			//if((serial_option[channel].flow_control == flow_rts_cts) && (M_BUFFER_USED_SIZE(channel) > UART_OFF_THRESHOLD)) // CTS/RTS
-            if((serial_option[0].flow_control == flow_rts_cts) && (RingBuffer_GetCount(&rxring[0]) > UART_OFF_THRESHOLD)) // CTS/RTS
-			{
-				; // Does nothing => RTS signal inactive
-			}
-			else
-#endif
-			{
-				ch_rx = UART_ReceiveData(UART0);
-                //UART_ClearITPendingBit(UARTx, UART_IT_FLAG_RXI);
-#ifdef _SEG_DEBUG_
-				UART_SendData(s2e_uart, ch_rx);	// ## UART echo; for debugging
-#endif
-
-                if((check_modeswitch_trigger(ch_rx))==0) // ret: [0] data / [1] trigger code
-                {
-                    if(check_serial_store_permitted(0, ch_rx)==1) // ret: [0] not permitted / [1] permitted
-                    {
-                        RingBuffer_Insert(&rxring[0], &ch_rx);
-                    }
-                }
-
-			}
-		}
-		init_time_delimiter_timer(0);
-	}
-
-	//UART Tx interrupt
-	if(UART_GetITStatus(UART0, UART_IT_FLAG_TXI) != RESET) 
-	{
-        UART_ClearITPendingBit(UART0, UART_IT_FLAG_TXI);
-        if(RingBuffer_Pop(&txring[0], &ch_tx))
-        {
-            UART_SendData(UART0, ch_tx);
-        }
-        // RingBuffer Empty
-        else												
-        {
-            UART_ITConfig(UART0, UART_IT_FLAG_TXI, DISABLE);
-        }
-	}
-}
-void S2E_UART1_IRQ_Handler()
-{
-    struct __serial_option *serial_option = (struct __serial_option *)get_DevConfig_pointer()->serial_option;
-    
-	uint8_t ch_tx; 
-    uint8_t ch_rx; 
-
-    //UART Rx interrupt
-	if(UART_GetITStatus(UART1,  UART_IT_FLAG_RXI))
-	{
-        UART_ClearITPendingBit(UART1, UART_IT_FLAG_RXI);
-        if(RingBuffer_IsFull(&rxring[1]))
-		{
-			UART_ReceiveData(UART1);
-			
-			flag_ringbuf_full[1] = 1;
-		}
-		else
-		{
-#ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
-			if(serial_option[1].flow_control == flow_rts_cts)
-			{
-				;
-			}
-#else
-			//if((serial_option[channel].flow_control == flow_rts_cts) && (M_BUFFER_USED_SIZE(channel) > UART_OFF_THRESHOLD)) // CTS/RTS
-            if((serial_option[1].flow_control == flow_rts_cts) && (RingBuffer_GetCount(&rxring[1]) > UART_OFF_THRESHOLD)) // CTS/RTS
-			{
-				; // Does nothing => RTS signal inactive
-			}
-			else
-#endif
-			{
-				ch_rx = UART_ReceiveData(UART1);
-                //UART_ClearITPendingBit(UARTx, UART_IT_FLAG_RXI);
-#ifdef _SEG_DEBUG_
-				UART_SendData(s2e_uart, ch_rx);	// ## UART echo; for debugging
-#endif
-
-                if(check_serial_store_permitted(1, ch_rx)==1) // ret: [0] not permitted / [1] permitted
-                {
-                    RingBuffer_Insert(&rxring[1], &ch_rx);
-                }
-			}
-		}
-		init_time_delimiter_timer(1);
-	}
-
-	//UART Tx interrupt
-	if(UART_GetITStatus(UART1, UART_IT_FLAG_TXI) != RESET) 
-	{
-        UART_ClearITPendingBit(UART1, UART_IT_FLAG_TXI);
-        if(RingBuffer_Pop(&txring[1], &ch_tx))
-        {
-            UART_SendData(UART1, ch_tx);
-        }
-        // RingBuffer Empty
-        else												
-        {
-            UART_ITConfig(UART1, UART_IT_FLAG_TXI, DISABLE);
-        }
-	}
-}
-#endif
 uint32_t UART_Send_RB(UART_TypeDef* UARTx, RINGBUFF_T *pRB, const void *data, int bytes)
 {
 	uint32_t ret;
@@ -279,10 +146,8 @@ uint32_t UART_Send_RB(UART_TypeDef* UARTx, RINGBUFF_T *pRB, const void *data, in
 
 	/* Move as much data as possible into transmit ring buffer */ 
 	ret = RingBuffer_InsertMult(pRB, p8, bytes);
-
     /* Enable UART transmit interrupt */
 	//UART_ITConfig(UARTx, UART_IT_FLAG_TXI, ENABLE);
-    
     
 	if(RingBuffer_Pop(pRB, &ch))
 	{

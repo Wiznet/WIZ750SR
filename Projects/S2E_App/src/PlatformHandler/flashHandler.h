@@ -15,12 +15,13 @@
 #define IAP_ERAS_MASS		(IAP_ERAS + 5)
 #define IAP_PROG			(0x022)
 #define SECT_SIZE			(0x0100) // 256 bytes
-#define BLOCK_SIZE			(0x1000) // 4096 bytes
+#define BLOCK_SIZE			(0x1000) // 4096 bytes per block erase
 
 /* W7500 IAP: Flash memory map */
 // Main flash size: 128kB (512 Sectors == 32 Blocks)
 #define FLASH_START_ADDR	0x00000000
 #define FLASH_END_ADDR		0x0001FEFF
+//#define FLASH_END_ADDR		0x0001FFFF
 
 // Data flash 0 size: 256bytes (1 Sector)
 #define DAT0_START_ADDR		0x0003FE00

@@ -475,7 +475,7 @@ uint8_t check_mac_address(void)
 	uint8_t i;
 	uint8_t mac_buf[6] = {0, };
 	//uint8_t mac_str[MACSTR_SIZE] = {0, };
-    uint8_t mac_str[MACSTR_SIZE] = {"MC00:08:dc:50:37:71\r\n"};
+    uint8_t mac_str[MACSTR_SIZE] = {"MC00:08:DC:50:37:71\r\n"};
 	uint8_t trep[MACSTR_SIZE] = {0, };
 	uint8_t ret = 0;
 	
@@ -484,12 +484,13 @@ uint8_t check_mac_address(void)
 	{
 		read_storage(STORAGE_MAC, 0, mac_buf, 0);
 		
-		//printf("Storage MAC: %.2x:%.2x:%.2x:%.2x:%.2x:%.2x\r\n", mac_buf[0], mac_buf[1], mac_buf[2], mac_buf[3], mac_buf[4], mac_buf[5]);
+		printf("Storage MAC: %.2x:%.2x:%.2x:%.2x:%.2x:%.2x\r\n", mac_buf[0], mac_buf[1], mac_buf[2], mac_buf[3], mac_buf[4], mac_buf[5]);
 		
 		// Initial stage: Input the MAC address
 		if(((mac_buf[0] != 0x00) || (mac_buf[1] != 0x08) || (mac_buf[2] != 0xDC)) ||
 			((mac_buf[0] == 0xff) && (mac_buf[1] == 0xff) && (mac_buf[2] == 0xff)))
 		{
+            
 			gSEGCPPRIVILEGE = SEGCP_PRIVILEGE_CLR;
 			gSEGCPPRIVILEGE = (SEGCP_PRIVILEGE_SET|SEGCP_PRIVILEGE_WRITE);
 			

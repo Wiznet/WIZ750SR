@@ -191,7 +191,6 @@ void do_seg(void)
                     break;
             }
         
-		
             // XON/XOFF Software flow control: Check the Buffer usage and Send the start/stop commands
             // [WIZnet Device] -> [Peer]
             if((serial_option[i].flow_control == flow_xon_xoff) || serial_option[i].flow_control == flow_rts_cts) 

@@ -121,12 +121,7 @@ int main(void)
         S2E_UART_Configuration(i);
     }
     
-	//uart_puts(SEG_DATA_UART0, (uint8_t *)"Test UART0\r\n", sizeof("Test UART0\r\n")); 
-    //uart_puts(SEG_DATA_UART1, (uint8_t *)"Test UART1\r\n", sizeof("Test UART1\r\n"));
-    //UART_Send_RB(UART0, &txring[0], (uint8_t *)"Test UART0\r\n", sizeof("Test UART0\r\n")); 
-    //UART_Send_RB(UART1, &txring[1], (uint8_t *)"Test UART1\r\n", sizeof("Test UART1\r\n"));
-    
-	/* GPIO Initialization*/
+	/* GPIO Initialization */
 	IO_Configuration();
 	
 	if(dev_config->serial_common.serial_debug_en)
@@ -229,6 +224,8 @@ int main(void)
     printf("NVIC_GetPriority UART0_IRQn : %+d\r\n", NVIC_GetPriority(UART0_IRQn));
     printf("NVIC_GetPriority UART1_IRQn : %+d\r\n", NVIC_GetPriority(UART1_IRQn));
     printf("NVIC_GetPriority UART2_IRQn : %+d\r\n", NVIC_GetPriority(UART2_IRQn));
+    printf("NVIC_GetPriority DUALTIMER0_IRQn : %+d\r\n", NVIC_GetPriority(DUALTIMER0_IRQn));
+    printf("NVIC_GetPriority DUALTIMER1_IRQn : %+d\r\n", NVIC_GetPriority(DUALTIMER1_IRQn));
     
     printf("%s\r\n", STR_BAR);
 	//link();
@@ -277,7 +274,16 @@ static void W7500x_Init(void)
 	Supervisory_IC_Init();
 	
 	/* Set System init */
+    //#define CLOCK_SOURCE_EXTERNAL	(0x1UL)
+    //#define PLL_SOURCE_12MHz	(12000000UL)    /* 12MHz External Oscillator Frequency             */
+    //#define SYSTEM_CLOCK_48MHz	(48000000UL)    // W7500x maximum clock frequency
+    
 	SystemInit_User(DEVICE_CLOCK_SELECT, DEVICE_PLL_SOURCE_CLOCK, DEVICE_TARGET_SYSTEM_CLOCK);
+    /*
+    SystemInit();
+    CRG->PLL_FCR = (60<<16)|(4<<8)|(1);
+    SystemCoreClockUpdate();
+    */
 
 	/* DualTimer0 Initialization */
 	Timer0_Configuration();
@@ -290,6 +296,7 @@ static void W7500x_Init(void)
 	
 	/* SysTick_Config */
 	SysTick_Config((GetSystemClock()/1000));
+    //SysTick_Config(48000000/1000);
 	
 
 #ifdef _MAIN_DEBUG_

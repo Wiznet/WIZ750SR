@@ -110,13 +110,7 @@ void SSP1_Handler(void)
   */
 void UART0_Handler(void)
 {
-    //__disable_irq();
-    #if 1
 	S2E_UART_IRQ_Handler(UART0, 0);
-    #else
-    S2E_UART0_IRQ_Handler();
-    #endif
-    //__enable_irq();
 }
 
 
@@ -127,13 +121,9 @@ void UART0_Handler(void)
   */
 void UART1_Handler(void)
 {
-    //__disable_irq();
-    #if 1
+    #if (DEVICE_UART_CNT==2)
 	S2E_UART_IRQ_Handler(UART1, 1);
-    #else
-    S2E_UART1_IRQ_Handler();
     #endif
-    //__enable_irq();
 }
 
 

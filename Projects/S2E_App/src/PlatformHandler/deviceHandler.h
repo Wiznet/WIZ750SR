@@ -20,8 +20,10 @@
 #define DEVICE_BOOT_SIZE					(28*1024)
 #ifdef __USE_APPBACKUP_AREA__
 	#define DEVICE_APP_SIZE						(50*1024)
+    //#define DEVICE_APP_SIZE						(49*1024)
 #else
 	#define DEVICE_APP_SIZE						(100*1024)
+    //#define DEVICE_APP_SIZE						(99*1024)
 #endif
 
 #define DEVICE_BOOT_ADDR					(FLASH_START_ADDR) // Boot: 28kB
@@ -40,6 +42,7 @@
 #define	DEVICE_APP_BACKUP_REMAIN_SECTORS	(8)
 
 #define DEVICE_MAC_ADDR						(MAC_ADDR)
+//#define DEVICE_MAC_ADDR						(DAT0_START_ADDR)
 #define DEVICE_CONFIG_ADDR					(DAT1_START_ADDR)
 
 

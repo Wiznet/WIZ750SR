@@ -14,6 +14,8 @@ static volatile uint16_t msec_cnt = 0;
 static volatile uint8_t  sec_cnt = 0;
 static volatile uint8_t  min_cnt = 0;
 static volatile uint32_t hour_cnt = 0;
+static volatile uint32_t devtime_sec = 0;
+static volatile uint32_t devtime_msec = 0;
 
 static uint8_t enable_phylink_check = 1;
 static volatile uint32_t phylink_down_time_msec;
@@ -52,6 +54,8 @@ void Timer_IRQ_Handler(void)
 		
 		msec_cnt++; // millisecond counter
 		
+		devtime_msec++;
+		
 		seg_timer_msec();		// [msec] time counter for SEG (S2E)
 		segcp_timer_msec();		// [msec] time counter for SEGCP (Config)
 		device_timer_msec();	// [msec] time counter for DeviceHandler (fw update)
@@ -77,6 +81,8 @@ void Timer_IRQ_Handler(void)
 			
 			DHCP_time_handler();	// Time counter for DHCP timeout
 			DNS_time_handler();		// Time counter for DNS timeout
+			
+			devtime_sec++; // device time counter, Can be updated this counter value by time protocol like NTP.
 		}
 		
 		/* Minute Process */
@@ -98,6 +104,26 @@ void Timer_IRQ_Handler(void)
 	{
 		DUALTIMER_IntClear(DUALTIMER0_1);
 	}
+}
+
+uint32_t getDevtime(void)
+{
+	return devtime_sec;
+}
+
+void setDevtime(uint32_t timeval_sec)
+{
+	devtime_sec = timeval_sec;
+}
+
+uint32_t getNow(void)
+{
+	return getDevtime();
+}
+
+uint32_t millis(void)
+{
+	return devtime_msec;
 }
 
 uint32_t getDeviceUptime_hour(void)

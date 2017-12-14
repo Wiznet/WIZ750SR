@@ -9,6 +9,7 @@
 #include "ConfigData.h"
 #include "storageHandler.h"
 #include "deviceHandler.h"
+#include "flashHandler.h"
 
 #include "segcp.h"
 #include "util.h"
@@ -33,7 +34,7 @@ uint8_t * tbSEGCPCMD[] = {"MC", "VR", "MN", "IM", "OP", "DD", "CP", "PO", "DG", 
 							"DP", "DI", "DW", "DH", "LP", "RP", "RH", "BR", "DB", "PR",
 							"SB", "FL", "IT", "PT", "PS", "PD", "TE", "SS", "NP", "SP",
 							"LG", "ER", "FW", "MA", "PW", "SV", "EX", "RT", "UN", "ST",
-							"FR", "EC", "K!", "UE", 0};
+							"FR", "EC", "K!", "UE", "AB", 0};
 
 uint8_t * tbSEGCPERR[] = {"ERNULL", "ERNOTAVAIL", "ERNOPARAM", "ERIGNORED", "ERNOCOMMAND", "ERINVALIDPARAM", "ERNOPRIVILEGE"};
 
@@ -99,6 +100,8 @@ void do_segcp(void)
 #ifdef __USE_APPBACKUP_AREA__
 			if(device_firmware_update(NETWORK_APP_BACKUP) == DEVICE_FWUP_RET_SUCCESS)
 			{
+				dev_config->network_info[0].state = ST_OPEN;
+				
 				save_DevConfig_to_storage();
 				device_reboot();
 			}
@@ -108,9 +111,21 @@ void do_segcp(void)
 				dev_config->firmware_update.fwup_flag = SEGCP_DISABLE;
 				dev_config->firmware_update.fwup_size = 0;
 				
+				dev_config->network_info[0].state = ST_OPEN;
 				save_DevConfig_to_storage();
+				
+				Copy_Interrupt_VectorTable(DEVICE_APP_MAIN_ADDR);
+				
 				device_reboot();
 			}
+			else // DEVICE_FWUP_RET_FAILED
+			{
+				dev_config->firmware_update.fwup_flag = SEGCP_DISABLE;
+				dev_config->firmware_update.fwup_size = 0;
+				
+				save_DevConfig_to_storage();
+			}
+			
 #endif
 			
 			//else
@@ -409,6 +424,13 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						break;
 					case SEGCP_UE:
 						sprintf(trep, "%d", 0);
+						break;
+					case SEGCP_AB: // Added command to return to App mode: AB
+						if(gSEGCPPRIVILEGE & (SEGCP_PRIVILEGE_SET|SEGCP_PRIVILEGE_WRITE)) {
+							dev_config->network_info[0].state = ST_OPEN;
+							ret |= SEGCP_RET_SAVE | SEGCP_RET_REBOOT;
+						}
+						else ret |= SEGCP_RET_ERR_NOPRIVILEGE;
 						break;
 					default:
 						ret |= SEGCP_RET_ERR_NOCOMMAND;
@@ -755,7 +777,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 #endif
 							dev_config->firmware_update.fwup_flag = SEGCP_ENABLE;
 							ret |= SEGCP_RET_FWUP;
-							sprintf(trep,"FW%d.%d.%d.%d:%d:%d\r\n", dev_config->network_info_common.local_ip[0], dev_config->network_info_common.local_ip[1]
+							sprintf(trep,"FW%d.%d.%d.%d:%d\r\n", dev_config->network_info_common.local_ip[0], dev_config->network_info_common.local_ip[1]
 							,dev_config->network_info_common.local_ip[2] , dev_config->network_info_common.local_ip[3], (uint16_t)DEVICE_FWUP_PORT);
 							
 							//close(SEG_SOCK);
@@ -785,6 +807,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 					case SEGCP_RT:
 					case SEGCP_FR:
 					case SEGCP_PW:
+					case SEGCP_AB:
 						ret |= SEGCP_RET_ERR_NOTAVAIL;
 						break;
 					default:

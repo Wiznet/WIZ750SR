@@ -40,8 +40,8 @@ uint8_t * tbSEGCPCMD[] = {"MC", "VR", "MN", "IM", "OP", "DD", "CP", "PO", "DG", 
 							"LG", "ER", "FW", "MA", "PW", "SV", "EX", "RT", "UN", "ST",
 							"FR", "EC", "K!", "UE", "GA", "GB", "GC", "GD", "CA", "CB", 
 							"CC", "CD", "SC", "S0", "S1", "RX", "FS", "FC", "FP", "FD",
-							"FH", "UI", 0};
-
+							"FH", "UI", "AB", 0};
+                            
 uint8_t * tbSEGCPERR[] = {"ERNULL", "ERNOTAVAIL", "ERNOPARAM", "ERIGNORED", "ERNOCOMMAND", "ERINVALIDPARAM", "ERNOPRIVILEGE"};
 
 uint8_t gSEGCPPRIVILEGE = SEGCP_PRIVILEGE_CLR;
@@ -606,6 +606,13 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 					case SEGCP_UE: // User echo, not used.
 						sprintf(trep, "%d", 0);
 						break;
+					case SEGCP_AB: // Added command to enter AppBoot mode: AB
+						if(gSEGCPPRIVILEGE & (SEGCP_PRIVILEGE_SET|SEGCP_PRIVILEGE_WRITE)) {
+							dev_config->network_info[0].state = ST_BOOT;
+							ret |= SEGCP_RET_SAVE | SEGCP_RET_REBOOT;
+						}
+						else ret |= SEGCP_RET_ERR_NOPRIVILEGE;
+						break;
 					default:
 						ret |= SEGCP_RET_ERR_NOCOMMAND;
 						sprintf(trep,"%s", strDEVSTATUS[dev_config->network_info[0].state]);
@@ -951,7 +958,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 #endif
 							dev_config->firmware_update.fwup_flag = SEGCP_ENABLE;
 							ret |= SEGCP_RET_FWUP;
-							sprintf(trep,"FW%d.%d.%d.%d:%d:%d\r\n", dev_config->network_info_common.local_ip[0], dev_config->network_info_common.local_ip[1]
+							sprintf(trep,"FW%d.%d.%d.%d:%d\r\n", dev_config->network_info_common.local_ip[0], dev_config->network_info_common.local_ip[1]
 							,dev_config->network_info_common.local_ip[2] , dev_config->network_info_common.local_ip[3], (uint16_t)DEVICE_FWUP_PORT);
 							
 							process_socket_termination(SEG_SOCK);
@@ -1086,7 +1093,6 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						break;
 
 					case SEGCP_UN:
-					case SEGCP_UI:
 					case SEGCP_ST:
 					case SEGCP_LG:
 					case SEGCP_ER: 
@@ -1096,6 +1102,8 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 					case SEGCP_RT:
 					case SEGCP_FR:
 					case SEGCP_PW:
+					case SEGCP_UI:
+					case SEGCP_AB:
 						ret |= SEGCP_RET_ERR_NOTAVAIL;
 						break;
 					default:

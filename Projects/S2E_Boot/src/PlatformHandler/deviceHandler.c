@@ -10,6 +10,7 @@
 #include "flashHandler.h"
 #include "storageHandler.h"
 #include "deviceHandler.h"
+#include "timerHandler.h"
 
 uint16_t get_firmware_from_network(uint8_t sock, uint8_t * buf);
 void reset_fw_update_timer(void);
@@ -195,6 +196,8 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 			printf(" > SEGCP:FW_UPDATE:UPDATE[%.2d] - %d / %d bytes\r\n", update_cnt++, write_fw_len, fwupdate->fwup_size);
 #endif
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
+			
+			Time_Counter();
 		} while(write_fw_len < fwupdate->fwup_size);
 #ifdef _FWUP_DEBUG_
 		printf(" > SEGCP:FW_UPDATE:FLASH-to-FLASH - UPDATE END | [%d] bytes\r\n", write_fw_len);
@@ -291,6 +294,8 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 				ret = DEVICE_FWUP_RET_FAILED;
 				break;
 			}
+			
+			Time_Counter();
 			
 		} while(write_fw_len < fwupdate->fwup_size);
 	}	

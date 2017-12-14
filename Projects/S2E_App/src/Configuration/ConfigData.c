@@ -148,7 +148,7 @@ void load_DevConfig_from_storage(void)
 		write_storage(STORAGE_CONFIG, 0, &dev_config, sizeof(DevConfig));
 	}
 	
-	dev_config.network_info[0].state = ST_OPEN;
+	//dev_config.network_info[0].state = ST_OPEN;
 	
 	dev_config.fw_ver[0] = MAJOR_VER;
 	dev_config.fw_ver[1] = MINOR_VER;

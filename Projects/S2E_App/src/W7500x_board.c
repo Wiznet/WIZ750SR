@@ -88,7 +88,7 @@ static void PHY_Init(void)
 	//mdio_write(GPIOB, PHYREG_CONTROL, CNTL_RESET); // PHY Reset
 	
 	#ifdef __W7500P__ // W7500P
-		set_link(FullDuplex10);
+		//set_link(FullDuplex10);
 		//set_link(HalfDuplex10);
 		//set_link(FullDuplex100);
 		//set_link(HalfDuplex100);

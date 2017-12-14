@@ -1,13 +1,14 @@
 /**
   ******************************************************************************
   * @file    W7500x Serial to Ethernet Project - WIZ750SR App
-  * @author  Eric Jung, Team Platform
-  * @version v1.1.0
-  * @date    Nov-2016
+  * @author  Eric Jung, Team Module
+  * @version v1.1.1
+  * @date    Dec-2017
   * @brief   Main program body
   ******************************************************************************
   * @attention
   * @par Revision history
+  *    <2017/12/13> v1.1.1 Develop by Eric Jung
   *    <2016/11/18> v1.1.0 Develop by Eric Jung
   *    <2016/03/29> v1.0.0 Develop by Eric Jung
   *    <2016/03/02> v0.8.0 Develop by Eric Jung
@@ -109,6 +110,7 @@ int main(void)
 	
 	/* Load the Configuration data */
 	load_DevConfig_from_storage();
+	dev_config->network_info[0].state = ST_OPEN;
 	
 	/* Set the MAC address to WIZCHIP */
 	Mac_Conf();
@@ -165,13 +167,13 @@ int main(void)
 			{
 				flag_process_dns_success = ON;
 			}
+			
+			// Debug UART: DNS results print out
+			if(dev_config->serial_info[0].serial_debug_en)
+			{
+				display_Dev_Info_dns();
+			}
 		}
-	}
-	
-	// Debug UART: DNS results print out
-	if(dev_config->serial_info[0].serial_debug_en)
-	{
-		display_Dev_Info_dns();
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////

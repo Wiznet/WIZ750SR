@@ -1,13 +1,14 @@
 /**
   ******************************************************************************
   * @file    W7500x Serial to Ethernet Project - WIZ750SR Boot
-  * @author  Eric Jung, Team Platform
-  * @version v1.1.0
-  * @date    Nov-2016
+  * @author  Eric Jung, Team Module
+  * @version v1.1.1
+  * @date    Dec-2017
   * @brief   Boot program body
   ******************************************************************************
   * @attention
   * @par Revision history
+  *    <2017/12/13> v1.1.1 Develop by Eric Jung
   *    <2016/11/18> v1.1.0 Develop by Eric Jung
   *    <2016/03/29> v1.0.0 Develop by Eric Jung
   *    <2016/03/02> v0.8.0 Develop by Eric Jung
@@ -126,9 +127,6 @@ int main(void)
 	/* Load the Configuration data */
 	load_DevConfig_from_storage();
 	
-	/* Set the device working mode: BOOT */
-	dev_config->network_info[0].state = ST_BOOT;
-	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// W7500x Application: Check the MAC address and Firmware update
 	////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -154,6 +152,7 @@ int main(void)
 			dev_config->firmware_update.fwup_flag = SEGCP_DISABLE;
 			dev_config->firmware_update.fwup_size = 0;
 			
+			dev_config->network_info[0].state = ST_OPEN;
 			save_DevConfig_to_storage();
 			
 			Copy_Interrupt_VectorTable(DEVICE_APP_MAIN_ADDR);
@@ -196,10 +195,26 @@ int main(void)
 		appjump_enable = ON;
 	}
 //#endif
+
+
+//#ifdef __USE_BOOT_ENTRY__
+//	if(get_boot_entry_pin() == 0) appjump_enable = OFF;
+//#endif
 	
+	if(appjump_enable == ON)
+	{
+		//printf("boot state: %d\r\n", dev_config->network_info[0].state);
+		if (dev_config->network_info[0].state == ST_BOOT) // for AppBoot cmd
+		{
+			appjump_enable = OFF;
+			dev_config->network_info[0].state = ST_OPEN;
+		
+			save_DevConfig_to_storage();
+		}
 #ifdef __USE_BOOT_ENTRY__
-	if(get_boot_entry_pin() == 0) appjump_enable = OFF;
+		else if(get_boot_entry_pin() == 0) appjump_enable = OFF;
 #endif
+	}
 	
 	if(appjump_enable == ON)
 	{
@@ -215,6 +230,9 @@ int main(void)
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// W7500x Application: Initialize part2
 	////////////////////////////////////////////////////////////////////////////////////////////////////
+	
+	/* Set the device working mode: BOOT */
+	dev_config->network_info[0].state = ST_BOOT;
 	
 	if(dev_config->serial_info[0].serial_debug_en)
 	{
@@ -310,7 +328,7 @@ static void W7500x_Init(void)
 	//SystemInit();
 	
 	/* Delay for working stabilize */
-	delay(1500); // 
+	//delay_ms(1500); // 
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// W7500x ISR: Interrupt Vector Table Remap (Custom)

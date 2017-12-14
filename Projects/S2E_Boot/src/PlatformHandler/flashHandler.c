@@ -2,6 +2,7 @@
 #include "W7500x.h"
 #include "common.h"
 #include "flashHandler.h"
+#include "deviceHandler.h"
 
 #ifdef _FLASH_DEBUG_
 	#include <stdio.h>
@@ -12,9 +13,10 @@ void erase_flash_sector(uint32_t sector_addr)
 	uint16_t erase_id = 0;
 	uint32_t addr = 0;
 	
-	if(sector_addr == (sector_addr & FLASH_END_ADDR)) 
+	//if(sector_addr == (sector_addr & FLASH_END_ADDR)) 
     //if(sector_addr == (sector_addr & FLASH_END_ADDR) || (sector_addr <= FLASH_END_ADDR))
     //if(sector_addr <= FLASH_END_ADDR)
+    if((sector_addr >= DEVICE_APP_MAIN_ADDR) && (sector_addr <= FLASH_END_ADDR))  
 	{
 		erase_id = IAP_ERAS_SECT;
 		addr = sector_addr;
@@ -32,7 +34,8 @@ void erase_flash_sector(uint32_t sector_addr)
 	else
 	{
 #ifdef _FLASH_DEBUG_
-		printf(" > FLASH:SECTOR_ERASE_FAILED: [0x%.8x]\r\n", sector_addr);
+		//printf(" > FLASH:SECTOR_ERASE_FAILED: [0x%.8x]\r\n", sector_addr);
+        printf(" > FLASH:SECTOR_ERASE_FAILED: [0x%.8x], [0x%.8x], [0x%.8x]\r\n", sector_addr, DEVICE_APP_MAIN_ADDR, FLASH_END_ADDR);
 #endif
 		return;
 	}

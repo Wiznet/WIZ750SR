@@ -232,7 +232,6 @@ int main(void)
     printf("NVIC_GetPriority UART2_IRQn : %+d\r\n", NVIC_GetPriority(UART2_IRQn));
     printf("NVIC_GetPriority DUALTIMER0_IRQn : %+d\r\n", NVIC_GetPriority(DUALTIMER0_IRQn));
     printf("NVIC_GetPriority DUALTIMER1_IRQn : %+d\r\n", NVIC_GetPriority(DUALTIMER1_IRQn));
-    
     printf("%s\r\n", STR_BAR);
 	//link();
 	while(1) // main loop
@@ -647,8 +646,6 @@ void display_Dev_Info_dns(void)
 		}
 		else printf(" # DNS Failed\r\n");
 	}
-	
-	printf("\r\n");
 }
 
 

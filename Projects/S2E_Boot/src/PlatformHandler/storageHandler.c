@@ -154,52 +154,25 @@ void erase_storage(teDATASTORAGE stype)
 
 	if((stype == STORAGE_APP_MAIN) || (stype == STORAGE_APP_BACKUP))
 	{
-		blocks = DEVICE_APP_SIZE / BLOCK_SIZE;
+        working_address = address; 
+        sectors = DEVICE_APP_SECT_SIZE;
 #ifdef _STORAGE_DEBUG_
-		printf(" > STORAGE:ERASE_block: - 0x%x, %d\r\n", working_address, working_address);
+		printf(" > BOOT:STORAGE:ERASE_START:ADDR - 0x%x\r\n", working_address);
 #endif
-		if(DEVICE_APP_SIZE > (blocks * BLOCK_SIZE))
-		{
-			remainder = DEVICE_APP_SIZE - (blocks * BLOCK_SIZE);
-			sectors = (remainder / SECT_SIZE);
-#ifdef _STORAGE_DEBUG_
-            printf(" > STORAGE:ERASE_remainder: - 0x%x, %d, sectors: - 0x%x, %d\r\n", remainder, remainder, sectors, sectors);
-#endif
-			if(remainder > (sectors * SECT_SIZE)) 
-            {
-                sectors++;
-            }
-		}
-		
-		working_address = address;
-#ifdef _STORAGE_DEBUG_
-		printf(" > STORAGE:ERASE_START:ADDR - 0x%x\r\n", working_address);
-#endif
-		// Flash block erase operation
-		for(i = 0; i < blocks; i++)
-		{
-#ifdef _STORAGE_DEBUG_
-			printf(" > STORAGE:BLOCK_ERASE:ADDR - 0x%x\r\n", working_address + (BLOCK_SIZE * i));
-#endif
-			erase_flash_block(working_address + (BLOCK_SIZE * i));
-		}
-		
-		working_address += (blocks * BLOCK_SIZE);
-		
 		// Flash sector erase operation
 		if(sectors > 0)
 		{
 			for(i = 0; i < sectors; i++)
 			{
 #ifdef _STORAGE_DEBUG_
-				printf(" > STORAGE:SECTOR_ERASE:ADDR - 0x%x\r\n", working_address + (SECT_SIZE * i));
+				printf(" > BOOT:STORAGE:SECTOR_ERASE:ADDR - 0x%x\r\n", working_address + (SECT_SIZE * i));
 #endif
 				erase_flash_sector(working_address + (SECT_SIZE * i));
 			}
 			working_address += (sectors * SECT_SIZE);
 		}
 #ifdef _STORAGE_DEBUG_
-			printf(" > STORAGE:ERASE_END:ADDR_RANGE - [0x%x ~ 0x%x]\r\n", address, working_address-1);
+			printf(" > BOOT:STORAGE:ERASE_END:ADDR_RANGE - [0x%x ~ 0x%x]\r\n", address, working_address-1);
 #endif
 	}
 }

@@ -9,7 +9,7 @@
 /* Application Firmware Version */
 #define MAJOR_VER			1
 #define MINOR_VER			1
-#define MAINTENANCE_VER		10
+#define MAINTENANCE_VER		11
 
 #define STR_VERSION_STATUS	"Develop" // or "Stable"
 //#define STR_VERSION_STATUS	"Stable"
@@ -72,7 +72,7 @@
 #define W7500P_S2E			3
 #define WIZ750MINI			4
 #define WIZ750JR			5
-#define WIZ752SR    		6	
+#define WIZ752SR_12x    	6	
 #define UNKNOWN_DEVICE		0xff
 
 ////////////////////////////////

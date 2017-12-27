@@ -42,6 +42,17 @@ uint32_t read_storage(teDATASTORAGE stype, uint32_t addr, void *data, uint16_t s
 	#endif
 #endif
 			break;
+        
+        case STORAGE_CONFIG_E:
+#ifndef __USE_EXT_EEPROM__
+			ret_len = read_flash(DEVICE_CONFIG_E_ADDR, data, size); // internal data flash for configuration data (DAT0/1)
+#else
+			ret_len = read_eeprom(convert_eeprom_addr(DEVICE_CONFIG_E_ADDR), data, size); // external eeprom for configuration data
+	#ifdef _EEPROM_DEBUG_
+			//dump_eeprom_block(convert_eeprom_addr(DEVICE_CONFIG_ADDR));
+	#endif
+#endif
+			break;
 		
 		case STORAGE_APP_MAIN:
 			ret_len = read_flash(addr, data, size);
@@ -94,6 +105,19 @@ uint32_t write_storage(teDATASTORAGE stype, uint32_t addr, void *data, uint16_t 
 	#endif
 #endif
 			break;
+        
+        case STORAGE_CONFIG_E:
+#ifndef __USE_EXT_EEPROM__	// flash
+			erase_storage(STORAGE_CONFIG_E);
+			ret_len = write_flash(DEVICE_CONFIG_E_ADDR, data, size); // internal data flash for configuration data (DAT0/1)
+#else
+			//erase_storage(STORAGE_CONFIG);
+			ret_len = write_eeprom(convert_eeprom_addr(DEVICE_CONFIG_E_ADDR), data, size); // external eeprom for configuration data
+	#ifdef _EEPROM_DEBUG_
+			dump_eeprom_block(convert_eeprom_addr(DEVICE_CONFIG_E_ADDR));
+	#endif
+#endif
+			break;
 		
 		case STORAGE_APP_MAIN:
 			ret_len = write_flash(addr, data, size);
@@ -137,6 +161,17 @@ void erase_storage(teDATASTORAGE stype)
 			erase_eeprom_block(convert_eeprom_addr(DEVICE_CONFIG_ADDR)); // external eeprom for configuration data
 	#ifdef _EEPROM_DEBUG_
 			dump_eeprom_block(convert_eeprom_addr(DEVICE_CONFIG_ADDR));
+	#endif
+#endif
+			break;
+        
+        case STORAGE_CONFIG_E:
+#ifndef __USE_EXT_EEPROM__
+			erase_flash_sector(DEVICE_CONFIG_E_ADDR); // internal data flash for configuration data (DAT0/1)
+#else
+			erase_eeprom_block(convert_eeprom_addr(DEVICE_CONFIG_E_ADDR)); // external eeprom for configuration data
+	#ifdef _EEPROM_DEBUG_
+			dump_eeprom_block(convert_eeprom_addr(DEVICE_CONFIG_E_ADDR));
 	#endif
 #endif
 			break;

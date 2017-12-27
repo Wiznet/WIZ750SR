@@ -9,8 +9,8 @@
 #include "wizchip_conf.h"
 #include "W7500x_board.h"
 
-#define FWUP_DOMAIN_SIZE		25
-#define FWUP_BINPATH_SIZE		35
+#define FWUP_DOMAIN_SIZE		30
+#define FWUP_BINPATH_SIZE		40
 
 /* REMOTE Firmware update */
 // HTTP Request: DEVICE_FWUP_DOMAIN + DEVICE_FWUP_BINPATH
@@ -22,7 +22,7 @@
 struct __device_common {
     uint8_t module_type[3];		// 모듈의 종류별로 코드를 부여하고 이를 사용한다.
     uint8_t fw_ver[3];			// 10진수. Major Version . Minor Version . Maintenance Version 버전으로 나뉨
-	uint8_t module_name[15];
+	uint8_t module_name[20];
     /* Check */
     uint8_t module_mode;
 } __attribute__((packed));
@@ -65,7 +65,7 @@ struct __network_option {
     uint8_t dhcp_use;
     uint8_t dns_use;
     uint8_t dns_server_ip[4];
-    char dns_domain_name[10];
+    char dns_domain_name[40];
 } __attribute__((packed));
 
 struct __tcp_option {
@@ -121,8 +121,7 @@ struct __user_io_info {
 typedef struct __DevConfig {
 
     struct __device_common device_common;
-    struct __config_common config_common;
-    struct __firmware_update firmware_update;					
+    struct __config_common config_common;				
     struct __network_common network_common;
     struct __network_connection network_connection[DEVICE_UART_CNT];	
     struct __network_option network_option;
@@ -135,7 +134,15 @@ typedef struct __DevConfig {
     
 } __attribute__((packed)) DevConfig;
 
+typedef struct __DevConfig_E {
+
+    struct __firmware_update firmware_update;						
+    
+} __attribute__((packed)) DevConfig_E;
+
 DevConfig* get_DevConfig_pointer(void);
+DevConfig_E* get_DevConfig_E_pointer(void);
+
 void set_DevConfig_to_factory_value(void);
 void load_DevConfig_from_storage(void);
 void save_DevConfig_to_storage(void);

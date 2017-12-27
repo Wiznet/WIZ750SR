@@ -209,17 +209,13 @@ void DUALTIMER0_Handler(void)
 	Timer0_IRQ_Handler();
 }
 
-
 /**
   * @brief  This function handles DUALTIMER1 Handler.
   * @param  None
   * @retval None
   */
 void DUALTIMER1_Handler(void)
-{
-    Timer1_IRQ_Handler();
-}
-
+{}
 
 /**
   * @brief  This function handles PWM0 Handler.

@@ -14,12 +14,16 @@
 #include "uartHandler.h"
 
 static DevConfig dev_config;
+static DevConfig_E dev_config_e;
 
 DevConfig* get_DevConfig_pointer(void)
 {
 	return &dev_config;
 }
-
+DevConfig_E* get_DevConfig_E_pointer(void)
+{
+	return &dev_config_e;
+}
 void set_DevConfig_to_factory_value(void)
 {
 	uint8_t i;
@@ -136,37 +140,39 @@ void set_DevConfig_to_factory_value(void)
 	dev_config.user_io_info.user_io_status = 0;
 #endif
 
-	dev_config.firmware_update.fwup_flag = SEGCP_DISABLE;
-	dev_config.firmware_update.fwup_port = DEVICE_FWUP_PORT;
-	dev_config.firmware_update.fwup_size = 0;
+	dev_config_e.firmware_update.fwup_flag = SEGCP_DISABLE;
+	dev_config_e.firmware_update.fwup_port = DEVICE_FWUP_PORT;
+	dev_config_e.firmware_update.fwup_size = 0;
 	
 	// Extended Fields: Firmware update by HTTP server
-	dev_config.firmware_update.fwup_server_port = FWUP_SERVER_PORT;
-	dev_config.firmware_update.fwup_server_use_default = SEGCP_ENABLE;
+	dev_config_e.firmware_update.fwup_server_port = FWUP_SERVER_PORT;
+	dev_config_e.firmware_update.fwup_server_use_default = SEGCP_ENABLE;
 	
 	// Planned to apply
-	memset(dev_config.firmware_update.fwup_server_domain, 0x00, sizeof(dev_config.firmware_update.fwup_server_domain));
-	memcpy(dev_config.firmware_update.fwup_server_domain, FWUP_SERVER_DOMAIN, sizeof(FWUP_SERVER_DOMAIN));
-	memset(dev_config.firmware_update.fwup_server_binpath, 0x00, sizeof(dev_config.firmware_update.fwup_server_binpath));
-	memcpy(dev_config.firmware_update.fwup_server_binpath, FWUP_SERVER_BINPATH, sizeof(FWUP_SERVER_BINPATH));
+	memset(dev_config_e.firmware_update.fwup_server_domain, 0x00, sizeof(dev_config_e.firmware_update.fwup_server_domain));
+	memcpy(dev_config_e.firmware_update.fwup_server_domain, FWUP_SERVER_DOMAIN, sizeof(FWUP_SERVER_DOMAIN));
+	memset(dev_config_e.firmware_update.fwup_server_binpath, 0x00, sizeof(dev_config_e.firmware_update.fwup_server_binpath));
+	memcpy(dev_config_e.firmware_update.fwup_server_binpath, FWUP_SERVER_BINPATH, sizeof(FWUP_SERVER_BINPATH));
 }
 
 void load_DevConfig_from_storage(void)
 {
     uint8_t i;
-	init_uart_if_sel_pin();
+	init_uart_if_sel();
 	
 	read_storage(STORAGE_CONFIG, 0, &dev_config, sizeof(DevConfig));
+    read_storage(STORAGE_CONFIG_E, 0, &dev_config_e, sizeof(DevConfig_E));
 
 	if(dev_config.config_common.packet_size == 0x0000 || dev_config.config_common.packet_size == 0xFFFF){
 		set_DevConfig_to_factory_value();
 		write_storage(STORAGE_CONFIG, 0, &dev_config, sizeof(DevConfig));
+        write_storage(STORAGE_CONFIG_E, 0, &dev_config_e, sizeof(DevConfig_E));
 	}
 	
     for(i=0; i<DEVICE_UART_CNT; i++)
     {
         dev_config.network_connection[i].working_state = ST_OPEN;
-        dev_config.serial_option[i].uart_interface = get_uart_if_sel_pin();
+        dev_config.serial_option[i].uart_interface = get_uart_if_sel();
     }
     
 	dev_config.device_common.fw_ver[0] = MAJOR_VER;
@@ -177,6 +183,7 @@ void load_DevConfig_from_storage(void)
 void save_DevConfig_to_storage(void)
 {
 	write_storage(STORAGE_CONFIG, 0, &dev_config, sizeof(DevConfig));
+    write_storage(STORAGE_CONFIG_E, 0, &dev_config_e, sizeof(DevConfig_E));
 }
 
 void get_DevConfig_value(void *dest, const void *src, uint16_t size)

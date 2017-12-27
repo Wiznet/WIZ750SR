@@ -60,12 +60,13 @@ extern uint8_t tmp_timeflag_for_debug;
 void do_segcp(void)
 {
 	DevConfig *dev_config = get_DevConfig_pointer();
+    DevConfig_E *dev_config_e = get_DevConfig_E_pointer();
 
 	uint8_t ret = 0;
     uint8_t i;
 	uint16_t segcp_ret = 0;
 	//uint8_t ConfigErasePW[10];
-	teDEVSTATUS status_bak;
+	teDEVSTATUS status_bak[DEVICE_UART_CNT];
 	
 	segcp_ret  = proc_SEGCP_udp(gSEGCPREQ, gSEGCPREP);
 	segcp_ret |= proc_SEGCP_tcp(gSEGCPREQ, gSEGCPREP);
@@ -112,6 +113,7 @@ void do_segcp(void)
 				
 				erase_storage(STORAGE_MAC);
 				erase_storage(STORAGE_CONFIG);
+                erase_storage(STORAGE_CONFIG_E);
 			//}
 //#ifdef _SEGCP_DEBUG_
 			//else
@@ -142,10 +144,10 @@ void do_segcp(void)
 			//printf(" - SetSystemClock: %lu (Hz) \r\n", PLL_SOURCE_8MHz);
 			//printf(" - GetSystemClock: %d (Hz) \r\n", GetSystemClock());
 			
-			status_bak = (teDEVSTATUS)get_device_status(0);
             
             for(i=0; i<DEVICE_UART_CNT; i++)
             {
+                status_bak[i] = (teDEVSTATUS)get_device_status(i);
                 set_device_status(i, ST_UPGRADE);
             }
 			
@@ -177,9 +179,9 @@ void do_segcp(void)
 			else
 			{
 				// Clear the firmware update flags and size
-				dev_config->firmware_update.fwup_size = 0;
-				dev_config->firmware_update.fwup_flag = SEGCP_DISABLE;
-				dev_config->firmware_update.fwup_server_flag = SEGCP_DISABLE;
+				dev_config_e->firmware_update.fwup_size = 0;
+				dev_config_e->firmware_update.fwup_flag = SEGCP_DISABLE;
+				dev_config_e->firmware_update.fwup_server_flag = SEGCP_DISABLE;
 				/*
 				if((opmode == DEVICE_AT_MODE) && ((segcp_ret & SEGCP_RET_FWUP_SERVER) == segcp_ret))
 				{
@@ -188,7 +190,7 @@ void do_segcp(void)
 				*/
                 for(i=0; i<DEVICE_UART_CNT; i++)
                 {
-                    set_device_status(i, status_bak);
+                    set_device_status(i, status_bak[i]);
 				}
 #ifdef __USE_APPBACKUP_AREA__
 				/* System Core Clock Update - Restore */
@@ -304,6 +306,7 @@ uint8_t parse_SEGCP(uint8_t * pmsg, uint8_t * param)
 uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 {
 	DevConfig *dev_config = get_DevConfig_pointer();
+    DevConfig_E *dev_config_e = get_DevConfig_E_pointer();
 	
 	uint8_t  i = 0;
 	uint16_t ret = 0;
@@ -604,8 +607,8 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 ///////////////////////////////////////////////////////////////////////////////////////////////
 // Firmware Update via HTTP server (Under Development)
 					case SEGCP_FS: // Firmware update by HTTP Server
-						dev_config->firmware_update.fwup_flag = SEGCP_ENABLE;
-						dev_config->firmware_update.fwup_server_flag = SEGCP_ENABLE;
+						dev_config_e->firmware_update.fwup_flag = SEGCP_ENABLE;
+						dev_config_e->firmware_update.fwup_server_flag = SEGCP_ENABLE;
                         for(i=0; i<2; i++)
                         {
                             process_socket_termination(i);
@@ -619,11 +622,11 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						break;
 					
 					case SEGCP_FC: // Firmware update by HTTP Server using default server info enable / disable
-						sprintf(trep, "%d", dev_config->firmware_update.fwup_server_use_default);
+						sprintf(trep, "%d", dev_config_e->firmware_update.fwup_server_use_default);
 						break;
 					
 					case SEGCP_FP: // Firmware update HTTP Server Port
-						sprintf(trep, "%d", dev_config->firmware_update.fwup_server_port);
+						sprintf(trep, "%d", dev_config_e->firmware_update.fwup_server_port);
 						break;
 
 					case SEGCP_FD: // HTTP Server domain for Firmware update
@@ -1191,7 +1194,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						if(tmp_long > (((uint32_t)DEVICE_FWUP_SIZE) & 0x19000)) // 100KByte
 #endif
 						{
-							dev_config->firmware_update.fwup_size = 0;
+							dev_config_e->firmware_update.fwup_size = 0;
 							ret |= SEGCP_RET_ERR_INVALIDPARAM;
 #ifdef _SEGCP_DEBUG_
 							printf("SEGCP_FW:ERROR:TOOBIG\r\n");
@@ -1200,11 +1203,11 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						else
 						{
 #ifdef __USE_APPBACKUP_AREA__
-							dev_config->firmware_update.fwup_size = (uint16_t)tmp_long;
+							dev_config_e->firmware_update.fwup_size = (uint16_t)tmp_long;
 #else
-							dev_config->firmware_update.fwup_size = tmp_long;
+							dev_config_e->firmware_update.fwup_size = tmp_long;
 #endif
-							dev_config->firmware_update.fwup_flag = SEGCP_ENABLE;
+							dev_config_e->firmware_update.fwup_flag = SEGCP_ENABLE;
 							ret |= SEGCP_RET_FWUP;
 							sprintf(trep,"FW%d.%d.%d.%d:%d:%d\r\n", dev_config->network_common.local_ip[0], dev_config->network_common.local_ip[1]
 							,dev_config->network_common.local_ip[2] , dev_config->network_common.local_ip[3], (uint16_t)DEVICE_FWUP_PORT);
@@ -1315,13 +1318,13 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 					case SEGCP_FC: // Firmware update by HTTP Server using default server info enable / disable
 						tmp_byte = is_hex(*param);
 						if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->firmware_update.fwup_server_use_default = tmp_byte;
+						else dev_config_e->firmware_update.fwup_server_use_default = tmp_byte;
 						break;
 					
 					case SEGCP_FP: // Firmware update HTTP Server Port
 						sscanf(param, "%d", &tmp_int);
 						if(tmp_int > 0xffff) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->firmware_update.fwup_server_port = tmp_int;
+						else dev_config_e->firmware_update.fwup_server_port = tmp_int;
 						break;
 					
 					// Planned to apply

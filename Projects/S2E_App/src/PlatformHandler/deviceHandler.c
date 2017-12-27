@@ -56,10 +56,6 @@ void device_socket_termination(void)
 	{
 		process_socket_termination(i);
 	}
-	
-	//process_socket_termination(SEG_SOCK);
-	//process_socket_termination(SEGCP_UDP_SOCK);
-	//process_socket_termination(SEGCP_TCP_SOCK);
 }
 
 
@@ -67,14 +63,7 @@ void device_reboot(void)
 {
 	uint8_t i;
 	device_socket_termination();
-	
-    /*
-	for(i=0; i<DEVICE_UART_CNT; i++)
-	{
-		clear_data_transfer_bytecount(i, SEG_ALL);
-	}
-	*/
-    
+	    
 	NVIC_SystemReset();
 	while(1);
 }
@@ -87,7 +76,7 @@ void device_reboot(void)
 
 uint8_t device_firmware_update(teDATASTORAGE stype)
 {
-	struct __firmware_update *firmware_update = (struct __firmware_update *)&(get_DevConfig_pointer()->firmware_update);
+	struct __firmware_update *firmware_update = (struct __firmware_update *)&(get_DevConfig_E_pointer()->firmware_update);
 	struct __serial_option *serial_option = (struct __serial_option *)(get_DevConfig_pointer()->serial_option);
 	struct __serial_common *serial_common = (struct __serial_common *)&(get_DevConfig_pointer()->serial_common);
 	
@@ -169,8 +158,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
                 recv_len = get_firmware_from_network(SOCK_FWUPDATE, g_recv_buf);
 #elif (BUFFER_TYPE==3)
                 recv_len = get_firmware_from_network(SOCK_FWUPDATE, g_data_buf);
-#endif
-                
+#endif      
             }
 			else if(stype == SERVER_APP_BACKUP)		
             {
@@ -251,8 +239,9 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 
 uint8_t device_firmware_update(teDATASTORAGE stype)
 {
-	struct __firmware_update *fwupdate = (struct __firmware_update *)&(get_DevConfig_pointer()->firmware_update);
-	struct __serial_info *serial = (struct __serial_info *)&(get_DevConfig_pointer()->serial_info);
+    struct __firmware_update *firmware_update = (struct __firmware_update *)&(get_DevConfig_E_pointer()->firmware_update);
+	struct __serial_common *serial_common = (struct __serial_common *)&(get_DevConfig_pointer()->serial_common);
+	
 	
 	uint8_t ret = DEVICE_FWUP_RET_PROGRESS; // No Meaning, [Firmware update process] have to work as blocking function.
 	//uint16_t len = 0;
@@ -265,12 +254,12 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 //#ifdef _FWUP_DEBUG_
 	//uint8_t update_cnt = 0;
 //#endif
-	if(fwupdate->fwup_flag == SEGCP_DISABLE)	return DEVICE_FWUP_RET_FAILED;
-	if((fwupdate->fwup_size == 0) || (fwupdate->fwup_size > DEVICE_FWUP_SIZE))
+	if(firmware_update->fwup_flag == SEGCP_DISABLE)	return DEVICE_FWUP_RET_FAILED;
+	if((firmware_update->fwup_size == 0) || (firmware_update->fwup_size > DEVICE_FWUP_SIZE))
 	{
-		if(serial->serial_debug_en == SEGCP_ENABLE)
+		if(serial_common->serial_debug_en == SEGCP_ENABLE)
 		{
-			printf(" > SEGCP:FW_UPDATE:FAILED - Invalid firmware size: %d bytes (Firmware size must be within %d bytes)\r\n", fwupdate->fwup_size, DEVICE_FWUP_SIZE);
+			printf(" > SEGCP:FW_UPDATE:FAILED - Invalid firmware size: %d bytes (Firmware size must be within %d bytes)\r\n", firmware_update->fwup_size, DEVICE_FWUP_SIZE);
 		}
 
 		return DEVICE_FWUP_RET_FAILED;
@@ -279,9 +268,9 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 	// App, FW update from Network (ethernet) to Flash memory (backup area)
 	if(stype == STORAGE_APP_MAIN)
 	{
-		if(serial->serial_debug_en == SEGCP_ENABLE)
+		if(serial_common->serial_debug_en == SEGCP_ENABLE)
 		{
-			printf(" > SEGCP:FW_UPDATE:NETWORK - Firmware size: [%d] bytes\r\n", fwupdate->fwup_size);
+			printf(" > SEGCP:FW_UPDATE:NETWORK - Firmware size: [%d] bytes\r\n", firmware_update->fwup_size);
 		}
 
 		write_fw_len = 0;
@@ -294,7 +283,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 		do 
 		{
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
-			recv_len = get_firmware_from_network(SOCK_FWUPDATE, g_recv_buf);
+			recv_len = get_firmware_from_network(SOCK_FWUPDATE, g_recv_buf[0]);
 			
 			if(recv_len > 0)
 			{
@@ -307,7 +296,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 			// Firmware update failed: Timeout occurred
 			if(flag_fw_update_timeout == SEGCP_ENABLE)
 			{
-				if(serial->serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:FW_UPDATE:FAILED - Firmware update timeout\r\n");
+				if(serial_common->serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:FW_UPDATE:FAILED - Firmware update timeout\r\n");
 				ret = DEVICE_FWUP_RET_FAILED;
 				break;
 			}
@@ -315,12 +304,12 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 			// Firmware update failed: timeout occurred at get_firmware_from_network() function
 			if(flag_fw_from_network_timeout == SEGCP_ENABLE)
 			{
-				if(serial->serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:FW_UPDATE:FAILED - Network download timeout\r\n");
+				if(serial_common->serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:FW_UPDATE:FAILED - Network download timeout\r\n");
 				ret = DEVICE_FWUP_RET_FAILED;
 				break;
 			}
 			
-		} while(write_fw_len < fwupdate->fwup_size);
+		} while(write_fw_len < firmware_update->fwup_size);
 	}	
 	else if((stype == NETWORK_APP_BACKUP) || stype == SERVER_APP_BACKUP) // Run this code in the boot area only
 	{
@@ -334,11 +323,11 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 	}
 	
 	// shared code
-	if(write_fw_len == fwupdate->fwup_size)
+	if(write_fw_len == firmware_update->fwup_size)
 	{
-		if(serial->serial_debug_en == SEGCP_ENABLE)
+		if(serial_common->serial_debug_en == SEGCP_ENABLE)
 		{
-			printf(" > SEGCP:FW_UPDATE:SUCCESS - %d / %d bytes\r\n", write_fw_len, fwupdate->fwup_size);
+			printf(" > SEGCP:FW_UPDATE:SUCCESS - %d / %d bytes\r\n", write_fw_len, firmware_update->fwup_size);
 		}
 		ret = DEVICE_FWUP_RET_SUCCESS;
 	}
@@ -353,7 +342,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 
 uint16_t get_firmware_from_network(uint8_t sock, uint8_t * buf)
 {
-	struct __firmware_update *fwupdate = (struct __firmware_update *)&(get_DevConfig_pointer()->firmware_update);
+	struct __firmware_update *fwupdate = (struct __firmware_update *)&(get_DevConfig_E_pointer()->firmware_update);
 	uint8_t len_buf[2] = {0, };
 	uint16_t len = 0;
 	uint8_t state = getSn_SR(sock);
@@ -447,7 +436,7 @@ uint16_t get_firmware_from_network(uint8_t sock, uint8_t * buf)
 
 uint16_t get_firmware_from_server(uint8_t sock, uint8_t * server_ip, uint8_t * buf)
 {
-	struct __firmware_update *firmware_update = (struct __firmware_update *)&(get_DevConfig_pointer()->firmware_update);
+	struct __firmware_update *firmware_update = (struct __firmware_update *)&(get_DevConfig_E_pointer()->firmware_update);
 	struct __serial_common *serial_common = (struct __serial_common *)&(get_DevConfig_pointer()->serial_common);
 	
 	uint16_t len = 0;

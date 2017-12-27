@@ -50,7 +50,8 @@ uint8_t flag_send_configtool_keepalive = SEGCP_DISABLE;
 void do_segcp(void)
 {
 	DevConfig *dev_config = get_DevConfig_pointer();
-
+    DevConfig_E *dev_config_e = get_DevConfig_E_pointer();
+    
 	uint16_t segcp_ret = 0;
 	
 	segcp_ret  = proc_SEGCP_udp(gSEGCPREQ, gSEGCPREP);
@@ -87,6 +88,7 @@ void do_segcp(void)
 				
 				erase_storage(STORAGE_MAC);
 				erase_storage(STORAGE_CONFIG);
+                erase_storage(STORAGE_CONFIG_E);
 			//}
 //#ifdef _SEGCP_DEBUG_
 			//else
@@ -107,8 +109,8 @@ void do_segcp(void)
 #else
 			if(device_firmware_update(STORAGE_APP_MAIN) == DEVICE_FWUP_RET_SUCCESS)
 			{
-				dev_config->firmware_update.fwup_flag = SEGCP_DISABLE;
-				dev_config->firmware_update.fwup_size = 0;
+				dev_config_e->firmware_update.fwup_flag = SEGCP_DISABLE;
+				dev_config_e->firmware_update.fwup_size = 0;
 				
 				save_DevConfig_to_storage();
 				device_reboot();
@@ -202,6 +204,7 @@ uint8_t parse_SEGCP(uint8_t * pmsg, uint8_t * param)
 uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 {
 	DevConfig *dev_config = get_DevConfig_pointer();
+    DevConfig_E *dev_config_e = get_DevConfig_E_pointer();
 	
 	uint8_t  i = 0;
 	uint16_t ret = 0;
@@ -960,7 +963,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						if(tmp_long > (((uint32_t)DEVICE_FWUP_SIZE) & 0x19000)) // 100KByte
 #endif
 						{
-							dev_config->firmware_update.fwup_size = 0;
+							dev_config_e->firmware_update.fwup_size = 0;
 							ret |= SEGCP_RET_ERR_INVALIDPARAM;
 #ifdef _SEGCP_DEBUG_
 							printf("SEGCP_FW:ERROR:TOOBIG\r\n");
@@ -969,11 +972,11 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						else
 						{
 #ifdef __USE_APPBACKUP_AREA__
-							dev_config->firmware_update.fwup_size = (uint16_t)tmp_long;
+							dev_config_e->firmware_update.fwup_size = (uint16_t)tmp_long;
 #else
-							dev_config->firmware_update.fwup_size = tmp_long;
+							dev_config_e->firmware_update.fwup_size = tmp_long;
 #endif
-							dev_config->firmware_update.fwup_flag = SEGCP_ENABLE;
+							dev_config_e->firmware_update.fwup_flag = SEGCP_ENABLE;
 							ret |= SEGCP_RET_FWUP;
 							sprintf(trep,"FW%d.%d.%d.%d:%d:%d\r\n", dev_config->network_common.local_ip[0], dev_config->network_common.local_ip[1]
 							,dev_config->network_common.local_ip[2] , dev_config->network_common.local_ip[3], (uint16_t)DEVICE_FWUP_PORT);

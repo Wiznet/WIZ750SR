@@ -20,68 +20,91 @@
 #ifdef DEVICE_BOARD_NAME
 	#if (DEVICE_BOARD_NAME == WIZ750SR)
         #define __W7500P__                                    
-        #define __USE_UART_IF_SELECTOR__	// RS-232/TTL or RS-422/485 selector using UART IF selector pin
-		#define __USE_EXT_EEPROM__			// External EEPROM or Internal Data flash (DAT0/1)
-		#define __USE_BOOT_ENTRY__			// Application boot mode entry pin activated
-		#define __USE_APPBACKUP_AREA__		// If this option activated, Application firmware area is consists of App (50kB) and App backup (50kB). If not, user's application can be 100kB size. (Does not use the backup area)
+        #define __USE_UART_IF_SELECTOR__	    // RS-232/TTL or RS-422/485 selector using UART IF selector pin
+		#define __USE_EXT_EEPROM__			    // External EEPROM or Internal Data flash (DAT0/1)
+		#define __USE_BOOT_ENTRY__			    // Application boot mode entry pin activated
+		#define __USE_APPBACKUP_AREA__		    // If this option activated, Application firmware area is consists of App (50kB) and App backup (50kB). If not, user's application can be 100kB size. (Does not use the backup area)
 		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
 		#define __USE_USERS_GPIO__
-		#define DEVICE_CLOCK_SELECT	         CLOCK_SOURCE_EXTERNAL
-		#define DEVICE_PLL_SOURCE_CLOCK      PLL_SOURCE_12MHz
-		#define DEVICE_TARGET_SYSTEM_CLOCK   SYSTEM_CLOCK_48MHz
-		#define DEVICE_ID_DEFAULT            "WIZ750SR" // Device name
-        #define DEVICE_UART_CNT                 
-	#elif (DEVICE_BOARD_NAME == W7500P_S2E) // Chip product
+        //#define __USE_HW_TRIG_PIN__
+        //#define __USE_PHYLINK_CHECK_PIN__
+        //#define __USE_UART_DTR_DSR__
+        //#define __USE_STATUS_PHYLINK_PIN__
+        //#define __USE_STATUS_TCPCONNECT_PIN__
+		#define DEVICE_CLOCK_SELECT	            CLOCK_SOURCE_EXTERNAL
+		#define DEVICE_PLL_SOURCE_CLOCK         PLL_SOURCE_12MHz
+		#define DEVICE_TARGET_SYSTEM_CLOCK      SYSTEM_CLOCK_48MHz
+		#define DEVICE_ID_DEFAULT               "WIZ750SR" 
+        #define DEVICE_UART_CNT                 1                                          
+	#elif (DEVICE_BOARD_NAME == W7500P_S2E) 
 		#define __W7500P__                  
-		#define __USE_UART_IF_SELECTOR__	// RS-232/TTL or RS-422/485 selector using UART IF selector pin
-		#define __USE_BOOT_ENTRY__			// Application boot mode entry pin activated
+		#define __USE_UART_IF_SELECTOR__	
+		#define __USE_BOOT_ENTRY__			
 		#define __USE_APPBACKUP_AREA__
 		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
 		#define __USE_USERS_GPIO__
-		#define DEVICE_CLOCK_SELECT	         CLOCK_SOURCE_EXTERNAL
-		#define DEVICE_PLL_SOURCE_CLOCK      PLL_SOURCE_12MHz
-		#define DEVICE_TARGET_SYSTEM_CLOCK   SYSTEM_CLOCK_48MHz
-		#define DEVICE_ID_DEFAULT            "W7500P-S2E"
-        #define DEVICE_UART_CNT		1 // Not used
+        #define __USE_HW_TRIG_PIN__
+        #define __USE_PHYLINK_CHECK_PIN__
+        #define __USE_UART_DTR_DSR__
+        #define __USE_STATUS_PHYLINK_PIN__
+        #define __USE_STATUS_TCPCONNECT_PIN__
+		#define DEVICE_CLOCK_SELECT	            CLOCK_SOURCE_EXTERNAL
+		#define DEVICE_PLL_SOURCE_CLOCK         PLL_SOURCE_12MHz
+		#define DEVICE_TARGET_SYSTEM_CLOCK      SYSTEM_CLOCK_48MHz
+		#define DEVICE_ID_DEFAULT               "W7500P-S2E"
+        #define DEVICE_UART_CNT		            1 
 	#elif (DEVICE_BOARD_NAME == WIZ750MINI)
 		#define __W7500P__                        
-		#define __USE_UART_IF_SELECTOR__	// RS-232/TTL or RS-422/485 selector using UART IF selector pin
-		#define __USE_EXT_EEPROM__			// External EEPROM or Internal Data flash (DAT0/1)
-		#define __USE_BOOT_ENTRY__			// Application boot mode entry pin activated
-		#define __USE_APPBACKUP_AREA__		// If this option activated, Application firmware area is consists of App (50kB) and App backup (50kB). If not, user's application can be 100kB size. (Does not use the backup area)
+		#define __USE_UART_IF_SELECTOR__	
+		#define __USE_EXT_EEPROM__			
+		#define __USE_BOOT_ENTRY__			
+		#define __USE_APPBACKUP_AREA__		
 		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
 		#define __USE_USERS_GPIO__
-		#define DEVICE_CLOCK_SELECT	         CLOCK_SOURCE_EXTERNAL
-		#define DEVICE_PLL_SOURCE_CLOCK      PLL_SOURCE_12MHz
-		#define DEVICE_TARGET_SYSTEM_CLOCK   SYSTEM_CLOCK_48MHz
-		#define DEVICE_ID_DEFAULT            "WIZ750Mini" // Device name
-        #define DEVICE_UART_CNT		1 // Not used
+        #define __USE_HW_TRIG_PIN__
+        #define __USE_PHYLINK_CHECK_PIN__
+        #define __USE_UART_DTR_DSR__
+        #define __USE_STATUS_PHYLINK_PIN__
+        #define __USE_STATUS_TCPCONNECT_PIN__
+		#define DEVICE_CLOCK_SELECT	            CLOCK_SOURCE_EXTERNAL
+		#define DEVICE_PLL_SOURCE_CLOCK         PLL_SOURCE_12MHz
+		#define DEVICE_TARGET_SYSTEM_CLOCK      SYSTEM_CLOCK_48MHz
+		#define DEVICE_ID_DEFAULT               "WIZ750Mini" // Device name
+        #define DEVICE_UART_CNT		            1 // Not used
 	#elif (DEVICE_BOARD_NAME == WIZ750JR)  
-		//#define __USE_UART_IF_SELECTOR__	// RS-232/TTL or RS-422/485 selector using UART IF selector pin
-		#define __USE_EXT_EEPROM__			// External EEPROM or Internal Data flash (DAT0/1)
-		#define __USE_BOOT_ENTRY__			// Application boot mode entry pin activated
-		#define __USE_APPBACKUP_AREA__		// If this option activated, Application firmware area is consists of App (50kB) and App backup (50kB). If not, user's application can be 100kB size. (Does not use the backup area)
+		//#define __USE_UART_IF_SELECTOR__	
+		#define __USE_EXT_EEPROM__			
+		#define __USE_BOOT_ENTRY__			
+		#define __USE_APPBACKUP_AREA__		
 		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
 		//#define __USE_USERS_GPIO__
-		#define DEVICE_CLOCK_SELECT	         CLOCK_SOURCE_EXTERNAL
-		#define DEVICE_PLL_SOURCE_CLOCK      PLL_SOURCE_12MHz
-		#define DEVICE_TARGET_SYSTEM_CLOCK   SYSTEM_CLOCK_48MHz
-		#define DEVICE_ID_DEFAULT            "WIZ750Jr" // Device name
-        #define DEVICE_UART_CNT		1 // Not used
+        #define __USE_HW_TRIG_PIN__
+        #define __USE_PHYLINK_CHECK_PIN__
+        #define __USE_UART_DTR_DSR__
+        #define __USE_STATUS_PHYLINK_PIN__
+        #define __USE_STATUS_TCPCONNECT_PIN__
+		#define DEVICE_CLOCK_SELECT	            CLOCK_SOURCE_EXTERNAL
+		#define DEVICE_PLL_SOURCE_CLOCK         PLL_SOURCE_12MHz
+		#define DEVICE_TARGET_SYSTEM_CLOCK      SYSTEM_CLOCK_48MHz
+		#define DEVICE_ID_DEFAULT               "WIZ750Jr" // Device name
+        #define DEVICE_UART_CNT		            1 // Not used
     #elif (DEVICE_BOARD_NAME == WIZ752SR_12x)  
-		//#define __USE_UART_IF_SELECTOR__	// RS-232/TTL or RS-422/485 selector using UART IF selector pin
-		//#define __USE_EXT_EEPROM__			// External EEPROM or Internal Data flash (DAT0/1)
-		//#define __USE_BOOT_ENTRY__			// Application boot mode entry pin activated
-		#define __USE_APPBACKUP_AREA__		// If this option activated, Application firmware area is consists of App (50kB) and App backup (50kB). If not, user's application can be 100kB size. (Does not use the backup area)
-		//#define __USE_GPIO_HARDWARE_FLOWCONTROL__
-		//#define __USE_USERS_GPIO__
-		#define DEVICE_CLOCK_SELECT	         CLOCK_SOURCE_EXTERNAL
-		#define DEVICE_PLL_SOURCE_CLOCK      PLL_SOURCE_12MHz
-		#define DEVICE_TARGET_SYSTEM_CLOCK   SYSTEM_CLOCK_48MHz
-		#define DEVICE_ID_DEFAULT            "WIZ752SR-12x" // Device name
-        #define DEVICE_UART_CNT		2 // Not used
+		//#define __USE_UART_IF_SELECTOR__	
+		//#define __USE_EXT_EEPROM__			
+		#define __USE_BOOT_ENTRY__			
+		#define __USE_APPBACKUP_AREA__		
+		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
+		#define __USE_USERS_GPIO__
         //#define __USE_HW_TRIG_PIN__
-        //#define __USE_PHYLINK_CHECK_PIN__
+        #define __USE_PHYLINK_CHECK_PIN__
+        //#define __USE_UART_DTR_DSR__
+        //#define __USE_STATUS_PHYLINK_PIN__
+        #define __USE_STATUS_TCPCONNECT_PIN__
+		#define DEVICE_CLOCK_SELECT	            CLOCK_SOURCE_EXTERNAL
+		#define DEVICE_PLL_SOURCE_CLOCK         PLL_SOURCE_12MHz
+		#define DEVICE_TARGET_SYSTEM_CLOCK      SYSTEM_CLOCK_48MHz
+		#define DEVICE_ID_DEFAULT               "WIZ752SR-12x" // Device name
+        #define DEVICE_UART_CNT		            2 // Not used
 	#else
 		//#define __USE_UART_IF_SELECTOR__
 		#define __USE_EXT_EEPROM__
@@ -103,8 +126,6 @@
     #define DEVICE_UART_CNT		1 // Not used
 #endif
 
-//#define DEVICE_UART_CNT		2 // Not used
-
 // PHY init defines: USE MDC/MDIO
 #define __DEF_USED_MDIO__ 
 
@@ -123,131 +144,101 @@
 
 /* PHY Link check  */
 #define PHYLINK_CHECK_CYCLE_MSEC	1000
+#define PHYLINK                     0
+#define TCPCONNECT                  1
 
 ////////////////////////////////
 // Pin definitions			  //
 ////////////////////////////////
-#define PHYLINK                     0
-#define TCPCONNECT                  1
+#ifdef __USE_UART_DTR_DSR__
+    #if (DEVICE_BOARD_NAME == WIZ750JR)
+        #define DTR_0_PIN						GPIO_Pin_0
+        #define DTR_0_PORT					GPIOB
+        #define DTR_0_PAD_AF					PAD_AF1
 
-#if (DEVICE_BOARD_NAME == WIZ750JR) // ##20161031 WIZ750Jr
+        #define DSR_0_PIN						GPIO_Pin_15
+        #define DSR_0_PORT					GPIOA
+        #define DSR_0_PAD_AF					PAD_AF1
+    #elif (DEVICE_BOARD_NAME == WIZ750SR)
+        #define DTR_0_PIN						GPIO_Pin_10//STATUS_PHYLINK_PIN
+        #define DTR_0_PORT					GPIOA//STATUS_PHYLINK_PORT
+        #define DTR_0_PAD_AF					PAD_AF1//STATUS_PHYLINK_PAD_AF
 
-    // PHY link status pin: Input (PHYLINK_IN_PIN -> STATUS_PHYLINK_PIN)
-    #define PHYLINK_IN_PIN				GPIO_Pin_9
-    #define PHYLINK_IN_PORT				GPIOA
-    #define PHYLINK_IN_PAD_AF			PAD_AF1 // PAD Config - LED used 2nd Function
-    
-	// Connection status indicator pins
-	// Direction: Output
-	#define STATUS_PHYLINK_PIN			GPIO_Pin_10
-	#define STATUS_PHYLINK_PORT			GPIOA
-	#define STATUS_PHYLINK_PAD_AF		PAD_AF1
-
-	#define STATUS_TCPCONNECT_PIN		GPIO_Pin_1
-	#define STATUS_TCPCONNECT_PORT		GPIOA
-	#define STATUS_TCPCONNECT_PAD_AF	PAD_AF1
-
-	#define DTR_PIN						GPIO_Pin_0
-	#define DTR_PORT					GPIOB
-	#define DTR_PAD_AF					PAD_AF1
-
-	#define DSR_PIN						GPIO_Pin_15
-	#define DSR_PORT					GPIOA
-	#define DSR_PAD_AF					PAD_AF1
-
-	// HW_TRIG - Command mode switch enable pin
-	// Direction: Input (Shared pin with TCP connection status pin)
-	#define HW_TRIG_PIN					GPIO_Pin_15
-	#define HW_TRIG_PORT				GPIOC
-	#define HW_TRIG_PAD_AF				PAD_AF1
-
-#elif (DEVICE_BOARD_NAME == WIZ750SR) // Original pins
-
-    // PHY link status pin: Input (PHYLINK_IN_PIN -> STATUS_PHYLINK_PIN)
-    #define PHYLINK_IN_PIN				GPIO_Pin_9
-    #define PHYLINK_IN_PORT				GPIOA
-    #define PHYLINK_IN_PAD_AF			PAD_AF1 // PAD Config - LED used 2nd Function
-
-	// Connection status indicator pins
-	// Direction: Output
-	#define STATUS_PHYLINK_PIN			GPIO_Pin_10
-	#define STATUS_PHYLINK_PORT			GPIOA
-	#define STATUS_PHYLINK_PAD_AF		PAD_AF1
-
-	#define STATUS_TCPCONNECT_PIN		GPIO_Pin_1
-	#define STATUS_TCPCONNECT_PORT		STATUS_PHYLINK_PORT
-	#define STATUS_TCPCONNECT_PAD_AF	STATUS_PHYLINK_PAD_AF
-    
-
-	// DTR / DSR - Handshaking signals, Shared with PHYLINK_PIN and TCPCONNECT_PIN (selectable)
-	// > DTR - Data Terminal Ready, Direction: Output (= PHYLINK_PIN)
-	// 		>> This signal pin asserted when the device could be possible to transmit the UART inputs
-	// 		>> [O], After boot and initialize
-	// 		>> [X], nope (E.g., TCP connected (Server / client mode) or TCP mixed mode or UDP mode)
-	// > DSR - Data Set Ready, Direction: Input (= TCPCONNECT_PIN)
-	// 		>> [O] Ethet_to_UART() function control
-
-	#define DTR_PIN						STATUS_PHYLINK_PIN
-	#define DTR_PORT					STATUS_PHYLINK_PORT
-	#define DTR_PAD_AF					STATUS_PHYLINK_PAD_AF
-
-	#define DSR_PIN						STATUS_TCPCONNECT_PIN
-	#define DSR_PORT					STATUS_TCPCONNECT_PORT
-	#define DSR_PAD_AF					STATUS_TCPCONNECT_PAD_AF
-	
-	// HW_TRIG - Command mode switch enable pin
-	// Direction: Input (Shared pin with TCP connection status pin)
-	#define HW_TRIG_PIN					STATUS_TCPCONNECT_PIN
-	#define HW_TRIG_PORT				STATUS_TCPCONNECT_PORT
-	#define HW_TRIG_PAD_AF				STATUS_TCPCONNECT_PAD_AF
-    
-#elif (DEVICE_BOARD_NAME == WIZ752SR_12x) // Original pins
-
-	// Connection status indicator pins
-	// Direction: Output
-	// PHY link status pin: Input (PHYLINK_IN_PIN -> STATUS_PHYLINK_PIN)
-    #define PHYLINK_IN_PIN				GPIO_Pin_9
-    #define PHYLINK_IN_PORT				GPIOA
-    #define PHYLINK_IN_PAD_AF			PAD_AF1 // PAD Config - LED used 2nd Function
-
-	// Connection status indicator pins
-	// Direction: Output
-	#define STATUS_PHYLINK_PIN			GPIO_Pin_10
-	#define STATUS_PHYLINK_PORT			GPIOA
-	#define STATUS_PHYLINK_PAD_AF		PAD_AF1
-
-	#define STATUS_TCPCONNECT_PIN		GPIO_Pin_1
-	#define STATUS_TCPCONNECT_PORT		STATUS_PHYLINK_PORT
-	#define STATUS_TCPCONNECT_PAD_AF	STATUS_PHYLINK_PAD_AF
-    
-    #define DTR_PIN						STATUS_PHYLINK_PIN
-	#define DTR_PORT					STATUS_PHYLINK_PORT
-	#define DTR_PAD_AF					STATUS_PHYLINK_PAD_AF
-
-	#define DSR_PIN						STATUS_TCPCONNECT_PIN
-	#define DSR_PORT					STATUS_TCPCONNECT_PORT
-	#define DSR_PAD_AF					STATUS_TCPCONNECT_PAD_AF
-    
+        #define DSR_0_PIN						GPIO_Pin_1//STATUS_TCPCONNECT_0_PIN
+        #define DSR_0_PORT					GPIOA//STATUS_TCPCONNECT_0_PORT
+        #define DSR_0_PAD_AF					PAD_AF1//STATUS_TCPCONNECT_PAD_AF
+    #else
+        #error "Please specify a pin name of UART DTR/DSR."
+    #endif
+    #if (DEVICE_UART_CNT == 2)
+        #ifndef DTR_1_PIN
+            #error "Please specify a pin name of channel 1 DTR/DSR."
+        #endif
+    #endif 
 #endif
 
-// UART Interface Selector Pin (temporary pin)
-// [Pull-down] RS-232/TTL mode
-// [Pull-up  ] RS-422/485 mode
-// if does not use this pin, UART interface is fixed RS-232 / TTL mode
-#ifdef __USE_UART_IF_SELECTOR__
-    #if (DEVICE_BOARD_NAME == WIZ750JR) // ##20170215 WIZ750Jr
-        #define BOOT_ENTRY_PIN			GPIO_Pin_8
-        #define BOOT_ENTRY_PORT			GPIOA
-        #define BOOT_ENTRY_PAD_AF		PAD_AF1
+#ifdef __USE_PHYLINK_CHECK_PIN__
+    #if (DEVICE_BOARD_NAME == WIZ750JR || DEVICE_BOARD_NAME == WIZ750SR)
+        #define PHYLINK_IN_PIN				GPIO_Pin_9
+        #define PHYLINK_IN_PORT				GPIOA
+        #define PHYLINK_IN_PAD_AF			PAD_AF1
+    #elif (DEVICE_BOARD_NAME == WIZ752SR_12x)
+        #define PHYLINK_IN_PIN				GPIO_Pin_0
+        #define PHYLINK_IN_PORT				GPIOA
+        #define PHYLINK_IN_PAD_AF			PAD_AF1
     #else
-        #define BOOT_ENTRY_PIN			GPIO_Pin_14
-        #define BOOT_ENTRY_PORT			GPIOC
-        #define BOOT_ENTRY_PAD_AF		PAD_AF1
+        #error "Please specify a pin name of PHY link check."
     #endif
 #endif
 
-// Configuration Storage Selector
-// Internal data flash (DAT0/DAT1) or External EEPROM (I2C bus interface via GPIO pins)
+#ifdef __USE_STATUS_PHYLINK_PIN__
+    #if (DEVICE_BOARD_NAME == WIZ750JR || DEVICE_BOARD_NAME == WIZ750SR)
+        #define STATUS_PHYLINK_PIN			GPIO_Pin_10
+        #define STATUS_PHYLINK_PORT			GPIOA
+        #define STATUS_PHYLINK_PAD_AF		PAD_AF1
+    #else
+        #error "Please specify a pin name of status PHY link."
+    #endif
+#endif
+#ifdef __USE_STATUS_TCPCONNECT_PIN__
+    #if (DEVICE_BOARD_NAME == WIZ750JR || DEVICE_BOARD_NAME == WIZ750SR)
+        #define STATUS_TCPCONNECT_0_PIN		GPIO_Pin_1
+        #define STATUS_TCPCONNECT_0_PORT	GPIOA
+        #define STATUS_TCPCONNECT_0_PAD_AF	PAD_AF1
+        
+    #elif (DEVICE_BOARD_NAME == WIZ752SR_12x)
+        #define STATUS_TCPCONNECT_0_PIN		GPIO_Pin_6
+        #define STATUS_TCPCONNECT_0_PORT	GPIOA
+        #define STATUS_TCPCONNECT_0_PAD_AF	PAD_AF1
+
+        #define STATUS_TCPCONNECT_1_PIN		GPIO_Pin_7
+        #define STATUS_TCPCONNECT_1_PORT	GPIOA
+        #define STATUS_TCPCONNECT_1_PAD_AF	PAD_AF1
+    #else
+        #error "Please specify a pin name of status TCP connect."
+    #endif
+    
+    #if (DEVICE_UART_CNT == 2)
+        #ifndef STATUS_TCPCONNECT_1_PIN
+            #error "Please specify a pin name of channel 2 status TCP connect."
+        #endif
+    #endif 
+#endif
+
+
+
+#ifdef __USE_UART_IF_SELECTOR__
+    #if (DEVICE_BOARD_NAME == WIZ750SR) 
+        #define UART_IF_SEL_PIN			GPIO_Pin_6
+        #define UART_IF_SEL_PORT		GPIOC
+        #define UART_IF_SEL_PAD_AF		PAD_AF1 // Used 2nd Function, GPIO
+        
+        #define  
+    #else
+        #error "Please specify a pin name of UART inferface selector."
+    #endif
+#endif
+
 #ifdef __USE_EXT_EEPROM__
 	#include "i2cHandler.h"
 	#define EEPROM_I2C_SCL_PIN		I2C_SCL_PIN
@@ -258,13 +249,72 @@
 #endif
 
 #ifdef __USE_BOOT_ENTRY__
-	#define BOOT_ENTRY_PIN			GPIO_Pin_14
-	#define BOOT_ENTRY_PORT			GPIOC
-	#define BOOT_ENTRY_PAD_AF		PAD_AF1
+    #if ((DEVICE_BOARD_NAME == WIZ750JR) || (DEVICE_BOARD_NAME == WIZ752SR_12x)) 
+        #define BOOT_ENTRY_PIN			GPIO_Pin_8
+        #define BOOT_ENTRY_PORT			GPIOA
+        #define BOOT_ENTRY_PAD_AF		PAD_AF1
+    #elif (DEVICE_BOARD_NAME == WIZ750SR) 
+        #define BOOT_ENTRY_PIN			GPIO_Pin_14
+        #define BOOT_ENTRY_PORT			GPIOC
+        #define BOOT_ENTRY_PAD_AF		PAD_AF1
+    #else
+        #error "Please specify a pin name of app/boot."
+    #endif
+#endif
+
+#ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
+    #if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == WIZ750JR)) // ##20170215 WIZ750Jr
+        // UART0
+        #define UART0_RTS_PIN				GPIO_Pin_12
+        #define UART0_RTS_PORT				GPIOA
+        #define UART0_RTS_PAD_AF			PAD_AF1 
+        #define UART0_CTS_PIN				GPIO_Pin_11
+        #define UART0_CTS_PORT				GPIOA
+        #define UART0_CTS_PAD_AF			PAD_AF1
+
+    #elif (DEVICE_BOARD_NAME == WIZ752SR_12x) 
+        // UART0
+        #define UART0_RTS_PIN				GPIO_Pin_12
+        #define UART0_RTS_PORT				GPIOA
+        #define UART0_RTS_PAD_AF			PAD_AF1 
+        #define UART0_CTS_PIN				GPIO_Pin_11
+        #define UART0_CTS_PORT				GPIOA
+        #define UART0_CTS_PAD_AF			PAD_AF1
+        
+        // UART1
+        #define UART1_RTS_PIN				GPIO_Pin_1
+        #define UART1_RTS_PORT				GPIOC
+        #define UART1_RTS_PAD_AF			PAD_AF1 
+        #define UART1_CTS_PIN				GPIO_Pin_0
+        #define UART1_CTS_PORT				GPIOC
+        #define UART1_CTS_PAD_AF			PAD_AF1
+    #endif
+    #if (DEVICE_UART_CNT == 2)
+        #ifndef UART1_RTS_PIN
+            #error "Please specify a pin name of channel 2 status TCP connect."
+        #endif
+    #endif 
+#endif
+
+#ifdef __USE_HW_TRIG_PIN__
+    #if (DEVICE_BOARD_NAME == WIZ750JR) // ##20161031 WIZ750Jr
+        // HW_TRIG - Command mode switch enable pin
+        // Direction: Input (Shared pin with TCP connection status pin)
+        #define HW_TRIG_PIN					GPIO_Pin_15
+        #define HW_TRIG_PORT				GPIOC
+        #define HW_TRIG_PAD_AF				PAD_AF1
+    #elif (DEVICE_BOARD_NAME == WIZ750SR)
+        // HW_TRIG - Command mode switch enable pin
+        // Direction: Input (Shared pin with TCP connection status pin)
+        #define HW_TRIG_PIN					GPIO_Pin_1
+        #define HW_TRIG_PORT				GPIOA
+        #define HW_TRIG_PAD_AF				PAD_AF1
+    #else
+        #error "Please specify a pin name of Hardware Trigger."
+    #endif
 #endif
 
 // Expansion GPIOs (4-Pins, GPIO A / B / C / D)
-
 #ifdef __USE_USERS_GPIO__
 
 	//#define MAX_USER_IOn    16
@@ -300,7 +350,7 @@
 		#define USER_IO_D_PORT				GPIOC
 		//#define USER_IO_D_ADC_CH			ADC_CH7
 		#define USER_IO_D_ADC_CH			ADC_CH3
-	#else
+	#elif ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == WIZwiki_W7500ECO)) // ##20170215 WIZ750Jr
 		// USER IO pins for WIZ750SR / WIZwiki-W7500ECO
 		#define USER_IO_A_PIN				GPIO_Pin_13 // ECO: P28, AIN2
 		#define USER_IO_A_PORT				GPIOC
@@ -317,6 +367,22 @@
 		#define USER_IO_D_PIN				GPIO_Pin_8 // ECO: P25, AIN7
 		#define USER_IO_D_PORT				GPIOC
 		#define USER_IO_D_ADC_CH			ADC_CH7
+    #elif (DEVICE_BOARD_NAME == WIZ752SR_12x) 
+		#define USER_IO_A_PIN				GPIO_Pin_15
+		#define USER_IO_A_PORT				GPIOC
+		#define USER_IO_A_ADC_CH			ADC_CH0
+
+		#define USER_IO_B_PIN				GPIO_Pin_14
+		#define USER_IO_B_PORT				GPIOC
+		#define USER_IO_B_ADC_CH			ADC_CH1
+
+		#define USER_IO_C_PIN				GPIO_Pin_13
+		#define USER_IO_C_PORT				GPIOC
+		#define USER_IO_C_ADC_CH			ADC_CH2
+
+		#define USER_IO_D_PIN				GPIO_Pin_12
+		#define USER_IO_D_PORT				GPIOC
+		#define USER_IO_D_ADC_CH			ADC_CH3
 	#endif
 
 #endif
@@ -325,10 +391,10 @@
 // Status LEDs define
 #if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750MINI))
 
-	#define LED1_PIN			GPIO_Pin_2
-	#define LED1_GPIO_PORT		GPIOB
-	#define LED1_GPIO_PAD		PAD_PB
-	#define LED1_GPIO_PAD_AF	PAD_AF1		// PAD Config - LED used 2nd Function
+	#define LED1_PIN			GPIO_Pin_2 
+    #define LED1_GPIO_PORT		GPIOB
+    #define LED1_GPIO_PAD		PAD_PB
+    #define LED1_GPIO_PAD_AF	PAD_AF1		// PAD Config - LED used 2nd Function
 
 	#define LED2_PIN			GPIO_Pin_3
 	#define LED2_GPIO_PORT		GPIOB
@@ -359,7 +425,19 @@
 	#define LED2_GPIO_PAD		PAD_PA
 	#define LED2_GPIO_PAD_AF	PAD_AF1
 
-#else // WIZwiki-W7500 board
+#elif (DEVICE_BOARD_NAME == WIZ752SR_12x)
+
+	#define LED1_PIN			GPIO_Pin_8 
+	#define LED1_GPIO_PORT		GPIOC
+	#define LED1_GPIO_PAD		PAD_PC
+	#define LED1_GPIO_PAD_AF	PAD_AF1
+
+	#define LED2_PIN			GPIO_Pin_9 
+	#define LED2_GPIO_PORT		GPIOC
+	#define LED2_GPIO_PAD		PAD_PC
+	#define LED2_GPIO_PAD_AF	PAD_AF1
+
+#elif (DEVICE_BOARD_NAME == WIZwiki_W7500) // WIZwiki-W7500 board
 
 	// [RGB LED] R: PC_08, G: PC_09, B: PC_05
 	#define LED1_PIN			GPIO_Pin_8 // RGB LED: RED
@@ -372,31 +450,6 @@
 	#define LED2_GPIO_PAD		PAD_PC
 	#define LED2_GPIO_PAD_AF	PAD_AF1
 	
-/*	
-	#define LED_R_PIN			GPIO_Pin_8
-	#define LED_R_GPIO_PORT		GPIOC
-	#define LED_R_GPIO_PAD		PAD_PC
-	#define LED_R_GPIO_PAD_AF	PAD_AF1
-
-	#define LED_G_PIN			GPIO_Pin_9
-	#define LED_G_GPIO_PORT		GPIOC
-	#define LED_G_GPIO_PAD		PAD_PC
-	#define LED_G_GPIO_PAD_AF	PAD_AF1
-
-	#define LED_B_PIN			GPIO_Pin_5
-	#define LED_B_GPIO_PORT		GPIOC
-	#define LED_B_GPIO_PAD		PAD_PC
-	#define LED_B_GPIO_PAD_AF	PAD_AF1
-
-	// LED
-	#define LEDn		3
-	typedef enum
-	{
-	  LED_R = 0,
-	  LED_G = 1,
-	  LED_B = 2  
-	} Led_TypeDef;
-*/
 #endif
 	
 	// LED
@@ -420,13 +473,11 @@
 	void init_phylink(void);
 	uint8_t get_phylink(void);
 	
-	void init_uart_if_sel_pin(void);
-	uint8_t get_uart_if_sel_pin(void);
+	void init_uart_if_sel(void);
+	uint8_t get_uart_if_sel(void);
 	
-#ifdef __USE_BOOT_ENTRY__
 	void init_boot_entry_pin(void);
 	uint8_t get_boot_entry_pin(void);
-#endif
 	
 	void LED_Init(Led_TypeDef Led);
 	void LED_On(Led_TypeDef Led);

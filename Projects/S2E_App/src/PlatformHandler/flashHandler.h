@@ -21,7 +21,6 @@
 // Main flash size: 128kB (512 Sectors == 32 Blocks)
 #define FLASH_START_ADDR	0x00000000
 #define FLASH_END_ADDR		0x0001FEFF
-//#define FLASH_END_ADDR		0x0001FFFF
 
 // Data flash 0 size: 256bytes (1 Sector)
 #define DAT0_START_ADDR		0x0003FE00

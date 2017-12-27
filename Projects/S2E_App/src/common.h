@@ -9,7 +9,7 @@
 /* Application Firmware Version */
 #define MAJOR_VER			1
 #define MINOR_VER			1
-#define MAINTENANCE_VER		11
+#define MAINTENANCE_VER		13
 
 #define STR_VERSION_STATUS	"Develop" // or "Stable"
 //#define STR_VERSION_STATUS	"Stable"
@@ -25,8 +25,8 @@
 #define SOCK_CONFIG_UDP		2
 #define SOCK_CONFIG_TCP		3
 
-//#define SEG_SOCK1			SOCK_DATA1
-//#define SEG_SOCK2			SOCK_DATA2
+#define SEG_SOCK1			SOCK_DATA1
+#define SEG_SOCK2			SOCK_DATA2
 #define SEGCP_UDP_SOCK		SOCK_CONFIG_UDP
 #define SEGCP_TCP_SOCK		SOCK_CONFIG_TCP
 
@@ -80,7 +80,6 @@
 ////////////////////////////////
 // Defines for S2E Status
 typedef enum{ST_BOOT, ST_OPEN, ST_CONNECT, ST_UPGRADE, ST_ATMODE, ST_UDP} teDEVSTATUS;   // for Device status
-//typedef enum{ST_BOOT, ST_OPEN, ST_CONNECT, ST_UPGRADE, ST_ATMODE, ST_UDP} teDEVSTATUS;   // for Device status
 
 #define DEVICE_AT_MODE		0
 #define DEVICE_GW_MODE		1

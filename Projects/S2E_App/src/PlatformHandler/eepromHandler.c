@@ -9,7 +9,6 @@
 	#include <ctype.h>
 #endif
 
-
 /* Private functions prototypes ----------------------------------------------*/
 void EE24AAXX_Init(void);
 uint16_t EE24AAXX_Read(uint16_t ReadAddr,uint8_t *pBuffer,uint16_t NumToRead);

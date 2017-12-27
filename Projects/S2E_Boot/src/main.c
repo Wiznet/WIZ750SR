@@ -101,6 +101,7 @@ uint8_t flag_process_dhcp_success = OFF;
 int main(void)
 {
 	DevConfig *dev_config = get_DevConfig_pointer();
+    DevConfig_E *dev_config_e = get_DevConfig_E_pointer();
 	uint8_t appjump_enable = OFF;
 	uint8_t ret = 0;
 	//uint16_t i;
@@ -144,7 +145,7 @@ int main(void)
 	
 	// 2. Firmware update flag가 1인 경우 		-> 전체 영역 erase, Fwup_size만큼 fw update 수행, app backup (flash) >> app main (flash)
 	
-	if(dev_config->firmware_update.fwup_flag == 1)
+	if(dev_config_e->firmware_update.fwup_flag == 1)
 	{
 		// Firmware download has already been done at application routine.
 			// 1. 50kB app mode: Firmware copy: [App backup] -> [App main]
@@ -152,8 +153,8 @@ int main(void)
 		ret = device_firmware_update(STORAGE_APP_MAIN);
 		if(ret == DEVICE_FWUP_RET_SUCCESS)
 		{
-			dev_config->firmware_update.fwup_flag = SEGCP_DISABLE;
-			dev_config->firmware_update.fwup_size = 0;
+			dev_config_e->firmware_update.fwup_flag = SEGCP_DISABLE;
+			dev_config_e->firmware_update.fwup_size = 0;
 			
 			save_DevConfig_to_storage();
 			
@@ -198,9 +199,10 @@ int main(void)
 	}
 //#endif
 	
-#ifdef __USE_BOOT_ENTRY__
-	if(get_boot_entry_pin() == 0) appjump_enable = OFF;
-#endif
+	if(get_boot_entry_pin() == 0) 
+    {
+        appjump_enable = OFF;
+    }
 	
 	if(appjump_enable == ON)
 	{

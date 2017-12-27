@@ -13,9 +13,6 @@
 #define SEG_DEBUG_UART		2	// S2E Debug UART, fixed
 
 #define SEG_DATA_BUF_SIZE	DATA_BUF_SIZE	// UART Ring buffer size
-//#define SEG_DATA_BUF_SIZE	2048	// UART Ring buffer size
-//#define SEG_DATA_BUF_SIZE	3072	// UART Ring buffer size
-//#define SEG_DATA_BUF_SIZE	4096	// UART Ring buffer size
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 #define DEFAULT_MODESWITCH_INTER_GAP	500 // 500ms (0.5sec)
@@ -29,11 +26,6 @@
 #define MAX_CONNECTION_AUTH_TIME		5000 // 5000ms (5sec)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-/*
-#ifndef DATA_BUF_SIZE
-	#define DATA_BUF_SIZE	2048
-#endif
-*/
 
 #define SEG_DISABLE			0
 #define SEG_ENABLE			1

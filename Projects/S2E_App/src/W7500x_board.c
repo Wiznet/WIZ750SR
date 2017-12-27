@@ -45,11 +45,8 @@ void W7500x_Board_Init(void)
 	init_eeprom();
 #endif
 	
-#ifdef __USE_BOOT_ENTRY__
-	init_boot_entry_pin();
-#endif
-	// STATUS #1 : PHY link status (LED1)
-	// STATUS #2 : TCP connection status (LED2)
+	init_boot_entry_pin(); 
+
 	LED_Init(LED1);
 	LED_Init(LED2);
 }
@@ -86,11 +83,11 @@ static void PHY_Init(void)
 	//mdio_write(GPIOB, PHYREG_CONTROL, CNTL_RESET); // PHY Reset
 	
 	#ifdef __W7500P__ // W7500P
-		set_link(FullDuplex10);
+		//set_link(FullDuplex10);
 		//set_link(HalfDuplex10);
 		//set_link(FullDuplex100);
 		//set_link(HalfDuplex100);
-		//set_link(AUTONEGO);
+		set_link(AUTONEGO);
 	#endif
 	
 	// ## for debugging
@@ -106,89 +103,85 @@ static void PHY_Init(void)
 // Status pins, active low
 void init_phylink(void)
 {
-    #ifdef __USE_PHYLINK_CHECK_PIN__
-        GPIO_Configuration(PHYLINK_IN_PORT, PHYLINK_IN_PIN, GPIO_Mode_IN, PHYLINK_IN_PAD_AF);
-    #else
-		;
-	#endif
+#ifdef __USE_PHYLINK_CHECK_PIN__
+    GPIO_Configuration(PHYLINK_IN_PORT, PHYLINK_IN_PIN, GPIO_Mode_IN, PHYLINK_IN_PAD_AF);
+#endif
 }
 
 
 uint8_t get_phylink(void)
 {
-    #ifdef __USE_PHYLINK_CHECK_PIN__
-        // PHYlink input; Active low
-        return GPIO_ReadInputDataBit(PHYLINK_IN_PORT, PHYLINK_IN_PIN);
-    #else
-		return !link();
-	#endif
+#ifdef __USE_PHYLINK_CHECK_PIN__
+    // PHYlink input; Active low
+    return GPIO_ReadInputDataBit(PHYLINK_IN_PORT, PHYLINK_IN_PIN);
+#else
+    return !link();
+#endif
 }
 
 // Hardware mode switch pin, active low
 void init_hw_trig_pin(void)
 {
-    #ifdef __USE_HW_TRIG_PIN__
-        GPIO_Configuration(HW_TRIG_PORT, HW_TRIG_PIN, GPIO_Mode_IN, HW_TRIG_PAD_AF);
-        HW_TRIG_PORT->OUTENCLR = HW_TRIG_PIN;
-    #else
-		;
-	#endif
+#ifdef __USE_HW_TRIG_PIN__
+    GPIO_Configuration(HW_TRIG_PORT, HW_TRIG_PIN, GPIO_Mode_IN, HW_TRIG_PAD_AF);
+    HW_TRIG_PORT->OUTENCLR = HW_TRIG_PIN;
+#endif
 }
 
 
 uint8_t get_hw_trig_pin(void)
 {
-    #ifdef __USE_HW_TRIG_PIN__
-        // HW_TRIG input; Active low
-        uint8_t hw_trig, i;
-        for(i = 0; i < 5; i++)
-        {
-            hw_trig = GPIO_ReadInputDataBit(HW_TRIG_PORT, HW_TRIG_PIN);
-            if(hw_trig != 0) return 1; // High
-            delay(5);
-        }
-    #else
-		;
-	#endif
-        
-	return 1; // Low
+#ifdef __USE_HW_TRIG_PIN__
+    // HW_TRIG input; Active low
+    uint8_t hw_trig, i;
+    for(i = 0; i < 5; i++)
+    {
+        hw_trig = GPIO_ReadInputDataBit(HW_TRIG_PORT, HW_TRIG_PIN);
+        if(hw_trig != 0) return 1; // High
+        delay(5);
+    }
+#else
+    return 1;
+#endif
 }
 
 
-void init_uart_if_sel_pin(void)
+void init_uart_if_sel(void)
 {
-	#ifdef __USE_UART_IF_SELECTOR__
-		GPIO_Configuration(UART_IF_SEL_PORT, UART_IF_SEL_PIN, GPIO_Mode_IN, UART_IF_SEL_PAD_AF);
-	#else
-		;
-	#endif
+#ifdef __USE_UART_IF_SELECTOR__
+    GPIO_Configuration(UART_IF_SEL_PORT, UART_IF_SEL_PIN, GPIO_Mode_IN, UART_IF_SEL_PAD_AF);
+#endif
 }
 
-uint8_t get_uart_if_sel_pin(void)
+uint8_t get_uart_if_sel(void)
 {
-	// Status of UART interface selector pin input; [0] RS-232/TTL mode, [1] RS-422/485 mode
-	#ifdef __USE_UART_IF_SELECTOR__
-		return GPIO_ReadInputDataBit(UART_IF_SEL_PORT, UART_IF_SEL_PIN);
-	#else
-		return UART_IF_DEFAULT;
-	#endif
+// Status of UART interface selector pin input; [0] RS-232/TTL mode, [1] RS-422/485 mode
+#ifdef __USE_UART_IF_SELECTOR__
+    return GPIO_ReadInputDataBit(UART_IF_SEL_PORT, UART_IF_SEL_PIN);
+#else
+    return UART_IF_DEFAULT;
+#endif
 }
 
-
-#ifdef __USE_BOOT_ENTRY__
 // Application boot mode entry pin, active low
 void init_boot_entry_pin(void)
 {
-	GPIO_Configuration(BOOT_ENTRY_PORT, BOOT_ENTRY_PIN, GPIO_Mode_IN, BOOT_ENTRY_PAD_AF);
-	BOOT_ENTRY_PORT->OUTENCLR = BOOT_ENTRY_PIN; // set to high
+#ifdef __USE_BOOT_ENTRY__
+    GPIO_Configuration(BOOT_ENTRY_PORT, BOOT_ENTRY_PIN, GPIO_Mode_IN, BOOT_ENTRY_PAD_AF);
+    //BOOT_ENTRY_PORT->OUTENCLR = BOOT_ENTRY_PIN; // set to high
+#endif
 }
 
 uint8_t get_boot_entry_pin(void)
 {
-	// Get the status of application boot mode entry pin, active low
-	return GPIO_ReadInputDataBit(BOOT_ENTRY_PORT, BOOT_ENTRY_PIN);
-}
+#ifdef __USE_BOOT_ENTRY__
+    // Get the status of application boot mode entry pin, active low
+    return GPIO_ReadInputDataBit(BOOT_ENTRY_PORT, BOOT_ENTRY_PIN);
+#else
+    return 1;
 #endif
+}
+
 
 
 /**

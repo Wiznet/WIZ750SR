@@ -64,7 +64,7 @@ void device_reboot(void)
 
 uint8_t device_firmware_update(teDATASTORAGE stype)
 {
-	struct __firmware_update *fwupdate = (struct __firmware_update *)&(get_DevConfig_pointer()->firmware_update);
+	struct __firmware_update *fwupdate = (struct __firmware_update *)&(get_DevConfig_E_pointer()->firmware_update);
 	struct __serial_common *serial_common = (struct __serial_common *)&(get_DevConfig_pointer()->serial_common);
 	
 	uint8_t ret = DEVICE_FWUP_RET_PROGRESS; // No Meaning, [Firmware update process] have to work as blocking function.
@@ -224,7 +224,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 
 uint8_t device_firmware_update(teDATASTORAGE stype)
 {
-	struct __firmware_update *fwupdate = (struct __firmware_update *)&(get_DevConfig_pointer()->firmware_update);
+	struct __firmware_update *firmware_update = (struct __firmware_update *)&(get_DevConfig_E_pointer()->firmware_update);
 	struct __serial_common *serial_common = (struct __serial_common *)&(get_DevConfig_pointer()->serial_common);
 	
 	uint8_t ret = DEVICE_FWUP_RET_PROGRESS; // No Meaning, [Firmware update process] have to work as blocking function.
@@ -238,12 +238,12 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 //#ifdef _FWUP_DEBUG_
 	//uint8_t update_cnt = 0;
 //#endif
-	if(fwupdate->fwup_flag == SEGCP_DISABLE)	return DEVICE_FWUP_RET_FAILED;
-	if((fwupdate->fwup_size == 0) || (fwupdate->fwup_size > DEVICE_FWUP_SIZE))
+	if(firmware_update->fwup_flag == SEGCP_DISABLE)	return DEVICE_FWUP_RET_FAILED;
+	if((firmware_update->fwup_size == 0) || (firmware_update->fwup_size > DEVICE_FWUP_SIZE))
 	{
 		if(serial_common->serial_debug_en == SEGCP_ENABLE)
 		{
-			printf(" > SEGCP:FW_UPDATE:FAILED - Invalid firmware size: %d bytes (Firmware size must be within %d bytes)\r\n", fwupdate->fwup_size, DEVICE_FWUP_SIZE);
+			printf(" > SEGCP:FW_UPDATE:FAILED - Invalid firmware size: %d bytes (Firmware size must be within %d bytes)\r\n", firmware_update->fwup_size, DEVICE_FWUP_SIZE);
 		}
 
 		return DEVICE_FWUP_RET_FAILED;
@@ -254,7 +254,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 	{
 		if(serial_common->serial_debug_en == SEGCP_ENABLE)
 		{
-			printf(" > SEGCP:FW_UPDATE:NETWORK - Firmware size: [%d] bytes\r\n", fwupdate->fwup_size);
+			printf(" > SEGCP:FW_UPDATE:NETWORK - Firmware size: [%d] bytes\r\n", firmware_update->fwup_size);
 		}
 
 		write_fw_len = 0;
@@ -292,7 +292,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 				break;
 			}
 			
-		} while(write_fw_len < fwupdate->fwup_size);
+		} while(write_fw_len < firmware_update->fwup_size);
 	}	
 	else if(stype == NETWORK_APP_BACKUP) // Run this code in the boot area only
 	{
@@ -306,11 +306,11 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 	}
 	
 	// shared code
-	if(write_fw_len == fwupdate->fwup_size)
+	if(write_fw_len == firmware_update->fwup_size)
 	{
 		if(serial_common->serial_debug_en == SEGCP_ENABLE)
 		{
-			printf(" > SEGCP:FW_UPDATE:SUCCESS - %d / %d bytes\r\n", write_fw_len, fwupdate->fwup_size);
+			printf(" > SEGCP:FW_UPDATE:SUCCESS - %d / %d bytes\r\n", write_fw_len, firmware_update->fwup_size);
 		}
 		ret = DEVICE_FWUP_RET_SUCCESS;
 	}
@@ -325,7 +325,7 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 
 uint16_t get_firmware_from_network(uint8_t sock, uint8_t * buf)
 {
-	struct __firmware_update *fwupdate = (struct __firmware_update *)&(get_DevConfig_pointer()->firmware_update);
+	struct __firmware_update *fwupdate = (struct __firmware_update *)&(get_DevConfig_E_pointer()->firmware_update);
 	uint8_t len_buf[2] = {0, };
 	uint16_t len = 0;
 	uint8_t state = getSn_SR(sock);

@@ -203,37 +203,13 @@ int main(void)
 	//printf("PHY Link status: %x\r\n", get_phylink());
 	printf("%s\r\n", STR_BAR);
     
-    #if 0
-    typedef enum IRQn
-{
-/******  Cortex-M0 Processor Exceptions Numbers ***************************************************/
-
-/* ToDo: use this Cortex interrupt numbers if your device is a CORTEX-M0 device                   */
-  NonMaskableInt_IRQn          = -14,      /*!<  2 Cortex-M0 Non Maskable Interrupt               */
-  HardFault_IRQn               = -13,      /*!<  3 Cortex-M0 Hard Fault Interrupt                 */
-  SVCall_IRQn                  = -5,       /*!< 11 Cortex-M0 SV Call Interrupt                    */
-  PendSV_IRQn                  = -2,       /*!< 14 Cortex-M0 Pend SV Interrupt                    */
-  SysTick_IRQn                 = -1,       /*!< 15 Cortex-M0 System Tick Interrupt                */
-/******  W7500x Specific Interrupt Numbers ********************************************************/
-  SSP0_IRQn                    = 0,        /*!< SSP 0 Interrupt                                   */ 
-  SSP1_IRQn                    = 1,        /*!< SSP 1 Interrupt                                   */ 
-  UART0_IRQn                   = 2,        /*!< UART 0 Interrupt                                  */
-  UART1_IRQn                   = 3,        /*!< UART 1 Interrupt                                  */
-  UART2_IRQn                   = 4,        /*!< UART 2 Interrupt                                  */
-    #endif
-    
-    printf("NVIC_GetPriority NonMaskableInt_IRQn : %+d\r\n", NVIC_GetPriority(NonMaskableInt_IRQn));
-    printf("NVIC_GetPriority HardFault_IRQn : %+d\r\n", NVIC_GetPriority(HardFault_IRQn));
-    printf("NVIC_GetPriority SVCall_IRQn : %+d\r\n", NVIC_GetPriority(SVCall_IRQn));
-    printf("NVIC_GetPriority PendSV_IRQn : %+d\r\n", NVIC_GetPriority(PendSV_IRQn));
     printf("NVIC_GetPriority SysTick_IRQn : %+d\r\n", NVIC_GetPriority(SysTick_IRQn));
     printf("NVIC_GetPriority UART0_IRQn : %+d\r\n", NVIC_GetPriority(UART0_IRQn));
     printf("NVIC_GetPriority UART1_IRQn : %+d\r\n", NVIC_GetPriority(UART1_IRQn));
     printf("NVIC_GetPriority UART2_IRQn : %+d\r\n", NVIC_GetPriority(UART2_IRQn));
-    printf("NVIC_GetPriority DUALTIMER0_IRQn : %+d\r\n", NVIC_GetPriority(DUALTIMER0_IRQn));
-    printf("NVIC_GetPriority DUALTIMER1_IRQn : %+d\r\n", NVIC_GetPriority(DUALTIMER1_IRQn));
+
     printf("%s\r\n", STR_BAR);
-	//link();
+
 	while(1) // main loop
 	{
 		do_segcp();
@@ -277,33 +253,18 @@ static void W7500x_Init(void)
 
 	/* Reset supervisory IC Init */
 	Supervisory_IC_Init();
-	
-	/* Set System init */
-    //#define CLOCK_SOURCE_EXTERNAL	(0x1UL)
-    //#define PLL_SOURCE_12MHz	(12000000UL)    /* 12MHz External Oscillator Frequency             */
-    //#define SYSTEM_CLOCK_48MHz	(48000000UL)    // W7500x maximum clock frequency
     
 	SystemInit_User(DEVICE_CLOCK_SELECT, DEVICE_PLL_SOURCE_CLOCK, DEVICE_TARGET_SYSTEM_CLOCK);
-    /*
-    SystemInit();
-    CRG->PLL_FCR = (60<<16)|(4<<8)|(1);
-    SystemCoreClockUpdate();
-    */
 
 	/* DualTimer0 Initialization */
 	Timer0_Configuration();
-    
-    /* DualTimer1 Initialization */
-	//Timer1_Configuration();
 	
 	/* Simple UART init for Debugging */
 	UART2_Configuration();
 	
 	/* SysTick_Config */
 	SysTick_Config((GetSystemClock()/1000));
-    //SysTick_Config(48000000/1000);
 	
-
 #ifdef _MAIN_DEBUG_
 	printf("\r\n >> W7500x MCU Clock Settings ===============\r\n"); 
 	printf(" - GetPLLSource: %s, %lu (Hz)\r\n", GetPLLSource()?"External":"Internal", DEVICE_PLL_SOURCE_CLOCK);
@@ -323,9 +284,6 @@ static void W7500x_WZTOE_Init(void)
 	uint8_t tx_size[8] = { 2, 2, 2, 2, 2, 2, 0, 0 }; // default: { 2, 2, 2, 2, 2, 2, 2, 2 }
 	uint8_t rx_size[8] = { 2, 2, 2, 2, 2, 2, 0, 0 }; // default: { 2, 2, 2, 2, 2, 2, 2, 2 }
 	
-	/* Structure for TCP timeout control: RTR, RCR */
-	//wiz_NetTimeout * net_timeout;
-	
 #ifdef _MAIN_DEBUG_
 	uint8_t i;
 #endif
@@ -340,14 +298,11 @@ static void W7500x_WZTOE_Init(void)
 	
 	/* Set TCP Timeout: retry count / timeout val */
 	// Retry count default: [8], Timeout val default: [2000]
-	//net_timeout->retry_cnt = 8;
-	//net_timeout->time_100us = 3300;
-	//wizchip_settimeout(net_timeout);
 	setRCR(8);
-    setRTR(2500);
+    setRTR(2000);
+    
 #ifdef _MAIN_DEBUG_
 	//wizchip_gettimeout(net_timeout); // TCP timeout settings
-	//printf(" - Network Timeout Settings - RCR: %d, RTR: %dms\r\n", net_timeout->retry_cnt, net_timeout->time_100us);
     printf(" - Network Timeout Settings - RCR: %d, RTR: %dms\r\n", getRCR(), getRTR());
 #endif
 	

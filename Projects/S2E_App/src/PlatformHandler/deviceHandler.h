@@ -16,7 +16,6 @@
 // HTTP Response: Status code
 #define STATUS_HTTP_OK				200
 
-
 /* W7500S2E Application flash memory map */
 #define DEVICE_BOOT_SECT_SIZE       112
 #define DEVICE_BOOT_SIZE			(SECT_SIZE * DEVICE_BOOT_SECT_SIZE)//28k byte
@@ -43,8 +42,8 @@
 #define DEVICE_APP_MAIN_ADDR				(DEVICE_BOOT_ADDR + DEVICE_BOOT_SIZE)
 #define DEVICE_APP_BACKUP_ADDR				(DEVICE_APP_MAIN_ADDR + DEVICE_APP_SIZE)
 #define DEVICE_MAC_ADDR						(MAC_ADDR)
-#define DEVICE_CONFIG_ADDR					(DAT1_START_ADDR)
-
+#define DEVICE_CONFIG_ADDR					(DAT0_START_ADDR)
+#define DEVICE_CONFIG_E_ADDR				(DAT1_START_ADDR)
 
 /* Defines for firmware update */
 #define DEVICE_FWUP_SIZE			DEVICE_APP_SIZE // Firmware size - 50kB MAX

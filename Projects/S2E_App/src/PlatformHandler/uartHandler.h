@@ -6,15 +6,8 @@
 #include "common.h"
 #include "ConfigData.h"
 #include "ring_buffer.h"
-//#include "seg.h"
 
 #define _UART_DEBUG_
-
-/*
-#ifndef DATA_BUF_SIZE
-	#define DATA_BUF_SIZE 2048
-#endif
-*/
 
 #define UART_SRB_SIZE 1024	/* Send */
 #define UART_RRB_SIZE 1024	/* Receive */
@@ -47,21 +40,6 @@
 
 #define UART_CTS_HIGH			1
 #define UART_CTS_LOW			0
-
-// UART0
-#define UART0_RTS_PIN				GPIO_Pin_12
-#define UART0_RTS_PORT				GPIOA
-#define UART0_RTS_PAD_AF			PAD_AF1 
-#define UART0_CTS_PIN				GPIO_Pin_11
-#define UART0_CTS_PORT				GPIOA
-#define UART0_CTS_PAD_AF			PAD_AF1
-// UART1
-#define UART1_RTS_PIN				GPIO_Pin_1
-#define UART1_RTS_PORT				GPIOC
-#define UART1_RTS_PAD_AF			PAD_AF1 
-#define UART1_CTS_PIN				GPIO_Pin_0
-#define UART1_CTS_PORT				GPIOC
-#define UART1_CTS_PAD_AF			PAD_AF1
 
 enum baud {
 	baud_300 = 0,
@@ -121,30 +99,18 @@ void UART2_Configuration(void);
 
 // #1 XON/XOFF Software flow control: Check the Buffer usage and Send the start/stop commands
 void check_uart_flow_control(uint8_t socket, uint8_t flow_ctrl);
-void UART_TX_IRQ_Handler_RB(UART_TypeDef *pUART, RINGBUFF_T *pTXRB);
 void serial_info_init(UART_InitTypeDef* UART_InitStructure, uint8_t channel);
 uint32_t UART_Send_RB(UART_TypeDef* UARTx, RINGBUFF_T *pRB, const void *data, int bytes);
 int UART_Read_RB(RINGBUFF_T *pRB, void *data, int bytes);
 void UART_Buffer_Flush(RINGBUFF_T *buf);
+
+
 // Hardware flow control by GPIOs (RTS/CTS)
-#ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
 uint8_t get_uart_cts_pin(uint8_t uartNum);
 void set_uart_rts_pin_high(uint8_t uartNum);
 void set_uart_rts_pin_low(uint8_t uartNum);
-#endif
 
-
-////////////////////////////////////////////////////////////////////////////////////////////////////
-// Defines: W7500x UART Ring buffer 
-////////////////////////////////////////////////////////////////////////////////////////////////////
-
-//int32_t uart_putc(uint8_t uartNum, uint8_t ch);
-//int32_t uart_getc(uint8_t uartNum);
-//int32_t uart_puts(uint8_t uartNum, uint8_t* buf, uint16_t reqSize);
-//int32_t uart_gets(uint8_t uartNum, uint8_t* buf, uint16_t reqSize);
-
-//void uart_rx_flush(uint8_t uartNum);
-
+// UART interface selector by GPIO
 uint8_t get_uart_rs485_sel(uint8_t uartNum);
 void uart_rs485_rs422_init(uint8_t uartNum);
 void uart_rs485_disable(uint8_t uartNum);
@@ -152,8 +118,5 @@ void uart_rs485_enable(uint8_t uartNum);
 
 #define MIN(_a, _b) (_a < _b) ? _a : _b
 #define MEM_FREE(mem_p) do{ if(mem_p) { free(mem_p); mem_p = NULL; } }while(0)	//
-//#define BITSET(var_v, bit_v) SET_BIT(var_v, bit_v)	//(var_v |= bit_v)
-//#define BITCLR(var_v, bit_v) CLEAR_BIT(var_v, bit_v)//(var_v &= ~(bit_v))
-
 
 #endif /* UARTHANDLER_H_ */

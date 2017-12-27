@@ -1,4 +1,5 @@
 #include "W7500x.h"
+#include "W7500x_miim.h"
 #include "W7500x_gpio.h"
 
 #include "common.h"
@@ -19,6 +20,8 @@
     #if (DEVICE_BOARD_NAME == WIZ750SR)
         const char*    USER_IO_PIN_STR[USER_IOn] = {"p28\0", "p27\0", "p26\0", "p25\0",};
     #elif (DEVICE_BOARD_NAME == WIZ750JR)        
+        const char*    USER_IO_PIN_STR[USER_IOn] = {"PC15\0", "PC14\0", "PC13\0", "PC12\0"};
+    #elif (DEVICE_BOARD_NAME == WIZ752SR_12x)        
         const char*    USER_IO_PIN_STR[USER_IOn] = {"PC15\0", "PC14\0", "PC13\0", "PC12\0"};
     #endif
 	const char*    USER_IO_TYPE_STR[] =        {"Digital", "Analog"};
@@ -237,13 +240,9 @@ uint8_t get_user_io_direction(uint8_t io_sel)
 	uint8_t ret;
 	
 	if((user_io_info->user_io_direction & io_sel) == io_sel)
-	{
 		ret = IO_OUTPUT;
-	}
 	else
-	{
 		ret = IO_INPUT;
-	}
 	
 	return ret;
 }
@@ -368,6 +367,7 @@ void init_connection_status_io(void)
 {
 	struct __serial_option *serial_option = (struct __serial_option *)&(get_DevConfig_pointer()->serial_option);
 	
+#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == WIZ750JR))
 	if(serial_option[0].dtr_en == 0)	
     {
         init_phylink_status_pin();
@@ -384,7 +384,11 @@ void init_connection_status_io(void)
 	else					
     {
         init_flowcontrol_dsr_pin();
-    }
+	}
+#elif (DEVICE_BOARD_NAME == WIZ752SR_12x)
+    init_phylink_status_pin();
+    init_tcpconnection_status_pin();
+#endif
 }
 
 // This function is intended only for output connection status pins; PHYlink, TCPconnection
@@ -394,48 +398,81 @@ void set_connection_status_io(uint16_t pin, uint8_t channel, uint8_t set)
 	
 	if(pin == PHYLINK)
 	{
-        #ifdef __USE_PHYLINK_CHECK_PIN__
-            if(set == ON)
-            {
-                
-                if(serial_option[0].dtr_en == 0) GPIO_ResetBits(STATUS_PHYLINK_PORT, STATUS_PHYLINK_PIN); 
-                LED_On(LED1);
-            }
-            else // OFF
-            {
-                if(serial_option[0].dtr_en == 0) GPIO_SetBits(STATUS_PHYLINK_PORT, STATUS_PHYLINK_PIN); 
-                LED_Off(LED1);
-            }
-        #endif
+#ifdef __USE_STATUS_PHYLINK_PIN__
+    #if ((DEVICE_BOARD_NAME == WIZ750JR) || (DEVICE_BOARD_NAME == WIZ750SR))
+        if(set == ON)
+        {
+            if(serial_option[0].dtr_en == 0) 
+                GPIO_ResetBits(STATUS_PHYLINK_PORT, STATUS_PHYLINK_PIN); 
+            LED_On(LED1);
+        }
+        else 
+        {
+            if(serial_option[0].dtr_en == 0) 
+                GPIO_SetBits(STATUS_PHYLINK_PORT, STATUS_PHYLINK_PIN); 
+            LED_Off(LED1);
+        }
+    #else
+        if(set == ON)
+            GPIO_ResetBits(STATUS_PHYLINK_PORT, STATUS_PHYLINK_PIN); 
+        else 
+            GPIO_SetBits(STATUS_PHYLINK_PORT, STATUS_PHYLINK_PIN); 
+    #endif
+#endif
 	}
 	else if(pin == TCPCONNECT)
 	{
-        if(channel)
+#ifdef __USE_STATUS_TCPCONNECT_PIN__
+    #if ((DEVICE_BOARD_NAME == WIZ750JR) || (DEVICE_BOARD_NAME == WIZ750SR))
+        if(!channel)
         {
             if(set == ON)
             {
-                if(serial_option[channel].dsr_en == 0) GPIO_ResetBits(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN); 
-                LED_On(LED2);
+                if(serial_option[channel].dsr_en == 0) 
+                    GPIO_ResetBits(STATUS_TCPCONNECT_0_PORT, STATUS_TCPCONNECT_0_PIN); 
             }
             else // OFF
             {
-                if(serial_option[channel].dsr_en == 0) GPIO_SetBits(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN);
-                LED_Off(LED2);
+                if(serial_option[channel].dsr_en == 0) 
+                    GPIO_SetBits(STATUS_TCPCONNECT_0_PORT, STATUS_TCPCONNECT_0_PIN);
             }
         }
+        #if (DEVICE_UART_CNT == 2)
         else
         {
             if(set == ON)
             {
-                if(serial_option->dsr_en == 0) GPIO_ResetBits(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN); 
+                if(serial_option[channel].dsr_en == 0)
+                    GPIO_ResetBits(STATUS_TCPCONNECT_1_PORT, STATUS_TCPCONNECT_1_PIN); 
                 LED_On(LED2);
             }
             else // OFF
             {
-                if(serial_option->dsr_en == 0) GPIO_SetBits(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN);
+                if(serial_option[channel].dsr_en == 0) 
+                    GPIO_SetBits(STATUS_TCPCONNECT_1_PORT, STATUS_TCPCONNECT_1_PIN);
                 LED_Off(LED2);
             }
         }
+        #endif
+    #elif (DEVICE_BOARD_NAME == WIZ752SR_12x) 
+        if(!channel)
+        {
+            if(set == ON)
+                GPIO_ResetBits(STATUS_TCPCONNECT_0_PORT, STATUS_TCPCONNECT_0_PIN); 
+            else // OFF
+                GPIO_SetBits(STATUS_TCPCONNECT_0_PORT, STATUS_TCPCONNECT_0_PIN);
+        }
+        #if (DEVICE_UART_CNT == 2)
+        else
+        {
+            if(set == ON)
+                GPIO_ResetBits(STATUS_TCPCONNECT_1_PORT, STATUS_TCPCONNECT_1_PIN); 
+            else // OFF
+                GPIO_SetBits(STATUS_TCPCONNECT_1_PORT, STATUS_TCPCONNECT_1_PIN);
+        }
+        #endif
+    #endif
+#endif
 	}
 }
 
@@ -444,30 +481,58 @@ uint8_t get_connection_status_io(uint16_t pin, uint8_t channel)
 	struct __serial_option *serial_option = (struct __serial_option *)&(get_DevConfig_pointer()->serial_option);
 	uint8_t status;
 	
-	if(pin == STATUS_PHYLINK_PIN)
+	if(pin == PHYLINK)
 	{
+#ifdef __USE_STATUS_PHYLINK_PIN__
+    #if (DEVICE_BOARD_NAME == WIZ750SR) 
         if(serial_option->dtr_en == 0)
             status = GPIO_ReadInputDataBit(STATUS_PHYLINK_PORT, STATUS_PHYLINK_PIN);
+        #ifdef __USE_UART_DTR_DSR__
         else
-            status = GPIO_ReadOutputDataBit(DTR_PORT, DTR_PIN);
+            status = GPIO_ReadOutputDataBit(DTR_0_PORT, DTR_0_PIN);
+        #endif
+    #else
+        status = GPIO_ReadInputDataBit(STATUS_PHYLINK_PORT, STATUS_PHYLINK_PIN);
+    #endif
+#endif
 	}
-	else if(pin == STATUS_TCPCONNECT_PIN)
+	else if(pin == TCPCONNECT)
 	{
-        if(channel)
+#ifdef __USE_STATUS_TCPCONNECT_PIN__
+    #if ((DEVICE_BOARD_NAME == WIZ750JR) || (DEVICE_BOARD_NAME == WIZ750SR))
+        if(!channel)
         {
-            if(serial_option->dsr_en == 0) 
-				status = GPIO_ReadInputDataBit(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN); 
+            if(serial_option[channel].dsr_en == 0) 
+				status = GPIO_ReadInputDataBit(STATUS_TCPCONNECT_0_PORT, STATUS_TCPCONNECT_0_PIN); 
+            #ifdef __USE_UART_DTR_DSR__
 			else 
 				status = GPIO_ReadInputDataBit(DSR_PORT, DSR_PIN);
+            #endif
         }
+        #if (DEVICE_UART_CNT == 2)
         else
         {
-            if(serial_option->dsr_en == 0) 
-				status = GPIO_ReadInputDataBit(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN); 
+            if(serial_option[channel].dsr_en == 0) 
+				status = GPIO_ReadInputDataBit(STATUS_TCPCONNECT_0_PORT, STATUS_TCPCONNECT_0_PIN); 
+            #ifdef __USE_UART_DTR_DSR__
 			else 
 				status = GPIO_ReadInputDataBit(DSR_PORT, DSR_PIN);
+            #endif
         }
-			
+        #endif
+    #elif (DEVICE_BOARD_NAME == WIZ752SR_12x)  
+        if(!channel)
+        {
+            status = GPIO_ReadInputDataBit(STATUS_TCPCONNECT_0_PORT, STATUS_TCPCONNECT_0_PIN); 
+        }
+        #if (DEVICE_UART_CNT == 2)
+        else
+        {
+            status = GPIO_ReadInputDataBit(STATUS_TCPCONNECT_1_PORT, STATUS_TCPCONNECT_1_PIN); 
+        }
+        #endif
+    #endif
+#endif	
 	}
 	
 	return status;
@@ -476,37 +541,50 @@ uint8_t get_connection_status_io(uint16_t pin, uint8_t channel)
 // PHY link status pin
 void init_phylink_status_pin(void)
 {
+#ifdef __USE_STATUS_PHYLINK_PIN__
 	GPIO_Configuration(STATUS_PHYLINK_PORT, STATUS_PHYLINK_PIN, GPIO_Mode_OUT, STATUS_PHYLINK_PAD_AF);
-	
-	// Pin initial state; High
 	GPIO_SetBits(STATUS_PHYLINK_PORT, STATUS_PHYLINK_PIN); 
+#endif
 }
 
 
 // TCP connection status pin
 void init_tcpconnection_status_pin(void)
 {
-	GPIO_Configuration(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN, GPIO_Mode_OUT, STATUS_TCPCONNECT_PAD_AF);
-	
-	// Pin initial state; High
-	GPIO_SetBits(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN); 
+#ifdef __USE_STATUS_TCPCONNECT_PIN__
+    GPIO_Configuration(STATUS_TCPCONNECT_0_PORT, STATUS_TCPCONNECT_0_PIN, GPIO_Mode_OUT, STATUS_TCPCONNECT_0_PAD_AF);
+    GPIO_SetBits(STATUS_TCPCONNECT_0_PORT, STATUS_TCPCONNECT_0_PIN); 
+    #if (DEVICE_UART_CNT == 2)
+    GPIO_Configuration(STATUS_TCPCONNECT_1_PORT, STATUS_TCPCONNECT_1_PIN, GPIO_Mode_OUT, STATUS_TCPCONNECT_1_PAD_AF);
+    GPIO_SetBits(STATUS_TCPCONNECT_1_PORT, STATUS_TCPCONNECT_1_PIN); 
+    #endif
+#endif
 }
-
 
 // DTR pin
 // output (shared pin with PHY link status)
 void init_flowcontrol_dtr_pin(void)
 {
-	GPIO_Configuration(DTR_PORT, DTR_PIN, GPIO_Mode_OUT, DTR_PAD_AF);
-	
+#ifdef __USE_UART_DTR_DSR__  
+	GPIO_Configuration(DTR_0_PORT, DTR_0_PIN, GPIO_Mode_OUT, DTR_0_PAD_AF);
 	// Pin initial state; High
-	GPIO_ResetBits(DTR_PORT, DTR_PIN); 
+	GPIO_ResetBits(DTR_0_PORT, DTR_0_PIN); 
+    #if (DEVICE_UART_CNT == 2)
+    GPIO_Configuration(DTR_1_PORT, DTR_1_PIN, GPIO_Mode_OUT, DTR_1_PAD_AF);
+	// Pin initial state; High
+	GPIO_ResetBits(DTR_1_PORT, DTR_1_PIN); 
+    #endif
+#endif
 }
 
 void set_flowcontrol_dtr_pin(uint8_t set)
 {
-	if(set == ON)	GPIO_SetBits(DTR_PORT, DTR_PIN);
-	else			GPIO_ResetBits(DTR_PORT, DTR_PIN);
+#ifdef __USE_UART_DTR_DSR__  
+	if(set == ON)	
+        GPIO_SetBits(DTR_0_PORT, DTR_0_PIN);
+	else			
+        GPIO_ResetBits(DTR_0_PORT, DTR_0_PIN);
+#endif
 }
 
 
@@ -514,12 +592,21 @@ void set_flowcontrol_dtr_pin(uint8_t set)
 // input, active high (shared pin with TCP connection status)
 void init_flowcontrol_dsr_pin(void)
 {
-	GPIO_Configuration(DSR_PORT, DSR_PIN, GPIO_Mode_IN, DSR_PAD_AF);
+#ifdef __USE_UART_DTR_DSR__ 
+	GPIO_Configuration(DSR_0_PORT, DSR_0_PIN, GPIO_Mode_IN, DSR_0_PAD_AF);
+    #if (DEVICE_UART_CNT == 2)
+    GPIO_Configuration(DSR_1_PORT, DSR_1_PIN, GPIO_Mode_IN, DSR_1_PAD_AF);
+    #endif
+#endif  
 }
 
 uint8_t get_flowcontrol_dsr_pin(void)
 {
-	return GPIO_ReadInputDataBit(DSR_PORT, DSR_PIN);
+#ifdef __USE_UART_DTR_DSR__ 
+	return GPIO_ReadInputDataBit(DSR_0_PORT, DSR_0_PIN);
+#else
+    return 1;
+#endif  
 }
 
 // Check the PHY link status
@@ -528,18 +615,18 @@ void check_phylink_status(void)
 	static uint8_t prev_link_status = 1;
 	uint8_t link_status;
 	
-#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750MINI) || (DEVICE_BOARD_NAME == WIZ750JR))
+//#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750MINI) || (DEVICE_BOARD_NAME == WIZ750JR))
 	link_status = get_phylink();
-#else
-	link_status = 0;
-#endif
+//#else
+//	link_status = 0;
+//#endif
 	
 	if(prev_link_status != link_status)
 	{
 		if(link_status == 0x00)
-			set_connection_status_io(STATUS_PHYLINK_PIN, 0, ON); 	// PHY Link up
+			set_connection_status_io(PHYLINK, 0, ON); 	// PHY Link up
 		else
-			set_connection_status_io(STATUS_PHYLINK_PIN, 0, OFF); 	// PHY Link down
+			set_connection_status_io(PHYLINK, 0, OFF); 	// PHY Link down
 		
 		prev_link_status = link_status;
 	}
@@ -552,7 +639,7 @@ void gpio_handler_timer_msec(void)
 	if(++phylink_check_time_msec >= PHYLINK_CHECK_CYCLE_MSEC)
 	{
 		phylink_check_time_msec = 0;
-		check_phylink_status();
+		//check_phylink_status();
 		
 		flag_check_phylink = 1;
 	}

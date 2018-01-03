@@ -8,9 +8,9 @@
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
 
-#define SEG_DATA_UART0		0	// S2E Data UART selector, [0] UART0 or [1] UART1
-#define SEG_DATA_UART1		1	// S2E Data UART selector, [0] UART0 or [1] UART1
-#define SEG_DEBUG_UART		2	// S2E Debug UART, fixed
+#define SEG_DATA_UART0		SOCK_CHANNEL0	
+#define SEG_DATA_UART1		SOCK_CHANNEL1	
+#define SEG_DEBUG_UART		2	
 
 #define SEG_DATA_BUF_SIZE	DATA_BUF_SIZE	// UART Ring buffer size
 
@@ -25,10 +25,6 @@
 
 #define MAX_CONNECTION_AUTH_TIME		5000 // 5000ms (5sec)
 ///////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-#define SEG_DISABLE			0
-#define SEG_ENABLE			1
 
 extern uint8_t opmode;
 extern uint8_t flag_s2e_application_running;

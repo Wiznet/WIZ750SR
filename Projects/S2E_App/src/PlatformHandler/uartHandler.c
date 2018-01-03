@@ -21,7 +21,7 @@ extern void delay(__IO uint32_t nCount);
 /* Private functions ---------------------------------------------------------*/
 /* Private macro -------------------------------------------------------------*/
 /* Private variables ---------------------------------------------------------*/
-uint8_t flag_ringbuf_full[DEVICE_UART_CNT] = {0,};
+uint8_t flag_ringbuf_full[DEVICE_UART_CNT] = {RESET,};
 
 static uint8_t rxbuff[DEVICE_UART_CNT][UART_RRB_SIZE];
 static uint8_t txbuff[DEVICE_UART_CNT][UART_SRB_SIZE];
@@ -50,15 +50,13 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx, uint8_t channel)
 	uint8_t ch_tx; 
     uint8_t ch_rx; 
 
-    //UART Rx interrupt
-	if(UART_GetITStatus(UARTx,  UART_IT_FLAG_RXI))
+	if(UART_GetITStatus(UARTx, UART_IT_FLAG_RXI) == SET)
 	{
         UART_ClearITPendingBit(UARTx, UART_IT_FLAG_RXI);
-        if(RingBuffer_IsFull(&rxring[channel]))
+        if(RingBuffer_IsFull(&rxring[channel]) == TRUE)
 		{
 			UART_ReceiveData(UARTx);
-			
-			flag_ringbuf_full[channel] = 1;
+			flag_ringbuf_full[channel] = SET;
 		}
 		else
 		{
@@ -81,20 +79,16 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx, uint8_t channel)
 #endif
                 if(channel==0)
                 {
-                    if((check_modeswitch_trigger(ch_rx))==0) // ret: [0] data / [1] trigger code
+                    if((check_modeswitch_trigger(ch_rx)) == 0) // ret: [0] data / [1] trigger code
                     {
-                        if(check_serial_store_permitted(channel, ch_rx)==1) // ret: [0] not permitted / [1] permitted
-                        {
+                        if(check_serial_store_permitted(channel, ch_rx) == 1) // ret: [0] not permitted / [1] permitted
                             RingBuffer_Insert(&rxring[channel], &ch_rx);
-                        }
                     }
                 }
                 else
                 {
-                    if(check_serial_store_permitted(channel, ch_rx)==1) // ret: [0] not permitted / [1] permitted
-                    {
+                    if(check_serial_store_permitted(channel, ch_rx) == 1) // ret: [0] not permitted / [1] permitted
                         RingBuffer_Insert(&rxring[channel], &ch_rx);
-                    }
                 }
 			}
 		}
@@ -102,10 +96,10 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx, uint8_t channel)
 	}
 
 	//UART Tx interrupt
-	if(UART_GetITStatus(UARTx, UART_IT_FLAG_TXI) != RESET) 
+	if(UART_GetITStatus(UARTx, UART_IT_FLAG_TXI) == SET) 
 	{
         UART_ClearITPendingBit(UARTx, UART_IT_FLAG_TXI);
-        if(RingBuffer_Pop(&txring[channel], &ch_tx))
+        if(RingBuffer_Pop(&txring[channel], &ch_tx) == SUCCESS)
             UART_SendData(UARTx, ch_tx);
         else												
             UART_ITConfig(UARTx, UART_IT_FLAG_TXI, DISABLE);
@@ -114,7 +108,6 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx, uint8_t channel)
 uint32_t UART_Send_RB(UART_TypeDef* UARTx, RINGBUFF_T *pRB, const void *data, int bytes)
 {
 	uint32_t ret;
-	uint8_t *p8 = (uint8_t *) data;
 	uint8_t ch, i;
 
 	/* Don't let UART transmit ring buffer change in the UART IRQ handler */
@@ -122,14 +115,15 @@ uint32_t UART_Send_RB(UART_TypeDef* UARTx, RINGBUFF_T *pRB, const void *data, in
     UART_ITConfig(UARTx, UART_IT_FLAG_TXI, DISABLE);
 
 	/* Move as much data as possible into transmit ring buffer */ 
-	ret = RingBuffer_InsertMult(pRB, p8, bytes);
-    /* Enable UART transmit interrupt */
-
-	if(RingBuffer_Pop(pRB, &ch))
+	ret = RingBuffer_InsertMult(pRB, data, bytes);
+    
+	if(RingBuffer_Pop(pRB, &ch) == SUCCESS)
 	{
         while(UARTx->FR & UART_FR_TXFF);
 		UART_SendData(UARTx, ch);
 	}
+	
+	/* Enable UART transmit interrupt */
     UART_ITConfig(UARTx, UART_IT_FLAG_TXI, ENABLE);
     __enable_irq();
     
@@ -164,7 +158,7 @@ void S2E_UART_Configuration(uint8_t channel)
     //UART_FIFO_Enable(UART,4,4);
     /* NVIC configuration */
     NVIC_ClearPendingIRQ(UARTx_IRQn);
-    NVIC_SetPriority(UARTx_IRQn, 3);
+    NVIC_SetPriority(UARTx_IRQn, 0);
     NVIC_EnableIRQ(UARTx_IRQn);
 }
 
@@ -172,7 +166,6 @@ void UART2_Configuration(void)
 {
 	/* Configure UART2: Simple UART */
 	/* UART2 configured as follow: 115200-8-N-1 */
-	
 	S_UART_Init(115200);
 }
 
@@ -284,7 +277,10 @@ void serial_info_init(UART_InitTypeDef* UART_InitStructure, uint8_t channel)
         // GPIO configration (RTS pin -> GPIO: 485SEL)
 		if((serial_option[channel].flow_control != flow_rtsonly) && (serial_option[channel].flow_control != flow_reverserts)) // Added by James in March 29
 		{
-			get_uart_rs485_sel(SEG_DATA_UART0);
+			if(channel == 0)
+				get_uart_rs485_sel(SEG_DATA_UART0);
+			else
+				get_uart_rs485_sel(SEG_DATA_UART1);
 		}
         else	// Added by James in March 29
 		{
@@ -297,7 +293,11 @@ void serial_info_init(UART_InitTypeDef* UART_InitStructure, uint8_t channel)
 				uart_if_mode[channel] = UART_IF_RS485_REVERSE;
 			}
 		}
-		uart_rs485_rs422_init(SEG_DATA_UART0);
+		
+		if(channel == 0)
+			uart_rs485_rs422_init(SEG_DATA_UART0);
+		else
+			uart_rs485_rs422_init(SEG_DATA_UART1);
 		//printf("UART Interface: %s mode\r\n", uart_if_mode?"RS-485":"RS-422");
 	}
 	
@@ -362,6 +362,7 @@ uint8_t get_uart_rs485_sel(uint8_t uartNum)
 		else
 			uart_if_mode[uartNum] = UART_IF_RS485;
 	}
+	#if (DEVICE_UART_CNT == 2)
 	else
 	{
 		GPIO_Configuration(UART1_RTS_PORT, UART1_RTS_PIN, GPIO_Mode_IN, UART1_RTS_PAD_AF); // UART1 RTS pin: GPIO / Input
@@ -372,6 +373,7 @@ uint8_t get_uart_rs485_sel(uint8_t uartNum)
 		else
 			uart_if_mode[uartNum] = UART_IF_RS485;
 	}
+	#endif
 	return uart_if_mode[uartNum];
 }
 
@@ -382,11 +384,13 @@ void uart_rs485_rs422_init(uint8_t uartNum)
 		GPIO_Configuration(UART0_RTS_PORT, UART0_RTS_PIN, GPIO_Mode_OUT, UART0_RTS_PAD_AF); // UART0 RTS pin: GPIO / Output
 		GPIO_ResetBits(UART0_RTS_PORT, UART0_RTS_PIN); // UART0 RTS pin init, Set the signal low
 	}
+	#if (DEVICE_UART_CNT == 2)
 	else if(uartNum == 1) // UART1
 	{
 		GPIO_Configuration(UART1_RTS_PORT, UART1_RTS_PIN, GPIO_Mode_OUT, UART1_RTS_PAD_AF); // UART1 RTS pin: GPIO / Output
 		GPIO_ResetBits(UART1_RTS_PORT, UART1_RTS_PIN); // UART1 RTS pin init, Set the signal low
 	}
+	#endif 
 }
 
 void uart_rs485_enable(uint8_t uartNum)
@@ -421,8 +425,6 @@ void uart_rs485_disable(uint8_t uartNum)
 	//UART_IF_RS422: None
 }
 
-
-	
 uint8_t get_uart_cts_pin(uint8_t uartNum)
 {
 	uint8_t cts_pin;

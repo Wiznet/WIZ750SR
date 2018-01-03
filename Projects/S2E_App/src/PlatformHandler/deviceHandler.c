@@ -23,24 +23,18 @@ int8_t process_dns_fw_server(uint8_t * domain_ip, uint8_t * buf);
 void reset_fw_update_timer(void);
 uint16_t get_any_port(void);
 
-uint8_t enable_fw_update_timer = SEGCP_DISABLE;
+uint8_t enable_fw_update_timer = DISABLE;
 volatile uint16_t fw_update_time = 0;
-uint8_t flag_fw_update_timeout = SEGCP_DISABLE;
+uint8_t flag_fw_update_timeout = DISABLE;
 	
-uint8_t enable_fw_from_network_timer = SEGCP_DISABLE;
+uint8_t enable_fw_from_network_timer = DISABLE;
 volatile uint16_t fw_from_network_time = 0;
-uint8_t flag_fw_from_network_timeout = SEGCP_DISABLE;
+uint8_t flag_fw_from_network_timeout = DISABLE;
 
-uint8_t flag_fw_from_server_failed = SEGCP_DISABLE;
+uint8_t flag_fw_from_server_failed = DISABLE;
 static uint16_t any_port = 0;
 
-#if (BUFFER_TYPE==1)
 extern uint8_t g_recv_buf[DEVICE_UART_CNT][DATA_BUF_SIZE];
-#elif (BUFFER_TYPE==2)
-extern uint8_t g_recv_buf[DATA_BUF_SIZE];
-#elif (BUFFER_TYPE==3)
-extern uint8_t g_data_buf[DATA_BUF_SIZE];
-#endif
 
 void device_set_factory_default(void)
 {
@@ -53,9 +47,7 @@ void device_socket_termination(void)
 {
 	uint8_t i;
 	for(i = 0; i < _WIZCHIP_SOCK_NUM_; i++)
-	{
 		process_socket_termination(i);
-	}
 }
 
 
@@ -89,10 +81,10 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 	
 	if(stype != SERVER_APP_BACKUP) 
 	{
-		if(firmware_update->fwup_flag == SEGCP_DISABLE)	return DEVICE_FWUP_RET_FAILED;
+		if(firmware_update->fwup_flag == DISABLE)	return DEVICE_FWUP_RET_FAILED;
 		if((firmware_update->fwup_size == 0) || (firmware_update->fwup_size > DEVICE_FWUP_SIZE))
 		{
-			if(serial_common->serial_debug_en == SEGCP_ENABLE)
+			if(serial_common->serial_debug_en == ENABLE)
 			{
 				printf(" > SEGCP:FW_UPDATE:FAILED - Invalid firmware size: %d bytes (Firmware size must be within %d bytes)\r\n", firmware_update->fwup_size, DEVICE_FWUP_SIZE);
 			}
@@ -102,109 +94,80 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 	}
 	else // styep == SERVER_APP_BACKUP, HTTP server -> Flash
 	{
-		if(firmware_update->fwup_flag == SEGCP_DISABLE)	return DEVICE_FWUP_RET_FAILED;
-		if(firmware_update->fwup_server_flag == SEGCP_DISABLE)	return DEVICE_FWUP_RET_FAILED;
+		if(firmware_update->fwup_flag == DISABLE)	return DEVICE_FWUP_RET_FAILED;
+		if(firmware_update->fwup_server_flag == DISABLE)	return DEVICE_FWUP_RET_FAILED;
 		if(firmware_update->fwup_server_port == 0)				return DEVICE_FWUP_RET_FAILED;
 		
 		// DNS Query to Firmware update server
-#if (BUFFER_TYPE==1)
-        if(process_dns_fw_server(server_ip, g_recv_buf[0]) != SEGCP_ENABLE)
-#elif (BUFFER_TYPE==2)
-        if(process_dns_fw_server(server_ip, g_recv_buf) != SEGCP_ENABLE)
-#elif (BUFFER_TYPE==3)
-        if(process_dns_fw_server(server_ip, g_data_buf) != SEGCP_ENABLE)
-#endif
+        if(process_dns_fw_server(server_ip, g_recv_buf[0]) != ENABLE)
 		{
-			if(serial_common->serial_debug_en == SEGCP_ENABLE)
-			{
+			if(serial_common->serial_debug_en == ENABLE)
 				printf(" > SEGCP:FW_UPDATE:FAILED - DNS failed\r\n");
-			}
 			return DEVICE_FWUP_RET_FAILED;
 		}
 		
 		// Update start
 		firmware_update->fwup_size = DEVICE_APP_SIZE; // Update the Temporary firmware size: Firmware update by HTTP server, fw size can be get by HTTP response from the server
-		if(serial_common->serial_debug_en == SEGCP_ENABLE)
-		{
+		if(serial_common->serial_debug_en == ENABLE)
 			printf(" > SEGCP:FW_UPDATE:UPDATE_SERVER - %s%s\r\n", FWUP_SERVER_DOMAIN, FWUP_SERVER_BINPATH);
 			//printf(" > SEGCP:FW_UPDATE:UPDATE_SERVER - %s%s\r\n", fwupdate_server->fwup_server_domain, fwupdate_server->fwup_server_binpath);
-		}
 	}
 		
 		
 	// App, FW update from Network (ethernet) to Flash memory (backup area)
 	if((stype == NETWORK_APP_BACKUP) || (stype == SERVER_APP_BACKUP))
 	{
-		if(serial_common->serial_debug_en == SEGCP_ENABLE)
-		{
-			if(stype == NETWORK_APP_BACKUP) printf(" > SEGCP:FW_UPDATE:NETWORK - Firmware size: [%d] bytes\r\n", firmware_update->fwup_size);
-		}
+		if(serial_common->serial_debug_en == ENABLE)
+			if(stype == NETWORK_APP_BACKUP) 
+				printf(" > SEGCP:FW_UPDATE:NETWORK - Firmware size: [%d] bytes\r\n", firmware_update->fwup_size);
 
 		write_fw_len = 0;
 		erase_storage(STORAGE_APP_BACKUP); // Erase application backup blocks
 		
 		// init firmware update timer
-		enable_fw_update_timer = SEGCP_ENABLE;
+		enable_fw_update_timer = ENABLE;
 		
 		do 
 		{
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 			//recv_len = get_firmware_from_network(SOCK_FWUPDATE, (uint8_t *)&g_recv_buf);
 			if(stype == NETWORK_APP_BACKUP) 		
-            {
-#if (BUFFER_TYPE==1)
-                recv_len = get_firmware_from_network(SOCK_FWUPDATE, g_recv_buf[0]);
-#elif (BUFFER_TYPE==2)
-                recv_len = get_firmware_from_network(SOCK_FWUPDATE, g_recv_buf);
-#elif (BUFFER_TYPE==3)
-                recv_len = get_firmware_from_network(SOCK_FWUPDATE, g_data_buf);
-#endif      
-            }
+                recv_len = get_firmware_from_network(SOCK_FWUPDATE, g_recv_buf[0]);    
 			else if(stype == SERVER_APP_BACKUP)		
-            {
-#if (BUFFER_TYPE==1)
                 recv_len = get_firmware_from_server(SOCK_FWUPDATE, server_ip, g_recv_buf[0]);
-#elif (BUFFER_TYPE==2)
-                recv_len = get_firmware_from_server(SOCK_FWUPDATE, server_ip, g_recv_buf);
-#elif (BUFFER_TYPE==3)
-                recv_len = get_firmware_from_server(SOCK_FWUPDATE, server_ip, g_data_buf);
-#endif
-            }
 			
 			if(recv_len > 0)
 			{
-#if (BUFFER_TYPE==1)
                 write_len = write_storage(STORAGE_APP_BACKUP, (DEVICE_APP_BACKUP_ADDR + write_fw_len), g_recv_buf[0], recv_len);
-#elif (BUFFER_TYPE==2)
-                write_len = write_storage(STORAGE_APP_BACKUP, (DEVICE_APP_BACKUP_ADDR + write_fw_len), g_recv_buf, recv_len);
-#elif (BUFFER_TYPE==3)
-                write_len = write_storage(STORAGE_APP_BACKUP, (DEVICE_APP_BACKUP_ADDR + write_fw_len), g_data_buf, recv_len);
-#endif
+
 				write_fw_len += write_len;
 				fw_update_time = 0; // Reset fw update timeout counter
 			}
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 			
 			// Firmware update failed: Timeout occurred
-			if(flag_fw_update_timeout == SEGCP_ENABLE)
+			if(flag_fw_update_timeout == ENABLE)
 			{
-				if(serial_common->serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:FW_UPDATE:FAILED - Firmware update timeout\r\n");
+				if(serial_common->serial_debug_en == ENABLE) 
+					printf(" > SEGCP:FW_UPDATE:FAILED - Firmware update timeout\r\n");
 				ret = DEVICE_FWUP_RET_FAILED;
 				break;
 			}
 			
 			// Firmware update failed: timeout occurred at get_firmware_from_network() function
-			if(flag_fw_from_network_timeout == SEGCP_ENABLE)
+			if(flag_fw_from_network_timeout == ENABLE)
 			{
-				if(serial_common->serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:FW_UPDATE:FAILED - Network download timeout\r\n");
+				if(serial_common->serial_debug_en == ENABLE) 
+					printf(" > SEGCP:FW_UPDATE:FAILED - Network download timeout\r\n");
 				ret = DEVICE_FWUP_RET_FAILED;
 				break;
 			}
 			
 			// Firmware update failed: invalid HTTP status code from server
-			if(flag_fw_from_server_failed == SEGCP_ENABLE)
+			if(flag_fw_from_server_failed == ENABLE)
 			{
-				if(serial_common->serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:FW_UPDATE:FAILED - Invalid HTTP Status code response\r\n");
+				if(serial_common->serial_debug_en == ENABLE) 
+					printf(" > SEGCP:FW_UPDATE:FAILED - Invalid HTTP Status code response\r\n");
 				ret = DEVICE_FWUP_RET_FAILED;
 				break;
 			}
@@ -212,10 +175,8 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 		
 		if(write_fw_len == firmware_update->fwup_size)
 		{
-			if(serial_common->serial_debug_en == SEGCP_ENABLE)
-			{
+			if(serial_common->serial_debug_en == ENABLE)
 				printf(" > SEGCP:FW_UPDATE:SUCCESS - %d / %d bytes\r\n", write_fw_len, firmware_update->fwup_size);
-			}
 			ret = DEVICE_FWUP_RET_SUCCESS;
 		}
 	}
@@ -254,13 +215,11 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 //#ifdef _FWUP_DEBUG_
 	//uint8_t update_cnt = 0;
 //#endif
-	if(firmware_update->fwup_flag == SEGCP_DISABLE)	return DEVICE_FWUP_RET_FAILED;
+	if(firmware_update->fwup_flag == DISABLE)	return DEVICE_FWUP_RET_FAILED;
 	if((firmware_update->fwup_size == 0) || (firmware_update->fwup_size > DEVICE_FWUP_SIZE))
 	{
-		if(serial_common->serial_debug_en == SEGCP_ENABLE)
-		{
+		if(serial_common->serial_debug_en == ENABLE)
 			printf(" > SEGCP:FW_UPDATE:FAILED - Invalid firmware size: %d bytes (Firmware size must be within %d bytes)\r\n", firmware_update->fwup_size, DEVICE_FWUP_SIZE);
-		}
 
 		return DEVICE_FWUP_RET_FAILED;
 	}
@@ -268,17 +227,15 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 	// App, FW update from Network (ethernet) to Flash memory (backup area)
 	if(stype == STORAGE_APP_MAIN)
 	{
-		if(serial_common->serial_debug_en == SEGCP_ENABLE)
-		{
+		if(serial_common->serial_debug_en == ENABLE)
 			printf(" > SEGCP:FW_UPDATE:NETWORK - Firmware size: [%d] bytes\r\n", firmware_update->fwup_size);
-		}
 
 		write_fw_len = 0;
 		erase_storage(STORAGE_APP_MAIN); // Erase application backup blocks
 		erase_storage(STORAGE_APP_BACKUP); // Erase application backup blocks
 		
 		// init firmware update timer
-		enable_fw_update_timer = SEGCP_ENABLE;
+		enable_fw_update_timer = ENABLE;
 		
 		do 
 		{
@@ -294,17 +251,19 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 /////////////////////////////////////////////////////////////////////////////////////////////////////////
 			
 			// Firmware update failed: Timeout occurred
-			if(flag_fw_update_timeout == SEGCP_ENABLE)
+			if(flag_fw_update_timeout == ENABLE)
 			{
-				if(serial_common->serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:FW_UPDATE:FAILED - Firmware update timeout\r\n");
+				if(serial_common->serial_debug_en == ENABLE) 
+					printf(" > SEGCP:FW_UPDATE:FAILED - Firmware update timeout\r\n");
 				ret = DEVICE_FWUP_RET_FAILED;
 				break;
 			}
 			
 			// Firmware update failed: timeout occurred at get_firmware_from_network() function
-			if(flag_fw_from_network_timeout == SEGCP_ENABLE)
+			if(flag_fw_from_network_timeout == ENABLE)
 			{
-				if(serial_common->serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:FW_UPDATE:FAILED - Network download timeout\r\n");
+				if(serial_common->serial_debug_en == ENABLE) 
+					printf(" > SEGCP:FW_UPDATE:FAILED - Network download timeout\r\n");
 				ret = DEVICE_FWUP_RET_FAILED;
 				break;
 			}
@@ -318,17 +277,13 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 		return DEVICE_FWUP_RET_FAILED;
 	}
 	else
-	{
 		ret = DEVICE_FWUP_RET_FAILED;
-	}
 	
 	// shared code
 	if(write_fw_len == firmware_update->fwup_size)
 	{
-		if(serial_common->serial_debug_en == SEGCP_ENABLE)
-		{
+		if(serial_common->serial_debug_en == ENABLE)
 			printf(" > SEGCP:FW_UPDATE:SUCCESS - %d / %d bytes\r\n", write_fw_len, firmware_update->fwup_size);
-		}
 		ret = DEVICE_FWUP_RET_SUCCESS;
 	}
 	
@@ -362,12 +317,12 @@ uint16_t get_firmware_from_network(uint8_t sock, uint8_t * buf)
 			if(getSn_IR(sock) & Sn_IR_CON)
 			{
 				// init network firmware update timer
-				enable_fw_from_network_timer = SEGCP_ENABLE;
+				enable_fw_from_network_timer = ENABLE;
 				setSn_IR(sock, Sn_IR_CON);
 			}
 			
 			// Timeout occurred
-			if(flag_fw_from_network_timeout == SEGCP_ENABLE)
+			if(flag_fw_from_network_timeout == ENABLE)
 			{
 #ifdef _FWUP_DEBUG_
 				printf(" > SEGCP:FW_UPDATE:NET_TIMEOUT\r\n");
@@ -470,7 +425,7 @@ uint16_t get_firmware_from_server(uint8_t sock, uint8_t * server_ip, uint8_t * b
 		case SOCK_ESTABLISHED:
 			if(getSn_IR(sock) & Sn_IR_CON)
 			{
-				if(serial_common->serial_debug_en == SEGCP_ENABLE)
+				if(serial_common->serial_debug_en == ENABLE)
 				{
 					 getSn_DIPR(sock, dest_ip);
 					 dest_port = getSn_DPORT(sock);
@@ -478,7 +433,7 @@ uint16_t get_firmware_from_server(uint8_t sock, uint8_t * server_ip, uint8_t * b
 				}
 				
 				// Init network firmware update timer
-				enable_fw_from_network_timer = SEGCP_ENABLE;
+				enable_fw_from_network_timer = ENABLE;
 				
 				// Send the HTTP Request
 				isHTTPHeaderParsed = 0; // flag init
@@ -490,7 +445,7 @@ uint16_t get_firmware_from_server(uint8_t sock, uint8_t * server_ip, uint8_t * b
 			}
 			
 			// Timeout occurred
-			if(flag_fw_from_network_timeout == SEGCP_ENABLE)
+			if(flag_fw_from_network_timeout == ENABLE)
 			{
 #ifdef _FWUP_DEBUG_
 				printf(" > SEGCP:FW_UPDATE:NET_TIMEOUT\r\n");
@@ -514,7 +469,7 @@ uint16_t get_firmware_from_server(uint8_t sock, uint8_t * server_ip, uint8_t * b
 					status_code = atoi((char *)tmp_buf);
 					if(status_code != STATUS_HTTP_OK)
 					{
-						flag_fw_from_server_failed = SEGCP_ENABLE;
+						flag_fw_from_server_failed = ENABLE;
 #ifdef _FWUP_DEBUG_
 						printf(" > SEGCP:FW_UPDATE:FAILED - HTTP_STATUS_CODE [%d]\r\n", status_code);
 #endif
@@ -666,26 +621,26 @@ uint16_t gen_http_fw_request(uint8_t * buf)
 // function for timer
 void device_timer_msec(void)
 {
-	if(enable_fw_update_timer == SEGCP_ENABLE)
+	if(enable_fw_update_timer == ENABLE)
 	{
 		if(fw_update_time < 0xFFFF) 	fw_update_time++;
 		else							fw_update_time = 0;
 		
 		if(fw_update_time >= DEVICE_FWUP_TIMEOUT)
 		{
-			flag_fw_update_timeout = SEGCP_ENABLE;
+			flag_fw_update_timeout = ENABLE;
 			fw_update_time = 0;
 		}
 	}
 	
-	if(enable_fw_from_network_timer == SEGCP_ENABLE)
+	if(enable_fw_from_network_timer == ENABLE)
 	{
 		if(fw_from_network_time < 0xFFFF)	fw_from_network_time++;
 		else								fw_from_network_time = 0;
 		
 		if(fw_from_network_time >= DEVICE_FWUP_TIMEOUT)
 		{
-			flag_fw_from_network_timeout = SEGCP_ENABLE;
+			flag_fw_from_network_timeout = ENABLE;
 			fw_from_network_time = 0;
 		}
 	}
@@ -694,16 +649,16 @@ void device_timer_msec(void)
 void reset_fw_update_timer(void)
 {
 	// Enables
-	enable_fw_update_timer = SEGCP_DISABLE;
-	enable_fw_from_network_timer = SEGCP_DISABLE;
+	enable_fw_update_timer = DISABLE;
+	enable_fw_from_network_timer = DISABLE;
 	
 	// Counters
 	fw_update_time = 0;
 	fw_from_network_time = 0;
 	
 	// Flags
-	flag_fw_update_timeout = SEGCP_DISABLE;
-	flag_fw_from_network_timeout = SEGCP_DISABLE;
+	flag_fw_update_timeout = DISABLE;
+	flag_fw_from_network_timeout = DISABLE;
 }
 
 uint16_t get_any_port(void)

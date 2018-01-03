@@ -436,6 +436,16 @@
 	#define LED2_GPIO_PORT		GPIOC
 	#define LED2_GPIO_PAD		PAD_PC
 	#define LED2_GPIO_PAD_AF	PAD_AF1
+	
+	#define LED3_PIN			GPIO_Pin_6
+	#define LED3_GPIO_PORT		GPIOA
+	#define LED3_GPIO_PAD		PAD_PA
+	#define LED3_GPIO_PAD_AF	PAD_AF1
+
+	#define LED4_PIN			GPIO_Pin_7
+	#define LED4_GPIO_PORT		GPIOA
+	#define LED4_GPIO_PAD		PAD_PA
+	#define LED4_GPIO_PAD_AF	PAD_AF1
 
 #elif (DEVICE_BOARD_NAME == WIZwiki_W7500) // WIZwiki-W7500 board
 
@@ -453,11 +463,13 @@
 #endif
 	
 	// LED
-	#define LEDn		2
+	#define LEDn		4
 	typedef enum
 	{
-	  LED1 = 0,	// PHY link status
-	  LED2 = 1	// TCP connection status
+		LED1 = 0,	// PHY link status
+		LED2 = 1,	// TCP connection status
+		LED3 = 2,	// TCP connection status
+		LED4 = 3	// TCP connection status
 	} Led_TypeDef;
 
 	extern volatile uint16_t phylink_check_time_msec;

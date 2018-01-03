@@ -123,9 +123,11 @@ int main(void)
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// W7500x Application: Initialize part1
 	////////////////////////////////////////////////////////////////////////////////////////////////////
-	
 	/* Load the Configuration data */
 	load_DevConfig_from_storage();
+	
+	/* GPIO Initialization */
+	//IO_Configuration();
 	
 	/* Set the device working mode: BOOT */
 	dev_config->network_connection[0].working_state = ST_BOOT;
@@ -153,7 +155,7 @@ int main(void)
 		ret = device_firmware_update(STORAGE_APP_MAIN);
 		if(ret == DEVICE_FWUP_RET_SUCCESS)
 		{
-			dev_config_e->firmware_update.fwup_flag = SEGCP_DISABLE;
+			dev_config_e->firmware_update.fwup_flag = DISABLE;
 			dev_config_e->firmware_update.fwup_size = 0;
 			
 			save_DevConfig_to_storage();
@@ -259,7 +261,7 @@ int main(void)
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	flag_s2e_application_running = ON;
-	LED_On(LED1);
+	//LED_On(LED1);
 	
 	while(1) // main loop
 	{
@@ -313,7 +315,7 @@ static void W7500x_Init(void)
 	//SystemInit();
 	
 	/* Delay for working stabilize */
-	delay(1500); // 
+	//delay(1500); // 
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// W7500x ISR: Interrupt Vector Table Remap (Custom)
@@ -358,8 +360,8 @@ static void W7500x_WZTOE_Init(void)
 	////////////////////////////////////////////////////
 	
 	/* Set Network Configuration: HW Socket Tx/Rx buffer size */
-	//uint8_t tx_size[8] = { 2, 2, 2, 2, 2, 2, 2, 2 };
-	//uint8_t rx_size[8] = { 2, 2, 2, 2, 2, 2, 2, 2 };
+	uint8_t tx_size[8] = { 2, 2, 2, 2, 2, 2, 0, 0 };
+	uint8_t rx_size[8] = { 2, 2, 2, 2, 2, 2, 0, 0 };
 		
 	/* Structure for timeout control: RTR, RCR */
 	wiz_NetTimeout * net_timeout;

@@ -52,10 +52,10 @@
 // ## for debugging
 //#include "loopback.h"
 
-
 /* Private typedef -----------------------------------------------------------*/
 extern RINGBUFF_T txring[DEVICE_UART_CNT];
 extern RINGBUFF_T rxring[DEVICE_UART_CNT];
+
 /* Private define ------------------------------------------------------------*/
 #define _MAIN_DEBUG_	// debugging message enable
 
@@ -65,7 +65,6 @@ static void W7500x_WZTOE_Init(void);
 int8_t process_dhcp(void);
 int8_t process_dns(void);
 
-// Debug messages
 void display_Dev_Info_header(void);
 void display_Dev_Info_main(void);
 void display_Dev_Info_dhcp(void);
@@ -77,17 +76,10 @@ void TimingDelay_Decrement(void);
 /* Private variables ---------------------------------------------------------*/
 static __IO uint32_t TimingDelay;
 
-/* Public variables ---------------------------------------------------------*/
-// Shared buffer declaration
-#if (BUFFER_TYPE==1)
+/* Public variables ----------------------------------------------------------*/
 uint8_t g_send_buf[DEVICE_UART_CNT][DATA_BUF_SIZE];
 uint8_t g_recv_buf[DEVICE_UART_CNT][DATA_BUF_SIZE];
-#elif (BUFFER_TYPE==2)
-uint8_t g_send_buf[DATA_BUF_SIZE];
-uint8_t g_recv_buf[DATA_BUF_SIZE];
-#elif (BUFFER_TYPE==3)
-uint8_t g_data_buf[DATA_BUF_SIZE];
-#endif
+
 /**
   * @brief  Main program
   * @param  None
@@ -99,12 +91,8 @@ int main(void)
     uint32_t time;
 	DevConfig *dev_config = get_DevConfig_pointer();
 	
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-	// W7500x Hardware Initialize
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-	
 	/* W7500x MCU Initialization */
-	W7500x_Init(); // includes UART2 initialize code for print out debugging messages
+	W7500x_Init(); 
 	
 	/* W7500x WZTOE (Hardwired TCP/IP stack) Initialization */
 	W7500x_WZTOE_Init();
@@ -112,9 +100,6 @@ int main(void)
 	/* W7500x Board Initialization */
 	W7500x_Board_Init();
 	
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-	// W7500x Application: Initialize
-	////////////////////////////////////////////////////////////////////////////////////////////////////
 	/* Load the Configuration data */
 	load_DevConfig_from_storage();
 	
@@ -123,46 +108,35 @@ int main(void)
 	
 	/* UART Initialization */
     for(i=0; i<DEVICE_UART_CNT; i++)
-    {
         S2E_UART_Configuration(i);
-    }
     
 	/* GPIO Initialization */
 	IO_Configuration();
 	
-	if(dev_config->serial_common.serial_debug_en)
+	if(dev_config->serial_common.serial_debug_en == ENABLE)
 	{
-		// Debug UART: Device information print out
+		/* Debug UART: Device information print out */
 		display_Dev_Info_header();
 		display_Dev_Info_main();
 	}
 	
     printf(" - PHY Link status: %x\r\n", get_phylink());
     printf("%s\r\n", STR_BAR);
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-	// W7500x Application: DHCP client / DNS client handler
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+
 	/* Network Configuration - DHCP client */
-	// Initialize Network Information: DHCP or Static IP allocation
-	if(dev_config->network_option.dhcp_use)
+	/* Initialize Network Information: DHCP or Static IP allocation */
+	if(dev_config->network_option.dhcp_use == ENABLE)
 	{
-		if(process_dhcp() == DHCP_IP_LEASED) // DHCP success
-		{
-			flag_process_dhcp_success = ON;
-		}
-		else // DHCP failed
-		{
+		if(process_dhcp() == DHCP_IP_LEASED) 
+			flag_process_dhcp_success = SET;
+		else /* DHCP failed */
 			Net_Conf(); // Set default static IP settings
-		}
 	}
 	else
-	{
 		Net_Conf(); // Set default static IP settings
-	}
 	
-	// Debug UART: Network information print out (includes DHCP IP allocation result)
-	if(dev_config->serial_common.serial_debug_en)
+	/* Debug UART: Network information print out (includes DHCP IP allocation result) */
+	if(dev_config->serial_common.serial_debug_en == ENABLE)
 	{
 		display_Net_Info();
 		display_Dev_Info_dhcp();
@@ -172,37 +146,26 @@ int main(void)
 	//if((value->network_info[0].working_mode == TCP_CLIENT_MODE) || (value->network_info[0].working_mode == TCP_MIXED_MODE))
 	if(dev_config->network_connection[0].working_mode != TCP_SERVER_MODE)
 	{
-		if(dev_config->network_option.dns_use) 
-		{
-			if(process_dns()) // DNS success
-			{
-				flag_process_dns_success = ON;
-			}
-		}
+		if(dev_config->network_option.dns_use == ENABLE) 
+			if(process_dns() == SUCCESS)
+				flag_process_dns_success = SET;
 	}
 	
-	// Debug UART: DNS results print out
-	if(dev_config->serial_common.serial_debug_en)
-	{
+	/* Debug UART: DNS results print out */
+	if(dev_config->serial_common.serial_debug_en == ENABLE)
 		display_Dev_Info_dns();
-	}
 	
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-	// W7500x Application: Main Routine
-	////////////////////////////////////////////////////////////////////////////////////////////////////
+	/* W7500x Application: Main Routine */
+	flag_s2e_application_running = SET;
 	
-	flag_s2e_application_running = ON;
-	
-	// HW_TRIG switch ON
-	if(flag_hw_trig_enable)
+	/* HW_TRIG switch ON */
+	if(flag_hw_trig_enable == SET)
 	{
 		init_trigger_modeswitch(DEVICE_AT_MODE);
-		flag_hw_trig_enable = 0;
+		flag_hw_trig_enable = RESET;
 	}
 	
-	//printf("PHY Link status: %x\r\n", get_phylink());
 	printf("%s\r\n", STR_BAR);
-    
     printf("NVIC_GetPriority SysTick_IRQn : %+d\r\n", NVIC_GetPriority(SysTick_IRQn));
     printf("NVIC_GetPriority UART0_IRQn : %+d\r\n", NVIC_GetPriority(UART0_IRQn));
     printf("NVIC_GetPriority UART1_IRQn : %+d\r\n", NVIC_GetPriority(UART1_IRQn));
@@ -210,47 +173,48 @@ int main(void)
 
     printf("%s\r\n", STR_BAR);
 
-	while(1) // main loop
+	while(1) 
 	{
 		do_segcp();
 		
 		do_seg();
 		
-		if(dev_config->network_option.dhcp_use) DHCP_run(); // DHCP client handler for IP renewal
+		if(dev_config->network_option.dhcp_use == ENABLE) 
+			DHCP_run(); // DHCP client handler for IP renewal
 		
 		// ## debugging: Data echoback
 		//loopback_tcps(6, g_recv_buf, 5001); // Loopback
 		//loopback_iperf(6, g_recv_buf, 5001); // iperf: Ethernet performance test
 		
 		// ## debugging: PHY link
-		if(flag_check_phylink)
+		if(flag_check_phylink == SET)
 		{
 			//printf("PHY Link status: %x\r\n", GPIO_ReadInputDataBit(PHYLINK_IN_PORT, PHYLINK_IN_PIN));
 			//printf("PHY Link status: %x\r\n", get_phylink());
-            flag_check_phylink = 0;	// flag clear
+            flag_check_phylink = RESET;	// flag clear
 		}
 		
 		for(i=0; i<DEVICE_UART_CNT; i++)
 		{
 			// ## debugging: Ring buffer full
-			if(flag_ringbuf_full[i])
+			if(flag_ringbuf_full[i] == SET)
 			{
-				if(dev_config->serial_common.serial_debug_en) printf(" > CHANNEL[%d]Rx Ring buffer Full\r\n", i);
-				flag_ringbuf_full[i] = 0;
+				if(dev_config->serial_common.serial_debug_en == ENABLE) 
+					printf(" > CHANNEL[%d]Rx Ring buffer Full\r\n", i);
+				flag_ringbuf_full[i] = RESET;
 			}
 		}
 	} // End of application main loop
 } // End of main
 
-/*****************************************************************************
- * Private functions
- ****************************************************************************/
+/**
+  * @brief  Main program
+  * @param  None
+  * @retval None
+  */
 static void W7500x_Init(void)
 {
-	////////////////////////////////////////////////////
-	// W7500x MCU Initialize
-	////////////////////////////////////////////////////
-
+	/* W7500x MCU Initialize------------------------------------------------------*/
 	/* Reset supervisory IC Init */
 	Supervisory_IC_Init();
     
@@ -274,6 +238,11 @@ static void W7500x_Init(void)
 #endif
 }
 
+/**
+  * @brief  Main program
+  * @param  None
+  * @retval None
+  */
 static void W7500x_WZTOE_Init(void)
 {
 	////////////////////////////////////////////////////
@@ -288,6 +257,9 @@ static void W7500x_WZTOE_Init(void)
 	uint8_t i;
 #endif
 	
+	/* Structure for timeout control: RTR, RCR */
+	wiz_NetTimeout * net_timeout;
+	
 	/* Set WZ_100US Register */
 	setTIC100US((GetSystemClock()/10000));
 #ifdef _MAIN_DEBUG_
@@ -297,13 +269,14 @@ static void W7500x_WZTOE_Init(void)
 #endif
 	
 	/* Set TCP Timeout: retry count / timeout val */
-	// Retry count default: [8], Timeout val default: [2000]
-	setRCR(8);
-    setRTR(2000);
+	net_timeout->retry_cnt = 8;
+	net_timeout->time_100us = 2500;
+	
+	wizchip_settimeout(net_timeout);
     
 #ifdef _MAIN_DEBUG_
-	//wizchip_gettimeout(net_timeout); // TCP timeout settings
-    printf(" - Network Timeout Settings - RCR: %d, RTR: %dms\r\n", getRCR(), getRTR());
+	wizchip_gettimeout(net_timeout); // TCP timeout settings
+	printf(" Network Timeout Settings - RTR: %d, RCR: %d\r\n", net_timeout->retry_cnt, net_timeout->time_100us);
 #endif
 	
 	/* Set Network Configuration */
@@ -312,14 +285,21 @@ static void W7500x_WZTOE_Init(void)
 #ifdef _MAIN_DEBUG_
 	printf(" - WZTOE H/W Socket Buffer Settings (kB)\r\n");
 	printf("   [Tx] ");
-	for(i = 0; i < _WIZCHIP_SOCK_NUM_; i++) printf("%d ", getSn_TXBUF_SIZE(i));
+	for(i = 0; i < _WIZCHIP_SOCK_NUM_; i++) 
+		printf("%d ", getSn_TXBUF_SIZE(i));
 	printf("\r\n");
 	printf("   [Rx] ");
-	for(i = 0; i < _WIZCHIP_SOCK_NUM_; i++) printf("%d ", getSn_RXBUF_SIZE(i));
+	for(i = 0; i < _WIZCHIP_SOCK_NUM_; i++) 
+		printf("%d ", getSn_RXBUF_SIZE(i));
 	printf("\r\n");
 #endif
 }
 
+/**
+  * @brief  Main program
+  * @param  None
+  * @retval None
+  */
 int8_t process_dhcp(void)
 {
 	uint8_t ret = 0;
@@ -330,20 +310,12 @@ int8_t process_dhcp(void)
 	printf(" - DHCP Client running\r\n");
 #endif
     
-#if (BUFFER_TYPE==1)
     DHCP_init(SOCK_DHCP, g_send_buf[0]);
-#elif (BUFFER_TYPE==2)
-    DHCP_init(SOCK_DHCP, g_send_buf);
-#elif (BUFFER_TYPE==3)
-    DHCP_init(SOCK_DHCP, g_data_buf);
-#endif
 
 	reg_dhcp_cbfunc(w7500x_dhcp_assign, w7500x_dhcp_assign, w7500x_dhcp_conflict);
 	
     for(i=0; i<DEVICE_UART_CNT; i++)
-    {
         set_device_status(i, ST_UPGRADE);
-    }
 	
 	while(1)
 	{
@@ -360,7 +332,8 @@ int8_t process_dhcp(void)
 		{
 			dhcp_retry++;
 #ifdef _MAIN_DEBUG_
-			if(dhcp_retry <= 3) printf(" - DHCP Timeout occurred and retry [%d]\r\n", dhcp_retry);
+			if(dhcp_retry <= 3) 
+				printf(" - DHCP Timeout occurred and retry [%d]\r\n", dhcp_retry);
 #endif
 		}
 
@@ -377,13 +350,16 @@ int8_t process_dhcp(void)
 	}
 	
     for(i=0; i<DEVICE_UART_CNT; i++)
-    {
         set_device_status(i, ST_OPEN);
-    }
 	
 	return ret;
 }
 
+/**
+  * @brief  Main program
+  * @param  None
+  * @retval None
+  */
 int8_t process_dns(void)
 {
 	DevConfig *dev_config = get_DevConfig_pointer();
@@ -396,13 +372,7 @@ int8_t process_dns(void)
 	printf(" - DNS Client running\r\n");
 #endif
 
-#if (BUFFER_TYPE==1)
     DNS_init(SOCK_DNS, g_send_buf[0]);
-#elif (BUFFER_TYPE==2)
-    DNS_init(SOCK_DNS, g_send_buf);
-#elif (BUFFER_TYPE==3)
-    DNS_init(SOCK_DNS, g_data_buf);
-#endif	
 	
 	dns_server_ip[0] = dev_config->network_option.dns_server_ip[0];
 	dns_server_ip[1] = dev_config->network_option.dns_server_ip[1];
@@ -410,9 +380,7 @@ int8_t process_dns(void)
 	dns_server_ip[3] = dev_config->network_option.dns_server_ip[3];
 	
     for(i=0; i<DEVICE_UART_CNT; i++)
-    {
         set_device_status(i, ST_UPGRADE);
-    }
 	
 	while(1) 
 	{
@@ -427,11 +395,13 @@ int8_t process_dns(void)
 		{
 			dns_retry++;
 #ifdef _MAIN_DEBUG_
-			if(dns_retry <= 2) printf(" - DNS Timeout occurred and retry [%d]\r\n", dns_retry);
+			if(dns_retry <= 2) 
+				printf(" - DNS Timeout occurred and retry [%d]\r\n", dns_retry);
 #endif
 		}
 
-		if(dns_retry > 2) {
+		if(dns_retry > 2) 
+		{
 #ifdef _MAIN_DEBUG_
 			printf(" - DNS Failed\r\n\r\n");
 #endif
@@ -440,16 +410,21 @@ int8_t process_dns(void)
 
 		do_segcp(); // Process the requests of configuration tool during the DNS client run.
 
-		if(dev_config->network_option.dhcp_use) DHCP_run();
+		if(dev_config->network_option.dhcp_use == ENABLE) 
+			DHCP_run();
 	}
 	
     for(i=0; i<DEVICE_UART_CNT; i++)
-    {
         set_device_status(i, ST_OPEN);
-    }
+	
 	return ret;
 }
 
+/**
+  * @brief  Display device informations
+  * @param  None
+  * @retval None
+  */
 void display_Dev_Info_header(void)
 {
 	DevConfig *dev_config = get_DevConfig_pointer();
@@ -472,7 +447,11 @@ void display_Dev_Info_header(void)
 	printf("%s\r\n", STR_BAR);
 }
 
-
+/**
+  * @brief  Display device informations
+  * @param  None
+  * @retval None
+  */
 void display_Dev_Info_main(void)
 {
 	DevConfig *dev_config = get_DevConfig_pointer();
@@ -571,26 +550,36 @@ void display_Dev_Info_main(void)
 	printf("%s\r\n", STR_BAR);
 }
 
-
+/**
+  * @brief  Display DHCP informations
+  * @param  None
+  * @retval None
+  */
 void display_Dev_Info_dhcp(void)
 {
 	DevConfig *dev_config = get_DevConfig_pointer();
 	
-	if(dev_config->network_option.dhcp_use) 
+	if(dev_config->network_option.dhcp_use == ENABLE) 
 	{
-		if(flag_process_dhcp_success == ON) printf(" # DHCP IP Leased time : %u seconds\r\n", getDHCPLeasetime());
-		else printf(" # DHCP Failed\r\n");
+		if(flag_process_dhcp_success == SET) 
+			printf(" # DHCP IP Leased time : %u seconds\r\n", getDHCPLeasetime());
+		else 
+			printf(" # DHCP Failed\r\n");
 	}
 }
 
-
+/**
+  * @brief  Display DNS informations
+  * @param  None
+  * @retval None
+  */
 void display_Dev_Info_dns(void)
 {
 	DevConfig *dev_config = get_DevConfig_pointer();
 	
-	if(dev_config->network_option.dns_use) 
+	if(dev_config->network_option.dns_use == ENABLE) 
 	{
-		if(flag_process_dns_success == ON)
+		if(flag_process_dns_success == SET)
 		{
 			printf(" # DNS: %s => %d.%d.%d.%d : %d\r\n", dev_config->network_option.dns_domain_name, 
 														dev_config->network_connection[0].remote_ip[0],
@@ -599,10 +588,10 @@ void display_Dev_Info_dns(void)
 														dev_config->network_connection[0].remote_ip[3],
 														dev_config->network_connection[0].remote_port);
 		}
-		else printf(" # DNS Failed\r\n");
+		else 
+			printf(" # DNS Failed\r\n");
 	}
 }
-
 
 /**
   * @brief  Inserts a delay time.
@@ -615,7 +604,6 @@ void delay(__IO uint32_t milliseconds)
 	while(TimingDelay != 0);
 }
 
-
 /**
   * @brief  Decrements the TimingDelay variable.
   * @param  None
@@ -624,8 +612,6 @@ void delay(__IO uint32_t milliseconds)
 void TimingDelay_Decrement(void)
 {
 	if(TimingDelay != 0x00)
-	{
 		TimingDelay--;
-	}
 }
 

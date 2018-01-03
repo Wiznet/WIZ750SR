@@ -49,9 +49,6 @@ typedef enum {SEGCP_MC, SEGCP_VR, SEGCP_MN, SEGCP_IM, SEGCP_OP, SEGCP_DD, SEGCP_
 
 #define SEGCP_NULL      ' '
 
-#define SEGCP_DISABLE   0
-#define SEGCP_ENABLE    1
-
 #define SEGCP_STATIC    0
 #define SEGCP_DHCP      1
 //#define SEGCP_PPPoE     2

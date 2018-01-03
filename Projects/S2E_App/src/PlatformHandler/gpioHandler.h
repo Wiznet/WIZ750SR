@@ -74,7 +74,7 @@ uint8_t get_connection_status_io(uint16_t pin, uint8_t channel);
 
 void init_flowcontrol_dtr_pin(void);
 void init_flowcontrol_dsr_pin(void);
-void set_flowcontrol_dtr_pin(uint8_t set);
+void set_flowcontrol_dtr_pin(uint8_t channel, uint8_t set);
 uint8_t get_flowcontrol_dsr_pin(void);
 
 

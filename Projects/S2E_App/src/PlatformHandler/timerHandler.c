@@ -15,7 +15,7 @@ static volatile uint8_t  sec_cnt = 0;
 static volatile uint8_t  min_cnt = 0;
 static volatile uint32_t hour_cnt = 0;
 
-static uint8_t enable_phylink_check = 1;
+static uint8_t enable_phylink_check = ENABLE;
 static volatile uint32_t phylink_down_time_msec;
 
 void Timer0_Configuration(void)
@@ -46,26 +46,25 @@ void Timer0_Configuration(void)
 
 void Timer0_IRQ_Handler(void)
 {
-	if(DUALTIMER_GetIntStatus(DUALTIMER0_0))
+	if(DUALTIMER_GetIntStatus(DUALTIMER0_0) == SET)
 	{
 		DUALTIMER_IntClear(DUALTIMER0_0);
-		//printf(",");
 		msec_cnt++; // millisecond counter
 		
 		seg_timer_msec();		// [msec] time counter for SEG (S2E)
 		segcp_timer_msec();		// [msec] time counter for SEGCP (Config)
 		device_timer_msec();	// [msec] time counter for DeviceHandler (fw update)
 		
-		if(enable_phylink_check) // will be modified
+		if(enable_phylink_check == ENABLE) // will be modified
 		{
-			if(phylink_down_time_msec < 0xffffffff)	phylink_down_time_msec++;
-			else									phylink_down_time_msec = 0;
+			if(phylink_down_time_msec < 0xffffffff)	
+				phylink_down_time_msec++;
+			else									
+				phylink_down_time_msec = 0;
 		}
 		
-		if(flag_s2e_application_running)
-		{
+		if(flag_s2e_application_running == SET)
 			gpio_handler_timer_msec();
-		}
 		
 		/* Second Process */
 		if(msec_cnt >= 1000 - 1) //second //if((msec_cnt % 1000) == 0) 

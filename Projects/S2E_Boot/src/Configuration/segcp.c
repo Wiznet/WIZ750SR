@@ -42,9 +42,9 @@ uint8_t * tbSEGCPERR[] = {"ERNULL", "ERNOTAVAIL", "ERNOPARAM", "ERIGNORED", "ERN
 uint8_t gSEGCPPRIVILEGE = SEGCP_PRIVILEGE_CLR;
 
 // Keep-alive timer values for TCP unicast search function
-uint8_t enable_configtool_keepalive_timer = SEGCP_DISABLE;
+uint8_t enable_configtool_keepalive_timer = DISABLE;
 volatile uint16_t configtool_keepalive_time = 0;
-uint8_t flag_send_configtool_keepalive = SEGCP_DISABLE;
+uint8_t flag_send_configtool_keepalive = DISABLE;
 
 
 void do_segcp(void)
@@ -62,7 +62,7 @@ void do_segcp(void)
 	
 	if(segcp_ret & SEGCP_RET_ERR)
 	{
-		if(dev_config->serial_common.serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:ERROR:%04X\r\n", segcp_ret);
+		if(dev_config->serial_common.serial_debug_en == ENABLE) printf(" > SEGCP:ERROR:%04X\r\n", segcp_ret);
 	}
 	else if(segcp_ret) // Command parsing success
 	{
@@ -109,7 +109,7 @@ void do_segcp(void)
 #else
 			if(device_firmware_update(STORAGE_APP_MAIN) == DEVICE_FWUP_RET_SUCCESS)
 			{
-				dev_config_e->firmware_update.fwup_flag = SEGCP_DISABLE;
+				dev_config_e->firmware_update.fwup_flag = DISABLE;
 				dev_config_e->firmware_update.fwup_size = 0;
 				
 				save_DevConfig_to_storage();
@@ -345,7 +345,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                     case SEGCP_QP: sprintf(trep, "%d", dev_config->network_connection[1].remote_port);
 						break;
 					case SEGCP_RH: 
-						if(dev_config->network_option.dns_use == SEGCP_DISABLE)
+						if(dev_config->network_option.dns_use == DISABLE)
 						{
 							sprintf(trep, "%d.%d.%d.%d", dev_config->network_connection[0].remote_ip[0], dev_config->network_connection[0].remote_ip[1],
 														dev_config->network_connection[0].remote_ip[2], dev_config->network_connection[0].remote_ip[3]);
@@ -358,7 +358,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						break;
                     /* For 2port */
                     case SEGCP_QH: 
-						if(dev_config->network_option.dns_use == SEGCP_DISABLE)
+						if(dev_config->network_option.dns_use == DISABLE)
 						{
 							sprintf(trep, "%d.%d.%d.%d", dev_config->network_connection[1].remote_ip[0], dev_config->network_connection[1].remote_ip[1],
 														dev_config->network_connection[1].remote_ip[2], dev_config->network_connection[1].remote_ip[3]);
@@ -547,10 +547,10 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						}
 						break;
 				   case SEGCP_DD: // ## Does nothing
-						//if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						//if(param_len != 1 || tmp_byte > ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						//else tsvDEVCONFnew.ddns_en = tmp_byte;
 						tmp_byte = is_hex(*param);
-						if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						if(param_len != 1 || tmp_byte > ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						break;               
 					case SEGCP_PO: // ## Does nothing
 						//if(param_len != 1 || tmp_byte > SEGCP_TELNET) ret |= SEGCP_RET_ERR_INVALIDPARAM;
@@ -560,23 +560,23 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						break;
 					case SEGCP_CP:
 						tmp_byte = is_hex(*param);
-						if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						if(param_len != 1 || tmp_byte > ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else dev_config->tcp_option[0].pw_connect_en = tmp_byte;
 						break;
 					case SEGCP_DG:
 						tmp_byte = is_hex(*param);
-						if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						if(param_len != 1 || tmp_byte > ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else dev_config->serial_common.serial_debug_en = tmp_byte;
 						break;
 					case SEGCP_KA:
 						tmp_byte = is_hex(*param);
-						if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						if(param_len != 1 || tmp_byte > ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else dev_config->tcp_option[0].keepalive_en = tmp_byte;
 						break;
                     /* For 2port */
                     case SEGCP_RA:
 						tmp_byte = is_hex(*param);
-						if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						if(param_len != 1 || tmp_byte > ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else dev_config->tcp_option[1].keepalive_en = tmp_byte;
 						break;
 					case SEGCP_KI:
@@ -740,7 +740,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 					case SEGCP_RH:
 						if(is_ipaddr(param, tmp_ip))
 						{
-							dev_config->network_option.dns_use = SEGCP_DISABLE;
+							dev_config->network_option.dns_use = DISABLE;
 							dev_config->network_connection[0].remote_ip[0] = tmp_ip[0];
 							dev_config->network_connection[0].remote_ip[1] = tmp_ip[1];
 							dev_config->network_connection[0].remote_ip[2] = tmp_ip[2];
@@ -748,7 +748,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						}
 						else
 						{
-							dev_config->network_option.dns_use = SEGCP_ENABLE;
+							dev_config->network_option.dns_use = ENABLE;
 							if(param[0] == SEGCP_NULL) dev_config->network_option.dns_domain_name[0] = 0;
 							else strcpy(dev_config->network_option.dns_domain_name, param);
 						}
@@ -758,7 +758,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                     case SEGCP_QH:
 						if(is_ipaddr(param, tmp_ip))
 						{
-							dev_config->network_option.dns_use = SEGCP_DISABLE;
+							dev_config->network_option.dns_use = DISABLE;
 							dev_config->network_connection[1].remote_ip[0] = tmp_ip[0];
 							dev_config->network_connection[1].remote_ip[1] = tmp_ip[1];
 							dev_config->network_connection[1].remote_ip[2] = tmp_ip[2];
@@ -766,7 +766,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						}
 						else
 						{
-							dev_config->network_option.dns_use = SEGCP_ENABLE;
+							dev_config->network_option.dns_use = ENABLE;
 							if(param[0] == SEGCP_NULL) dev_config->network_option.dns_domain_name[0] = 0;
 							else strcpy(dev_config->network_option.dns_domain_name, param);
 						}
@@ -923,7 +923,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						break;
 					case SEGCP_TE:
 						tmp_byte = is_hex(*param);
-						if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						if(param_len != 1 || tmp_byte > ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else dev_config->serial_command.serial_command = tmp_byte;
 						break;
 					case SEGCP_SS:
@@ -976,7 +976,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 #else
 							dev_config_e->firmware_update.fwup_size = tmp_long;
 #endif
-							dev_config_e->firmware_update.fwup_flag = SEGCP_ENABLE;
+							dev_config_e->firmware_update.fwup_flag = ENABLE;
 							ret |= SEGCP_RET_FWUP;
 							sprintf(trep,"FW%d.%d.%d.%d:%d:%d\r\n", dev_config->network_common.local_ip[0], dev_config->network_common.local_ip[1]
 							,dev_config->network_common.local_ip[2] , dev_config->network_common.local_ip[3], (uint16_t)DEVICE_FWUP_PORT);
@@ -989,12 +989,12 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						break;
 					case SEGCP_EC:
 						tmp_byte = is_hex(*param);
-						if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						if(param_len != 1 || tmp_byte > ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else dev_config->serial_command.serial_command_echo = tmp_byte;
 						break;
 					case SEGCP_UE: // User echo, Not used
 						tmp_byte = is_hex(*param);
-						if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						if(param_len != 1 || tmp_byte > ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else ;
 						break;
 
@@ -1119,7 +1119,7 @@ uint16_t proc_SEGCP_udp(uint8_t* segcp_req, uint8_t* segcp_rep)
 		case SOCK_CLOSED:
 			if(socket(SEGCP_UDP_SOCK, Sn_MR_UDP, DEVICE_SEGCP_PORT, 0x00) == SEGCP_UDP_SOCK)
 			{
-				;//if(dev_config->serial_info[0].serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:UDP:STARTED\r\n");
+				;//if(dev_config->serial_info[0].serial_debug_en == ENABLE) printf(" > SEGCP:UDP:STARTED\r\n");
 			}
 			break;
 	}
@@ -1161,10 +1161,10 @@ uint16_t proc_SEGCP_tcp(uint8_t* segcp_req, uint8_t* segcp_rep)
 				setSn_IR(SEGCP_TCP_SOCK, Sn_IR_CON); // TCP connection interrupt clear
 			}
 			
-			if(flag_send_configtool_keepalive == SEGCP_ENABLE) // default: 15sec
+			if(flag_send_configtool_keepalive == ENABLE) // default: 15sec
 			{
 				send_keepalive_packet_configtool(SEGCP_TCP_SOCK);
-				flag_send_configtool_keepalive = SEGCP_DISABLE; // flag clear
+				flag_send_configtool_keepalive = DISABLE; // flag clear
 			}
 
 			if((len = getSn_RX_RSR(SEGCP_TCP_SOCK)) > 0)
@@ -1222,7 +1222,7 @@ uint16_t proc_SEGCP_tcp(uint8_t* segcp_req, uint8_t* segcp_rep)
 			
 			if(socket(SEGCP_TCP_SOCK, Sn_MR_TCP, DEVICE_SEGCP_PORT, Sn_MR_ND) == SEGCP_TCP_SOCK)
 			{
-				;//if(dev_config->serial_info[0].serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:TCP:STARTED\r\n");
+				;//if(dev_config->serial_info[0].serial_debug_en == ENABLE) printf(" > SEGCP:TCP:STARTED\r\n");
 				
 				//Keep-alive timer keep disabled until TCP connection established.
 				enable_configtool_keepalive_timer = DISABLE;
@@ -1253,7 +1253,7 @@ void segcp_timer_msec(void)
 		
 		if(configtool_keepalive_time >= CONFIGTOOL_KEEPALIVE_TIME_MS)
 		{
-			flag_send_configtool_keepalive = SEGCP_ENABLE;
+			flag_send_configtool_keepalive = ENABLE;
 			configtool_keepalive_time = 0;
 		}
 	}

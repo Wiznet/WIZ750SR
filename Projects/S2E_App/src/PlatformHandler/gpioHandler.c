@@ -34,6 +34,7 @@
 void IO_Configuration(void)
 {
 	struct __serial_option *serial_option = (struct __serial_option *)&(get_DevConfig_pointer()->serial_option);
+	uint8_t i;
 	//uint16_t val;
 	
 	/* GPIOs Initialization */
@@ -42,8 +43,12 @@ void IO_Configuration(void)
 	init_connection_status_io(); 
 	
 	// Set the DTR pin to high when the DTR signal enabled (== PHY link status disabled)
-	if(serial_option[0].dtr_en == 1) set_flowcontrol_dtr_pin(ON);
-    if(serial_option[1].dtr_en == 1) set_flowcontrol_dtr_pin(ON);
+	for(i=0; i<DEVICE_UART_CNT; i++)
+	{
+		if(serial_option[i].dtr_en == 1) 
+			set_flowcontrol_dtr_pin(i, ON);
+	}
+
 	
 	/* GPIOs Initialization */
 	// Expansion GPIOs (4-pins, A to D)
@@ -369,22 +374,14 @@ void init_connection_status_io(void)
 	
 #if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == WIZ750JR))
 	if(serial_option[0].dtr_en == 0)	
-    {
         init_phylink_status_pin();
-    }
 	else					
-    {
         init_flowcontrol_dtr_pin();
-    }
 
 	if(serial_option[0].dsr_en == 0)	
-    {
         init_tcpconnection_status_pin();
-    }
 	else					
-    {
         init_flowcontrol_dsr_pin();
-	}
 #elif (DEVICE_BOARD_NAME == WIZ752SR_12x)
     init_phylink_status_pin();
     init_tcpconnection_status_pin();
@@ -522,14 +519,10 @@ uint8_t get_connection_status_io(uint16_t pin, uint8_t channel)
         #endif
     #elif (DEVICE_BOARD_NAME == WIZ752SR_12x)  
         if(!channel)
-        {
             status = GPIO_ReadInputDataBit(STATUS_TCPCONNECT_0_PORT, STATUS_TCPCONNECT_0_PIN); 
-        }
         #if (DEVICE_UART_CNT == 2)
         else
-        {
             status = GPIO_ReadInputDataBit(STATUS_TCPCONNECT_1_PORT, STATUS_TCPCONNECT_1_PIN); 
-        }
         #endif
     #endif
 #endif	
@@ -577,7 +570,7 @@ void init_flowcontrol_dtr_pin(void)
 #endif
 }
 
-void set_flowcontrol_dtr_pin(uint8_t set)
+void set_flowcontrol_dtr_pin(uint8_t channel, uint8_t set)
 {
 #ifdef __USE_UART_DTR_DSR__  
 	if(set == ON)	

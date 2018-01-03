@@ -85,7 +85,7 @@ void set_DevConfig_to_factory_value(void)
 		dev_config.serial_data_packing[i].packing_delimiter_length = 0;
 		dev_config.serial_data_packing[i].packing_data_appendix = 0;
 		
-		dev_config.tcp_option[i].keepalive_en = 1;
+		dev_config.tcp_option[i].keepalive_en = ENABLE;
 		dev_config.tcp_option[i].keepalive_wait_time = 7000;
 		dev_config.tcp_option[i].keepalive_retry_time = 5000;
 		
@@ -97,23 +97,23 @@ void set_DevConfig_to_factory_value(void)
 		dev_config.serial_option[i].stop_bits = stop_bit1;
 		dev_config.serial_option[i].flow_control = flow_none;
 
-		dev_config.serial_option[i].dtr_en = SEGCP_DISABLE;
-		dev_config.serial_option[i].dsr_en = SEGCP_DISABLE;
+		dev_config.serial_option[i].dtr_en = DISABLE;
+		dev_config.serial_option[i].dsr_en = DISABLE;
 	}
 	
-	//dev_config.serial_info[0].serial_debug_en = SEGCP_DISABLE;
-	dev_config.serial_common.serial_debug_en = SEGCP_ENABLE;
+	//dev_config.serial_info[0].serial_debug_en = DISABLE;
+	dev_config.serial_common.serial_debug_en = ENABLE;
 	
 	//memset(dev_config.options.pw_setting, 0x00, sizeof(dev_config.options.pw_setting));		// Added for WIZ107SR compatibility;
 	memset(dev_config.config_common.pw_search, 0x00, sizeof(dev_config.config_common.pw_search));		// Added for WIZ107SR compatibility;
 	for(i=0; i<DEVICE_UART_CNT; i++)
 	{
 		memset(dev_config.tcp_option[i].pw_connect, 0x00, sizeof(dev_config.tcp_option[i].pw_connect));
-		dev_config.tcp_option[i].pw_connect_en = SEGCP_DISABLE;
+		dev_config.tcp_option[i].pw_connect_en = DISABLE;
 	}
 	
-	dev_config.network_option.dhcp_use = SEGCP_DISABLE;
-	dev_config.network_option.dns_use = SEGCP_DISABLE;
+	dev_config.network_option.dhcp_use = DISABLE;
+	dev_config.network_option.dns_use = DISABLE;
 	
 	dev_config.network_option.dns_server_ip[0] = 8;	// Default DNS server IP: Google Public DNS (8.8.8.8)
 	dev_config.network_option.dns_server_ip[1] = 8;
@@ -122,8 +122,8 @@ void set_DevConfig_to_factory_value(void)
 	memset(dev_config.network_option.dns_domain_name, 0x00, sizeof(dev_config.network_option.dns_domain_name));
 	//memcpy(dev_config.options.dns_domain_name, "www.google.com", 14);
 
-	dev_config.serial_command.serial_command = SEGCP_ENABLE;
-	dev_config.serial_command.serial_command_echo = SEGCP_DISABLE;
+	dev_config.serial_command.serial_command = ENABLE;
+	dev_config.serial_command.serial_command_echo = DISABLE;
 	dev_config.serial_command.serial_trigger[0] = 0x2b;	// Defualt serial command mode trigger code: '+++' (0x2b, 0x2b, 0x2b)
 	dev_config.serial_command.serial_trigger[1] = 0x2b;
 	dev_config.serial_command.serial_trigger[2] = 0x2b;
@@ -140,13 +140,13 @@ void set_DevConfig_to_factory_value(void)
 	dev_config.user_io_info.user_io_status = 0;
 #endif
 
-	dev_config_e.firmware_update.fwup_flag = SEGCP_DISABLE;
+	dev_config_e.firmware_update.fwup_flag = DISABLE;
 	dev_config_e.firmware_update.fwup_port = DEVICE_FWUP_PORT;
 	dev_config_e.firmware_update.fwup_size = 0;
 	
 	// Extended Fields: Firmware update by HTTP server
 	dev_config_e.firmware_update.fwup_server_port = FWUP_SERVER_PORT;
-	dev_config_e.firmware_update.fwup_server_use_default = SEGCP_ENABLE;
+	dev_config_e.firmware_update.fwup_server_use_default = ENABLE;
 	
 	// Planned to apply
 	memset(dev_config_e.firmware_update.fwup_server_domain, 0x00, sizeof(dev_config_e.firmware_update.fwup_server_domain));
@@ -240,7 +240,7 @@ void display_Net_Info(void)
 	{
 		if(value->network_connection[i].working_mode != TCP_SERVER_MODE)
 		{
-			if(value->network_option.dns_use == SEGCP_ENABLE)
+			if(value->network_option.dns_use == ENABLE)
 			{
 				if(i==0)
 				{

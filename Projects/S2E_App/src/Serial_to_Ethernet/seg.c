@@ -392,7 +392,7 @@ void proc_SEG_tcp_client(uint8_t channel)
 			if((tcp_option[channel].keepalive_en == ENABLE) && (enable_keepalive_timer[channel] == ENABLE))
 			{
 				// Send the first keee-alive packet
-				if((flag_sent_first_keepalive[channel] == DISABLE) 
+				if((flag_sent_first_keepalive[channel] == RESET) 
                     && (keepalive_time[channel] >= tcp_option[channel].keepalive_wait_time) 
                     && (tcp_option[channel].keepalive_wait_time != 0))
 				{
@@ -402,10 +402,10 @@ void proc_SEG_tcp_client(uint8_t channel)
 					send_keepalive_packet_manual(channel); // <-> send_keepalive_packet_auto()
 					keepalive_time[channel] = 0;
 					
-					flag_sent_first_keepalive[channel] = ENABLE;
+					flag_sent_first_keepalive[channel] = SET;
 				}
 				// Send the keee-alive packet periodically
-				if((flag_sent_first_keepalive[channel] == ENABLE) 
+				if((flag_sent_first_keepalive[channel] == SET) 
                     && (keepalive_time[channel] >= tcp_option[channel].keepalive_retry_time) 
                     && (tcp_option[channel].keepalive_retry_time != 0))
 				{
@@ -558,7 +558,7 @@ void proc_SEG_tcp_server(uint8_t channel)
 			if((tcp_option[channel].keepalive_en == ENABLE) && (enable_keepalive_timer[channel] == ENABLE))
 			{
 				// Send the first keee-alive packet
-				if((flag_sent_first_keepalive[channel] == DISABLE) 
+				if((flag_sent_first_keepalive[channel] == RESET) 
                     && (keepalive_time[channel] >= tcp_option[channel].keepalive_wait_time) 
                     && (tcp_option[channel].keepalive_wait_time != 0))
 				{
@@ -568,10 +568,10 @@ void proc_SEG_tcp_server(uint8_t channel)
 					send_keepalive_packet_manual(channel); // <-> send_keepalive_packet_auto()
 					keepalive_time[channel] = 0;
 					
-					flag_sent_first_keepalive[channel] = ENABLE;
+					flag_sent_first_keepalive[channel] = SET;
 				}
 				// Send the keee-alive packet periodically
-				if((flag_sent_first_keepalive[channel] == ENABLE) 
+				if((flag_sent_first_keepalive[channel] == SET) 
                     && (keepalive_time[channel] >= tcp_option[channel].keepalive_retry_time) 
                     && (tcp_option[channel].keepalive_retry_time != 0))
 				{
@@ -815,7 +815,7 @@ void proc_SEG_tcp_mixed(uint8_t channel)
 			if((tcp_option[channel].keepalive_en == ENABLE) && (enable_keepalive_timer[channel] == ENABLE))
 			{
 				// Send the first keee-alive packet
-				if((flag_sent_first_keepalive[channel] == DISABLE) 
+				if((flag_sent_first_keepalive[channel] == RESET) 
                     && (keepalive_time[channel] >= tcp_option[channel].keepalive_wait_time) 
                     && (tcp_option[channel].keepalive_wait_time != 0))
 				{
@@ -825,10 +825,10 @@ void proc_SEG_tcp_mixed(uint8_t channel)
 					send_keepalive_packet_manual(channel); // <-> send_keepalive_packet_auto()
 					keepalive_time[channel] = 0;
 					
-					flag_sent_first_keepalive[channel] = ENABLE;
+					flag_sent_first_keepalive[channel] = SET;
 				}
 				// Send the keee-alive packet periodically
-				if((flag_sent_first_keepalive[channel] == ENABLE) 
+				if((flag_sent_first_keepalive[channel] == SET) 
                     && (keepalive_time[channel] >= tcp_option[channel].keepalive_retry_time) 
                     && (tcp_option[channel].keepalive_retry_time != 0))
 				{
@@ -1029,13 +1029,13 @@ void uart_to_ether(uint8_t channel)
 
 					if(tcp_option[channel].keepalive_en == ENABLE)
 					{
-						if(flag_sent_first_keepalive[channel] == DISABLE)
+						if(flag_sent_first_keepalive[channel] == RESET)
 						{
 							enable_keepalive_timer[channel] = ENABLE;
 						}
 						else
 						{
-							flag_sent_first_keepalive[channel] = DISABLE;
+							flag_sent_first_keepalive[channel] = RESET;
 						}
 						keepalive_time[channel] = 0;
 					}
@@ -1061,7 +1061,7 @@ uint16_t get_serial_data(uint8_t channel)
     
 	uint16_t i;
 	uint16_t len;
-    int32_t ch;
+    uint8_t ch;
 	
     len = RingBuffer_GetCount(&rxring[channel]);
     //memset(g_data_buf, 0, sizeof(g_data_buf));
@@ -1071,7 +1071,7 @@ uint16_t get_serial_data(uint8_t channel)
 		if((serial_data_packing[channel].packing_delimiter[0] != 0x00) && (len == 1))
 		{
             if(UART_Read_RB(&rxring[channel], &ch, 1))
-                g_send_buf[channel][u2e_size[channel]] = (uint8_t)ch;
+                g_send_buf[channel][u2e_size[channel]] = ch;
 			
             if(serial_data_packing[channel].packing_delimiter[0] == g_send_buf[channel][u2e_size[channel]])
 				return u2e_size[channel];
@@ -1134,7 +1134,7 @@ void ether_to_uart(uint8_t channel)
 	uint16_t len;
 	uint16_t i;
     uint8_t sock_state;
-    uint16_t stored_size;
+    uint32_t stored_size;
     
     UART_TypeDef* UARTx = (channel==0)?UART0:UART1;
     
@@ -1176,14 +1176,14 @@ void ether_to_uart(uint8_t channel)
 			
 			case SOCK_ESTABLISHED: // TCP_SERVER_MODE, TCP_CLIENT_MODE, TCP_MIXED_MODE
 			case SOCK_CLOSE_WAIT:
-                e2u_size[channel] = e2u_size[channel] + recv(channel, g_recv_buf[channel], sizeof(g_recv_buf[channel]));
+                e2u_size[channel] = e2u_size[channel] + recv(channel, g_recv_buf[channel], len);
 				break;
 			default:
 				break;
 		}
 		inactivity_time[channel] = 0;
 		keepalive_time[channel] = 0;
-		flag_sent_first_keepalive[channel] = DISABLE;
+		flag_sent_first_keepalive[channel] = RESET;
 	}
 	
 	if((network_connection[channel].working_state == TCP_SERVER_MODE) 

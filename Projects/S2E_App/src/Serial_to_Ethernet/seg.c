@@ -1158,7 +1158,7 @@ void ether_to_uart(uint8_t channel)
 	if(len > 0)
 	{
 		if(len > RingBuffer_GetFree(&txring[channel])) 
-			len = RingBuffer_GetFree(&txring[channel]);
+			len = RingBuffer_GetFree(&txring[channel])-1;
 		
 		switch(getSn_SR(channel))
 		{

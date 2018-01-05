@@ -94,6 +94,7 @@ typedef enum
 	FALSE	= 0,
 	TRUE	= 1
 } bool;
+
 #define OP_COMMAND	0
 #define OP_DATA		1
 

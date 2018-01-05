@@ -42,6 +42,7 @@ void Timer0_Configuration(void)
 
 	/* Dualtimer 0_0 start */
 	DUALTIMER_Start(DUALTIMER0_0);
+	
 }
 
 void Timer0_IRQ_Handler(void)

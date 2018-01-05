@@ -19,10 +19,10 @@ extern void delay(__IO uint32_t nCount);
 static void PHY_Init(void);
 //static void delay_ms(uint32_t ms);
 
-GPIO_TypeDef* LED_PORT[LEDn] = {LED1_GPIO_PORT, LED2_GPIO_PORT, LED3_GPIO_PORT, LED4_GPIO_PORT};
-const uint16_t LED_PIN[LEDn] = {LED1_PIN, LED2_PIN, LED3_PIN, LED4_PIN};
-PAD_Type LED_PAD[LEDn] = {LED1_GPIO_PAD, LED2_GPIO_PAD, LED3_GPIO_PAD, LED4_GPIO_PAD};
-PAD_AF_TypeDef LED_PAD_AF[LEDn] = {LED1_GPIO_PAD_AF, LED2_GPIO_PAD_AF, LED3_GPIO_PAD_AF, LED4_GPIO_PAD_AF};
+GPIO_TypeDef* LED_PORT[LEDn] = {LED1_GPIO_PORT, LED2_GPIO_PORT};
+const uint16_t LED_PIN[LEDn] = {LED1_PIN, LED2_PIN};
+PAD_Type LED_PAD[LEDn] = {LED1_GPIO_PAD, LED2_GPIO_PAD};
+PAD_AF_TypeDef LED_PAD_AF[LEDn] = {LED1_GPIO_PAD_AF, LED2_GPIO_PAD_AF};
 
 volatile uint16_t phylink_check_time_msec = 0;
 uint8_t flag_check_phylink = 0;
@@ -33,8 +33,6 @@ void W7500x_Board_Init(void)
 {
 	LED_Init(LED1);
 	LED_Init(LED2);
-	LED_Init(LED3);
-	LED_Init(LED4);
 
 	/* PHY Initialization */
 	PHY_Init();

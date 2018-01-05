@@ -49,6 +49,8 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx, uint8_t channel)
     
 	uint8_t ch_tx; 
     uint8_t ch_rx; 
+	
+	LED_Toggle(LED2);
 
 	if(UART_GetITStatus(UARTx, UART_IT_FLAG_RXI) == SET)
 	{
@@ -100,32 +102,32 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx, uint8_t channel)
 	{
         UART_ClearITPendingBit(UARTx, UART_IT_FLAG_TXI);
         if(RingBuffer_Pop(&txring[channel], &ch_tx) == SUCCESS)
+		{
             UART_SendData(UARTx, ch_tx);
-        else												
+		}
+        else	
+		{			
             UART_ITConfig(UARTx, UART_IT_FLAG_TXI, DISABLE);
+		}
 	}
 }
 uint32_t UART_Send_RB(UART_TypeDef* UARTx, RINGBUFF_T *pRB, const void *data, int bytes)
 {
 	uint32_t ret;
-	uint8_t ch, i;
+	uint8_t *p8 = (uint8_t *) data;
+	uint8_t ch;
 
 	/* Don't let UART transmit ring buffer change in the UART IRQ handler */
-    __disable_irq();
-    UART_ITConfig(UARTx, UART_IT_FLAG_TXI, DISABLE);
+	UART_ITConfig(UARTx, UART_IT_FLAG_TXI, DISABLE);
 
 	/* Move as much data as possible into transmit ring buffer */ 
-	ret = RingBuffer_InsertMult(pRB, data, bytes);
+	ret = RingBuffer_InsertMult(pRB, p8 , bytes);
     
-	if(RingBuffer_Pop(pRB, &ch) == SUCCESS)
-	{
-        while(UARTx->FR & UART_FR_TXFF);
+	if(RingBuffer_Pop(pRB, &ch))
 		UART_SendData(UARTx, ch);
-	}
 	
 	/* Enable UART transmit interrupt */
-    UART_ITConfig(UARTx, UART_IT_FLAG_TXI, ENABLE);
-    __enable_irq();
+	UART_ITConfig(UARTx, UART_IT_FLAG_TXI, ENABLE);
     
 	return ret;
 }
@@ -153,7 +155,9 @@ void S2E_UART_Configuration(uint8_t channel)
     serial_info_init(&UART_InitStructure, channel);
     UART_Init(UARTx,&UART_InitStructure);
     /* Configure UART Interrupt Enable */
-    UART_ITConfig(UARTx, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
+    //UART_ITConfig(UARTx, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI | UART_IT_FLAG_BEI), ENABLE);
+	//UART_ITConfig(UARTx, (UART_IT_FLAG_BEI), DISABLE);
+	UART_ITConfig(UARTx, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
     /* Configure UART FIFO Enable */
     //UART_FIFO_Enable(UART,4,4);
     /* NVIC configuration */

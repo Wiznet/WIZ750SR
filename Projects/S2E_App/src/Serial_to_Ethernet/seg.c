@@ -89,7 +89,7 @@ void uart_to_ether(uint8_t channel);
 void ether_to_uart(uint8_t channel);
 uint16_t get_serial_data(uint8_t channel);
 void reset_SEG_timeflags(uint8_t channel);
-uint8_t check_connect_pw_auth(uint8_t * buf, uint16_t len);
+uint8_t check_connect_pw_auth(uint8_t * buf, uint16_t len, uint8_t channel);
 void restore_serial_data(uint8_t idx);
 
 uint8_t check_tcp_connect_exception(uint8_t channel);
@@ -112,6 +112,7 @@ void do_seg(void)
 #if 0
 	if(tmp_timeflag_for_debug == SET) // every 1 sec
 	{
+		/*
 		if(opmode == DEVICE_GW_MODE) 	
 			printf("working mode: %s, mixed: %s\r\n", str_working[network_connection[0].working_mode], (network_connection[0].working_mode == 2)?(mixed_state ? "CLIENT":"SERVER"):("NONE"));
 		else 							
@@ -128,7 +129,24 @@ void do_seg(void)
 		printf("sock_state: %x\r\n", getSn_SR(0));
 		printf("\r\nringbuf_usedlen = %d\r\n", RingBuffer_GetCount(&rxring[0]));
 		printf(" >> RINGBUFFER_USED_SIZE: [Rx] %d\r\n", RingBuffer_GetCount(&rxring[0]));
+		*/
 		tmp_timeflag_for_debug = RESET;
+		
+		//FlagStatus UART_GetFlagStatus(UART_TypeDef* UARTx, uint16_t UART_FLAG)
+		//void UART_ITConfig(UART_TypeDef* UARTx, uint16_t UART_IT, FunctionalState NewState)
+		//ITStatus UART_GetITStatus(UART_TypeDef* UARTx, uint16_t UART_IT)
+		printf(" UART0 Interrupt Mask : %d\r\n", UART0->IMSC);
+		printf(" UART1 Interrupt Mask : %d\r\n", UART1->IMSC);
+		printf(" UART0 Raw Interrupt Status : %d\r\n", UART0->RIS);
+		printf(" UART1 Raw Interrupt Status : %d\r\n", UART1->RIS);
+		printf(" UART0 Masked Interrupt Status : %d\r\n", UART0->MIS);
+		printf(" UART1 Masked Interrupt Status : %d\r\n", UART1->MIS);
+		printf(" UART0 Interrupt Clear : %d\r\n", UART0->ICR);
+		printf(" UART1 Interrupt Clear : %d\r\n", UART1->ICR);
+		printf(" UART0 Break error interrupt : %d\r\n", UART_GetITStatus(UART0, UART_IT_FLAG_BEI));
+		printf(" UART1 Break error interrupt : %d\r\n", UART_GetITStatus(UART1, UART_IT_FLAG_BEI));
+		printf("----------------------------\r\n");
+		
 	}
 #endif
 	
@@ -305,7 +323,7 @@ void proc_SEG_tcp_client(uint8_t channel)
 				reconnection_time[channel] = 0; // reconnection time variable clear
 				
 				// TCP connect exception checker; e.g., dns failed / zero srcip ... and etc.
-				if(check_tcp_connect_exception(channel) == TRUE) 
+				if(check_tcp_connect_exception(channel) == ERROR) 
                 {
                     return;
                 }
@@ -337,8 +355,8 @@ void proc_SEG_tcp_client(uint8_t channel)
                 }
 				
 				// TCP server mode only, This flag have to be enabled always at TCP client mode
-				//if(option->pw_connect_en == ENABLE)		flag_connect_pw_auth = ENABLE;
-				flag_connect_pw_auth[channel] = ENABLE;
+				//if(option->pw_connect_en == ENABLE)		flag_connect_pw_auth = SET;
+				flag_connect_pw_auth[channel] = SET;
 				
 				// Reconnection timer disable
 				if(enable_reconnection_timer[channel] == ENABLE)
@@ -508,7 +526,7 @@ void proc_SEG_tcp_server(uint8_t channel)
 				if(tcp_option[channel].pw_connect_en == DISABLE)	
                 {
                     
-                    flag_connect_pw_auth[channel] = ENABLE;		// TCP server mode only (+ mixed_server)
+                    flag_connect_pw_auth[channel] = SET;		// TCP server mode only (+ mixed_server)
                 }
 				else
 				{
@@ -586,7 +604,7 @@ void proc_SEG_tcp_server(uint8_t channel)
 			// Check the connection password auth timer
 			if(tcp_option[channel].pw_connect_en == ENABLE)
 			{
-				if((flag_connect_pw_auth[channel] == DISABLE) && (connection_auth_time[channel] >= MAX_CONNECTION_AUTH_TIME)) // timeout default: 5000ms (5 sec)
+				if((flag_connect_pw_auth[channel] == RESET) && (connection_auth_time[channel] >= MAX_CONNECTION_AUTH_TIME)) // timeout default: 5000ms (5 sec)
 				{
 					//disconnect(sock);
 					process_socket_termination(channel);
@@ -670,7 +688,7 @@ void proc_SEG_tcp_mixed(uint8_t channel)
 					reconnection_time[channel] = 0; // reconnection time variable clear
 					
 					// TCP connect exception checker; e.g., dns failed / zero srcip ... and etc.
-					if(check_tcp_connect_exception(channel) == TRUE)
+					if(check_tcp_connect_exception(channel) == ERROR)
 					{
 #ifdef MIXED_CLIENT_LIMITED_CONNECT
 						process_socket_termination(channel);
@@ -740,9 +758,9 @@ void proc_SEG_tcp_mixed(uint8_t channel)
 				// Connection Password option: TCP server mode only (+ mixed_server)
 				if((tcp_option[channel].pw_connect_en == DISABLE) || (mixed_state[channel] == MIXED_CLIENT))
 				{
-					flag_connect_pw_auth[channel] = ENABLE;
+					flag_connect_pw_auth[channel] = SET;
 				}
-				else if((mixed_state[channel] == MIXED_SERVER) && (flag_connect_pw_auth[channel] == DISABLE))
+				else if((mixed_state[channel] == MIXED_SERVER) && (flag_connect_pw_auth[channel] == RESET))
 				{
 					// Connection password auth timer initialize
 					enable_connection_auth_timer[channel] = ENABLE;
@@ -843,7 +861,7 @@ void proc_SEG_tcp_mixed(uint8_t channel)
 			// Check the connection password auth timer
 			if((mixed_state[channel] == MIXED_SERVER) && (tcp_option[channel].pw_connect_en == ENABLE))
 			{
-				if((flag_connect_pw_auth[channel] == DISABLE) && (connection_auth_time[channel] >= MAX_CONNECTION_AUTH_TIME)) // timeout default: 5000ms (5 sec)
+				if((flag_connect_pw_auth[channel] == RESET) && (connection_auth_time[channel] >= MAX_CONNECTION_AUTH_TIME)) // timeout default: 5000ms (5 sec)
 				{
 					//disconnect(sock);
 					process_socket_termination(channel);
@@ -1005,7 +1023,7 @@ void uart_to_ether(uint8_t channel)
 			case SOCK_ESTABLISHED: // TCP_SERVER_MODE, TCP_CLIENT_MODE, TCP_MIXED_MODE
 			case SOCK_CLOSE_WAIT:
 				// Connection password is only checked in the TCP SERVER MODE / TCP MIXED MODE (MIXED_SERVER)
-				if(flag_connect_pw_auth[channel] == ENABLE)
+				if(flag_connect_pw_auth[channel] == SET)
 				{
 					/* ## 1
 					len = send(sock, g_send_buf, len);
@@ -1052,7 +1070,7 @@ void uart_to_ether(uint8_t channel)
 	}
  
 	inactivity_time[channel] = 0;
-	//flag_serial_input_time_elapse = DISABLE; // this flag is cleared in the 'Data packing delimiter:time' checker routine
+	//flag_serial_input_time_elapse = RESET; // this flag is cleared in the 'Data packing delimiter:time' checker routine
 }
 
 uint16_t get_serial_data(uint8_t channel)
@@ -1113,10 +1131,10 @@ uint16_t get_serial_data(uint8_t channel)
 	// Packing delimiter: time option
 	if((serial_data_packing[channel].packing_time != 0) 
         && (u2e_size[channel] != 0) 
-        && (flag_serial_input_time_elapse[channel]))
+        && (flag_serial_input_time_elapse[channel] == SET))
 	{
         if(RingBuffer_GetCount(&rxring[channel]) == 0) 
-            flag_serial_input_time_elapse[channel] = DISABLE; // ##
+            flag_serial_input_time_elapse[channel] = RESET; // ##
 		
 		return u2e_size[channel];
 	}
@@ -1131,7 +1149,7 @@ void ether_to_uart(uint8_t channel)
     struct __network_connection *network_connection = (struct __network_connection *)(get_DevConfig_pointer()->network_connection);
     struct __tcp_option *tcp_option = (struct __tcp_option *)(get_DevConfig_pointer()->tcp_option);
 
-	uint16_t len;
+	uint16_t len, recv_len;
 	uint16_t i;
     uint8_t sock_state;
     uint32_t stored_size;
@@ -1142,9 +1160,7 @@ void ether_to_uart(uint8_t channel)
 	{
 #ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
 		if(get_uart_cts_pin(channel) != UART_CTS_LOW) 
-        {
             return;
-        }
 #else
         if((UARTx->FR &UART_FR_CTS )!=0)
             return;
@@ -1154,12 +1170,11 @@ void ether_to_uart(uint8_t channel)
 
 	// H/W Socket buffer -> User's buffer
 	len = getSn_RX_RSR(channel);
+	if(len > UART_SRB_SIZE)
+		len = UART_SRB_SIZE;
     
-	if(len > 0)
+	if((len > 0) && len <= RingBuffer_GetFree(&txring[channel])) 
 	{
-		if(len > RingBuffer_GetFree(&txring[channel])) 
-			len = RingBuffer_GetFree(&txring[channel])-1;
-		
 		switch(getSn_SR(channel))
 		{
 			case SOCK_UDP: // UDP_MODE
@@ -1176,7 +1191,7 @@ void ether_to_uart(uint8_t channel)
 			
 			case SOCK_ESTABLISHED: // TCP_SERVER_MODE, TCP_CLIENT_MODE, TCP_MIXED_MODE
 			case SOCK_CLOSE_WAIT:
-                e2u_size[channel] = e2u_size[channel] + recv(channel, g_recv_buf[channel], len);
+                e2u_size[channel] = recv(channel, g_recv_buf[channel], len);
 				break;
 			default:
 				break;
@@ -1190,23 +1205,22 @@ void ether_to_uart(uint8_t channel)
         || ((network_connection[channel].working_state == TCP_MIXED_MODE) && (mixed_state[channel] == MIXED_SERVER)))
 	{
 		// Connection password authentication
-		if((tcp_option[channel].pw_connect_en == ENABLE) && (flag_connect_pw_auth == DISABLE))
+		if((tcp_option[channel].pw_connect_en == ENABLE) && (flag_connect_pw_auth == RESET))
 		{
-            if(check_connect_pw_auth(g_recv_buf[channel], len) == ENABLE)
-				flag_connect_pw_auth[channel] = ENABLE;
+            if(check_connect_pw_auth(g_recv_buf[channel], len, channel) == ENABLE)
+				flag_connect_pw_auth[channel] = SET;
 			else
-				flag_connect_pw_auth[channel] = DISABLE;
+				flag_connect_pw_auth[channel] = RESET;
 			
 			e2u_size[channel] = 0;
 			
-			if(flag_connect_pw_auth[channel] == DISABLE)
+			if(flag_connect_pw_auth[channel] == RESET)
 			{
 				disconnect(channel);
 				return;
 			}
 		}
 	}
-	// Ethernet data transfer to DATA UARTx
 	if(e2u_size[channel] != 0)
 	{
 		if(serial_option[channel].dsr_en == ENABLE) // DTR / DSR handshake (flowcontrol)
@@ -1216,7 +1230,6 @@ void ether_to_uart(uint8_t channel)
                 return;
             }
 		}
-//////////////////////////////////////////////////////////////////////
 		if(serial_option[channel].uart_interface == UART_IF_RS422_485)
 		{
 			uart_rs485_enable(channel);
@@ -1228,23 +1241,18 @@ void ether_to_uart(uint8_t channel)
 			
 			e2u_size[channel] = 0;
 		}
-//////////////////////////////////////////////////////////////////////
 		else if(serial_option[channel].flow_control == flow_xon_xoff) 
 		{
 			if(isXON[channel] == ENABLE)
 			{
-                stored_size = UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
+                UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
 				e2u_size[channel] = e2u_size[channel] - stored_size;
 			}
-			//else
-			//{
-			//	;//XOFF!!
-			//}
 		}
 		else
 		{
-            stored_size = UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
-            e2u_size[channel] = e2u_size[channel] - stored_size;
+			UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
+			e2u_size[channel] = 0;
 		}
 	}
 }
@@ -1298,7 +1306,7 @@ uint8_t process_socket_termination(uint8_t channel)
 }
 
 
-uint8_t check_connect_pw_auth(uint8_t * buf, uint16_t len)
+uint8_t check_connect_pw_auth(uint8_t * buf, uint16_t len, uint8_t channel)
 {
 	struct __tcp_option *tcp_option = (struct __tcp_option *)(get_DevConfig_pointer()->tcp_option);
 	uint8_t ret = DISABLE;
@@ -1310,11 +1318,12 @@ uint8_t check_connect_pw_auth(uint8_t * buf, uint16_t len)
     }
 	
 	memcpy(pwbuf, buf, len);
-	if((len == strlen(tcp_option[0].pw_connect)) && (memcmp(tcp_option[0].pw_connect, pwbuf, len) == 0))
+	
+	if((len == strlen(tcp_option[channel].pw_connect)) && (memcmp(tcp_option[channel].pw_connect, pwbuf, len) == 0))
 		ret = ENABLE; // Connection password auth success
 	
 #ifdef _SEG_DEBUG_
-	printf(" > Connection password: %s, len: %d\r\n", tcp_option->pw_connect, strlen(tcp_option->pw_connect));
+	printf(" > Connection password: %s, len: %d\r\n", tcp_option[channel].pw_connect, strlen(tcp_option[channel].pw_connect));
 	printf(" > Entered password: %s, len: %d\r\n", pwbuf, len);
 	printf(" >> Auth %s\r\n", ret ? "success":"failed");
 #endif
@@ -1378,7 +1387,7 @@ void init_trigger_modeswitch(uint8_t mode)
 		inactivity_time[i] = 0;
 		keepalive_time[i] = 0;
 		serial_input_time[i] = 0;
-		flag_serial_input_time_elapse[i] = 0;
+		flag_serial_input_time_elapse[i] = RESET;
         
         RingBuffer_Flush(&rxring[i]);
 	}
@@ -1480,13 +1489,11 @@ uint8_t check_serial_store_permitted(uint8_t channel, uint8_t ch)
 		if(ch == UART_XON)
 		{
 			isXON[channel] = ENABLE;
-            //isXON = ENABLE;
 			ret = DISABLE; 
 		}
 		else if(ch == UART_XOFF)
 		{
 			isXON[channel] = DISABLE;
-            //isXON = DISABLE;
 			ret = DISABLE;
 		}
 	}
@@ -1502,10 +1509,10 @@ void reset_SEG_timeflags(uint8_t channel)
     enable_connection_auth_timer[channel] = DISABLE;
     
     // Flag clear
-    flag_serial_input_time_elapse[channel] = DISABLE;
-    flag_sent_keepalive[channel] = DISABLE;
-    //flag_sent_keepalive_wait = DISABLE;
-    flag_connect_pw_auth[channel] = DISABLE; // TCP_SERVER_MODE only (+ MIXED_SERVER)
+    flag_serial_input_time_elapse[channel] = RESET;
+    flag_sent_keepalive[channel] = RESET;
+    //flag_sent_keepalive_wait = RESET;
+    flag_connect_pw_auth[channel] = RESET; // TCP_SERVER_MODE only (+ MIXED_SERVER)
     
     // Timer value clear
     inactivity_time[channel] = 0;
@@ -1514,6 +1521,11 @@ void reset_SEG_timeflags(uint8_t channel)
     connection_auth_time[channel] = 0;	
 }
 
+/**
+  * @brief  
+  * @param  None
+  * @retval None
+  */
 void init_time_delimiter_timer(uint8_t channel)
 {
 	struct __serial_command *serial_command = (struct __serial_command *)&(get_DevConfig_pointer()->serial_command);
@@ -1534,6 +1546,11 @@ void init_time_delimiter_timer(uint8_t channel)
 	}
 }
 
+/**
+  * @brief  
+  * @param  None
+  * @retval None
+  */
 uint8_t check_tcp_connect_exception(uint8_t channel)
 {
     struct __network_option *network_option = (struct __network_option *)&get_DevConfig_pointer()->network_option;
@@ -1541,7 +1558,7 @@ uint8_t check_tcp_connect_exception(uint8_t channel)
     struct __network_connection *network_connection = (struct __network_connection *)get_DevConfig_pointer()->network_connection;
 	
 	uint8_t srcip[4] = {0, };
-	uint8_t ret = OFF;
+	uint8_t ret = SUCCESS;
 	
 	getSIPR(srcip);
 	
@@ -1552,7 +1569,7 @@ uint8_t check_tcp_connect_exception(uint8_t channel)
         {
             printf(" > SEG:CONNECTION FAILED - DNS Failed\r\n");
         }
-		ret = TRUE;
+		ret = ERROR;
 	}	
 	// if dhcp failed (0.0.0.0), this case do not connect to peer
 	else if((srcip[0] == 0x00) 
@@ -1564,7 +1581,7 @@ uint8_t check_tcp_connect_exception(uint8_t channel)
         {
             printf(" > SEG:CONNECTION FAILED - Invalid IP address: Zero IP\r\n");
         }
-		ret = TRUE;
+		ret = ERROR;
 	}
 	// Destination zero IP
 	else if((network_connection[channel].remote_ip[0] == 0x00) 
@@ -1573,10 +1590,8 @@ uint8_t check_tcp_connect_exception(uint8_t channel)
                 && (network_connection[channel].remote_ip[3] == 0x00))
 	{
 		if(serial_common->serial_debug_en == ENABLE) 
-        {
             printf(" > SEG:CONNECTION FAILED - Invalid Destination IP address: Zero IP\r\n");
-        }
-		ret = TRUE;
+		ret = ERROR;
 	}
 	 // Duplicate IP address
 	else if((srcip[0] == network_connection[channel].remote_ip[0]) 
@@ -1585,10 +1600,8 @@ uint8_t check_tcp_connect_exception(uint8_t channel)
                 && (srcip[3] == network_connection[channel].remote_ip[3]))
 	{
 		if(serial_common->serial_debug_en == ENABLE) 
-        {
             printf(" > SEG:CONNECTION FAILED - Duplicate IP address\r\n");
-        }
-		ret = TRUE;
+		ret = ERROR;
 	}
 	else if((srcip[0] == 192) && (srcip[1] == 168)) // local IP address == Class C private IP
 	{
@@ -1599,10 +1612,8 @@ uint8_t check_tcp_connect_exception(uint8_t channel)
 			if(srcip[2] != network_connection[channel].remote_ip[2]) // Class C Private IP network mismatch
 			{
 				if(serial_common->serial_debug_en == ENABLE) 
-                {
                     printf(" > SEG:CONNECTION FAILED - Invalid IP address range (%d.%d.[%d].%d)\r\n", network_connection[0].remote_ip[0], network_connection[0].remote_ip[1], network_connection[0].remote_ip[2], network_connection[0].remote_ip[3]);
-                }
-				ret = TRUE; 
+				ret = ERROR; 
 			}
 		}
 	}
@@ -1610,7 +1621,11 @@ uint8_t check_tcp_connect_exception(uint8_t channel)
 	return ret;
 }
 
-// This function have to call every 1 millisecond by Timer IRQ handler routine.
+/**
+  * @brief  This function have to call every 1 millisecond by Timer IRQ handler routine.
+  * @param  None
+  * @retval None
+  */
 void seg_timer_msec(void)
 {
 	struct __serial_data_packing *serial_data_packing = (struct __serial_data_packing *)(get_DevConfig_pointer()->serial_data_packing);
@@ -1627,13 +1642,9 @@ void seg_timer_msec(void)
 		if(enable_reconnection_timer[i])
 		{
 			if(reconnection_time[i] < 0xFFFF) 	
-			{
 				reconnection_time[i]++;
-			}
 			else 							
-			{
 				reconnection_time[i] = 0;
-			}
 		}
 		
 		// Keep-alive timer: Time count routine (msec)
@@ -1648,9 +1659,7 @@ void seg_timer_msec(void)
 	
 	// Mode switch timer: Time count routine (msec) (GW mode <-> Serial command mode, for s/w mode switch trigger code)
 	if(modeswitch_time < modeswitch_gap_time) 
-    {
         modeswitch_time++;
-    }
 	
 	if((enable_modeswitch_timer) && (modeswitch_time == modeswitch_gap_time))
 	{
@@ -1675,7 +1684,7 @@ void seg_timer_msec(void)
 			{
 				serial_input_time[i] = 0;
 				enable_serial_input_timer[i] = 0;
-				flag_serial_input_time_elapse[i] = 1;
+				flag_serial_input_time_elapse[i] = SET;
 			}
 		}
 		
@@ -1690,7 +1699,11 @@ void seg_timer_msec(void)
 	}
 }
 
-// This function have to call every 1 second by Timer IRQ handler routine.
+/**
+  * @brief  This function have to call every 1 second by Timer IRQ handler routine.
+  * @param  None
+  * @retval None
+  */
 void seg_timer_sec(void)
 {
     uint8_t i;
@@ -1699,8 +1712,10 @@ void seg_timer_sec(void)
     {
         // Inactivity timer: Time count routine (sec)
         if(enable_inactivity_timer[i] == ENABLE)
+		{
             if(inactivity_time[i] < 0xFFFF) 
                 inactivity_time[i]++;
+		}
     }
     tmp_timeflag_for_debug = SET;
 }

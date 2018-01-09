@@ -262,6 +262,8 @@ void     reset_DHCP_timeout(void);
 /* Parse message as OFFER and ACK and NACK from DHCP server.*/
 int8_t   parseDHCPCMSG(void);
 
+char NibbleToHex(uint8_t nibble);
+    
 /* The default handler of ip assign first */
 void default_ip_assign(void)
 {
@@ -396,10 +398,13 @@ void send_DHCP_DISCOVER(void)
 	pDHCPMSG->OPT[k++] = 0;          // fill zero length of hostname 
 	for(i = 0 ; HOST_NAME[i] != 0; i++)
    	pDHCPMSG->OPT[k++] = HOST_NAME[i];
-	pDHCPMSG->OPT[k++] = DHCP_CHADDR[3];
-	pDHCPMSG->OPT[k++] = DHCP_CHADDR[4];
-	pDHCPMSG->OPT[k++] = DHCP_CHADDR[5];
-	pDHCPMSG->OPT[k - (i+3+1)] = i+3; // length of hostname
+	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3] >> 4); 
+	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3]);
+	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4] >> 4); 
+	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4]);
+	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5] >> 4); 
+	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5]);
+	pDHCPMSG->OPT[k - (i+6+1)] = i+6; // length of hostname
 
 	pDHCPMSG->OPT[k++] = dhcpParamRequest;
 	pDHCPMSG->OPT[k++] = 0x06;	// length of request
@@ -501,10 +506,13 @@ void send_DHCP_REQUEST(void)
 	pDHCPMSG->OPT[k++] = 0; // length of hostname
 	for(i = 0 ; HOST_NAME[i] != 0; i++)
    	pDHCPMSG->OPT[k++] = HOST_NAME[i];
-	pDHCPMSG->OPT[k++] = DHCP_CHADDR[3];
-	pDHCPMSG->OPT[k++] = DHCP_CHADDR[4];
-	pDHCPMSG->OPT[k++] = DHCP_CHADDR[5];
-	pDHCPMSG->OPT[k - (i+3+1)] = i+3; // length of hostname
+	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3] >> 4); 
+	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[3]);
+	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4] >> 4); 
+	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[4]);
+	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5] >> 4); 
+	pDHCPMSG->OPT[k++] = NibbleToHex(DHCP_CHADDR[5]);
+	pDHCPMSG->OPT[k - (i+6+1)] = i+6; // length of hostname
 	
 	pDHCPMSG->OPT[k++] = dhcpParamRequest;
 	pDHCPMSG->OPT[k++] = 0x08;
@@ -705,12 +713,12 @@ uint8_t DHCP_run(void)
 
 	switch ( dhcp_state ) {
 	   case STATE_DHCP_INIT     :
-         DHCP_allocated_ip[0] = 0;
-         DHCP_allocated_ip[1] = 0;
-         DHCP_allocated_ip[2] = 0;
-         DHCP_allocated_ip[3] = 0;
-   		send_DHCP_DISCOVER();
-   		dhcp_state = STATE_DHCP_DISCOVER;
+            DHCP_allocated_ip[0] = 0;
+            DHCP_allocated_ip[1] = 0;
+            DHCP_allocated_ip[2] = 0;
+            DHCP_allocated_ip[3] = 0;
+            send_DHCP_DISCOVER();
+            dhcp_state = STATE_DHCP_DISCOVER;
    		break;
 		case STATE_DHCP_DISCOVER :
 			if (type == DHCP_OFFER){
@@ -1002,6 +1010,13 @@ uint32_t getDHCPLeasetime(void)
 	return dhcp_lease_time;
 }
 
-
+char NibbleToHex(uint8_t nibble)
+{
+  nibble &= 0x0F;
+  if (nibble <= 9)
+    return nibble + '0';
+  else 
+    return nibble + ('A'-0x0A);
+}
 
 

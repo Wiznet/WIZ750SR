@@ -287,12 +287,15 @@ typedef struct
 void        UART_StructInit         (UART_InitTypeDef* UART_InitStruct);
 
 uint32_t    UART_Init               (UART_TypeDef *UARTx, UART_InitTypeDef* UART_InitStruct);
+void 		UART_FIFO_Enable		(UART_TypeDef *UARTx, uint16_t rx_fifo_level, uint16_t tx_fifo_level);
 void        UART_SendData           (UART_TypeDef* UARTx, uint16_t Data);
 uint16_t    UART_ReceiveData        (UART_TypeDef* UARTx);
 void        UART_SendBreak          (UART_TypeDef* UARTx);
+FlagStatus 	UART_GetRecvStatus		(UART_TypeDef* UARTx, uint16_t UART_RECV_STATUS);
 void        UART_ClearRecvStatus    (UART_TypeDef* UARTx, uint16_t UART_RECV_STATUS);
 FlagStatus  UART_GetFlagStatus      (UART_TypeDef* UARTx, uint16_t UART_FLAG);
 void        UART_ITConfig           (UART_TypeDef* UARTx, uint16_t UART_IT, FunctionalState NewState);
+ITStatus 	UART_GetITConfigStatus	(UART_TypeDef* UARTx, uint16_t UART_IT);
 ITStatus    UART_GetITStatus        (UART_TypeDef* UARTx, uint16_t UART_IT);
 void        UART_ClearITPendingBit  (UART_TypeDef* UARTx, uint16_t UART_IT);
 

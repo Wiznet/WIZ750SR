@@ -1167,7 +1167,6 @@ void ether_to_uart(uint8_t channel)
 #endif
 	}
 
-
 	// H/W Socket buffer -> User's buffer
 	len = getSn_RX_RSR(channel);
 	if(len > UART_SRB_SIZE)
@@ -1191,7 +1190,11 @@ void ether_to_uart(uint8_t channel)
 			
 			case SOCK_ESTABLISHED: // TCP_SERVER_MODE, TCP_CLIENT_MODE, TCP_MIXED_MODE
 			case SOCK_CLOSE_WAIT:
-                e2u_size[channel] = recv(channel, g_recv_buf[channel], len);
+#if 1
+                e2u_size[channel] = recv(channel, g_recv_buf[channel], sizeof(g_recv_buf[channel]));
+#else
+				e2u_size[channel] = e2u_size[channel] + recv(channel, g_recv_buf[channel], sizeof(g_recv_buf[channel]));
+#endif	
 				break;
 			default:
 				break;
@@ -1251,8 +1254,12 @@ void ether_to_uart(uint8_t channel)
 		}
 		else
 		{
+#if 1
 			UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
 			e2u_size[channel] = 0;
+#else
+			e2u_size[channel] = e2u_size[channel] - UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
+#endif
 		}
 	}
 }

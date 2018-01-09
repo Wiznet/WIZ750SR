@@ -479,7 +479,7 @@ uint8_t check_mac_address(void)
 	uint8_t i;
 	uint8_t mac_buf[6] = {0, };
 	//uint8_t mac_str[MACSTR_SIZE] = {0, };
-    uint8_t mac_str[MACSTR_SIZE] = {"MC00:08:DC:50:37:71\r\n"};
+    uint8_t mac_str[MACSTR_SIZE] = {"MC00:08:DC:50:37:72\r\n"};
 	uint8_t trep[MACSTR_SIZE] = {0, };
 	uint8_t ret = 0;
 	

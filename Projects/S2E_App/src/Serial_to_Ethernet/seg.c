@@ -78,7 +78,10 @@ uint8_t isSocketOpen_TCPclient[DEVICE_UART_CNT] = {OFF,};
 
 // ## timeflag for debugging
 uint8_t tmp_timeflag_for_debug = RESET;
-uint8_t check_TX[DEVICE_UART_CNT][2] = {0,};
+
+uint8_t check_tx_status[DEVICE_UART_CNT] = {0,};
+uint8_t check_tx_prev_status[DEVICE_UART_CNT] = {0,};
+
 /* Private functions prototypes ----------------------------------------------*/
 void proc_SEG_tcp_client(uint8_t channel);
 void proc_SEG_tcp_server(uint8_t channel);
@@ -113,7 +116,7 @@ void do_seg(void)
 	
 	uint8_t i;
 	
-#if 1	
+#if 0	
 	if(tmp_timeflag_for_debug == SET) // every 1 sec
 	{
 		tmp_timeflag_for_debug = RESET;
@@ -552,6 +555,9 @@ void proc_SEG_tcp_server(uint8_t channel)
                 UART_Buffer_Flush(&rxring[channel]);
 				UART_Buffer_Flush(&txring[channel]);
 				setSn_IR(channel, Sn_IR_CON);
+				
+				check_tx_prev_status[channel] = 0; 
+				check_tx_status[channel] = 0;
 			}
 			
 			// Serial to Ethernet process        
@@ -1158,9 +1164,10 @@ void ether_to_uart(uint8_t channel)
     struct __network_connection *network_connection = (struct __network_connection *)(get_DevConfig_pointer()->network_connection);
     struct __tcp_option *tcp_option = (struct __tcp_option *)(get_DevConfig_pointer()->tcp_option);
 
-	uint16_t len=0, recv_len;
+	uint16_t len=0, rb_free=0;
 	uint16_t i;
     uint8_t sock_state;
+	uint8_t ch;
     
     UART_TypeDef* UARTx = (channel==0)?UART0:UART1;
     
@@ -1180,9 +1187,27 @@ void ether_to_uart(uint8_t channel)
 	if(len > UART_SRB_SIZE)
 		len = UART_SRB_SIZE;
 	
+	rb_free = RingBuffer_GetFree(&txring[channel]);
 	
-    
-	if((len > 0) && len <= RingBuffer_GetFree(&txring[channel])) 
+    if(rb_free > 0)
+	{	
+		check_tx_status[channel] = rb_free;
+		if(check_tx_prev_status[channel] == check_tx_status[channel])
+		{
+			UART_ClearITPendingBit(UARTx, UART_IT_FLAG_TXI);
+			if(RingBuffer_Pop(&txring[channel], &ch))
+			{
+				while(UART_GetFlagStatus(UARTx, UART_FR_TXFF) == SET);
+				UART_SendData(UARTx, ch);
+			}
+		}
+		else
+		{
+			check_tx_prev_status[channel] = check_tx_status[channel];
+		}
+	}
+	
+	if((len > 0) && (len <= rb_free)) 
 	{
 		switch(getSn_SR(channel))
 		{

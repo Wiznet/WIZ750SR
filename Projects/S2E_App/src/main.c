@@ -208,7 +208,7 @@ int main(void)
 } // End of main
 
 /**
-  * @brief  Main program
+  * @brief  W7500x Initialize
   * @param  None
   * @retval None
   */
@@ -239,16 +239,12 @@ static void W7500x_Init(void)
 }
 
 /**
-  * @brief  Main program
+  * @brief  W7500x WZTOE (Hardwired TCP/IP core) Initialize
   * @param  None
   * @retval None
   */
 static void W7500x_WZTOE_Init(void)
 {
-	////////////////////////////////////////////////////
-	// W7500x WZTOE (Hardwired TCP/IP core) Initialize
-	////////////////////////////////////////////////////
-	
 	/* Set Network Configuration: HW Socket Tx/Rx buffer size */
 	uint8_t tx_size[8] = { 2, 2, 2, 2, 2, 2, 0, 0 }; // default: { 2, 2, 2, 2, 2, 2, 2, 2 }
 	uint8_t rx_size[8] = { 2, 2, 2, 2, 2, 2, 0, 0 }; // default: { 2, 2, 2, 2, 2, 2, 2, 2 }
@@ -296,9 +292,9 @@ static void W7500x_WZTOE_Init(void)
 }
 
 /**
-  * @brief  Main program
+  * @brief  Process DHCP
   * @param  None
-  * @retval None
+  * @retval The result of process DHCP (SUCCESS or ERROR).
   */
 int8_t process_dhcp(void)
 {
@@ -356,9 +352,9 @@ int8_t process_dhcp(void)
 }
 
 /**
-  * @brief  Main program
+  * @brief  Process DNS
   * @param  None
-  * @retval None
+  * @retval The result of process DNS (SUCCESS or ERROR).
   */
 int8_t process_dns(void)
 {
@@ -458,6 +454,7 @@ void display_Dev_Info_main(void)
     
     uint8_t i;
 	uint32_t baud_table[] = {300, 600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400};
+	//uint32_t baud_table[14] = {460800, 921600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400};
 	    
 	printf(" - Device name: %s\r\n", dev_config->device_common.module_name);
 	printf(" - Network settings: \r\n");
@@ -595,7 +592,7 @@ void display_Dev_Info_dns(void)
 
 /**
   * @brief  Inserts a delay time.
-  * @param  nTime: specifies the delay time length, in milliseconds.
+  * @param  - milliseconds: specifies the delay time length, in milliseconds.
   * @retval None
   */
 void delay(__IO uint32_t milliseconds)

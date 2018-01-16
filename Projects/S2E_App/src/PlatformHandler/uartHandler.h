@@ -57,7 +57,6 @@ enum baud {
 	baud_115200 = 12,
 	baud_230400 = 13
 };
-
 enum word_len {
 	word_len7 = 0,
 	word_len8 = 1,

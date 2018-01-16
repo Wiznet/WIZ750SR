@@ -608,11 +608,11 @@ void check_phylink_status(void)
 	static uint8_t prev_link_status = 1;
 	uint8_t link_status;
 	
-//#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750MINI) || (DEVICE_BOARD_NAME == WIZ750JR))
+#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750MINI) || (DEVICE_BOARD_NAME == WIZ750JR))
 	link_status = get_phylink();
-//#else
-//	link_status = 0;
-//#endif
+#else
+	link_status = 0;
+#endif
 	
 	if(prev_link_status != link_status)
 	{

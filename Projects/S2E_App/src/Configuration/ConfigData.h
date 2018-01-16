@@ -79,7 +79,6 @@ struct __tcp_option {
 	uint8_t pw_connect_en;
 } __attribute__((packed));
 
-
 struct __serial_common {
     uint8_t uart_interface_cnt;
     uint8_t serial_debug_en;	// ## Eric, Field added for compatibility with WIZ107SR

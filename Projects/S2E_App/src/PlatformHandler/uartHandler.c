@@ -55,7 +55,7 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx, uint8_t channel)
         UART_ClearITPendingBit(UARTx, UART_IT_FLAG_RXI);
         if(RingBuffer_IsFull(&rxring[channel]) == TRUE)
 		{
-			UART_ReceiveData(UARTx);
+			ch_rx = UART_ReceiveData(UARTx);
 			flag_ringbuf_full[channel] = SET;
 		}
 		else
@@ -101,7 +101,6 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx, uint8_t channel)
         UART_ClearITPendingBit(UARTx, UART_IT_FLAG_TXI);
         if(RingBuffer_Pop(&txring[channel], &ch_tx) == SUCCESS)
 		{
-			while(UART_GetFlagStatus(UARTx, UART_FR_TXFF) == SET);
 			UART_SendData(UARTx, ch_tx);
 		}
         else	
@@ -178,6 +177,7 @@ void serial_info_init(UART_InitTypeDef* UART_InitStructure, uint8_t channel)
     
 	uint32_t valid_arg = 0;
 	uint32_t baud_table[14] = {300, 600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400};
+	//uint32_t baud_table[14] = {460800, 921600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400};
 
 	/* Set Baud Rate */
 	if(serial_option[channel].baud_rate < (sizeof(baud_table) / sizeof(baud_table[0])))
@@ -288,13 +288,9 @@ void serial_info_init(UART_InitTypeDef* UART_InitStructure, uint8_t channel)
         else	// Added by James in March 29
 		{
 			if(serial_option->flow_control == flow_rtsonly)
-			{
 				uart_if_mode[channel] = UART_IF_RS485;
-			}
             else
-			{
 				uart_if_mode[channel] = UART_IF_RS485_REVERSE;
-			}
 		}
 		
 		if(channel == 0)

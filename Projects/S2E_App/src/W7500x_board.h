@@ -89,6 +89,7 @@
 		#define DEVICE_ID_DEFAULT               "WIZ750Jr" // Device name
         #define DEVICE_UART_CNT		            1 // Not used
     #elif (DEVICE_BOARD_NAME == WIZ752SR_12x)  
+		//#define __W7500P__
 		//#define __USE_UART_IF_SELECTOR__	
 		//#define __USE_EXT_EEPROM__			
 		#define __USE_BOOT_ENTRY__			

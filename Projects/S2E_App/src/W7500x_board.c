@@ -99,7 +99,6 @@ static void PHY_Init(void)
 	set_phylink_time_check(0); // start PHY link time checker
 }
 
-
 // Status pins, active low
 void init_phylink(void)
 {
@@ -128,7 +127,6 @@ void init_hw_trig_pin(void)
 #endif
 }
 
-
 uint8_t get_hw_trig_pin(void)
 {
 #ifdef __USE_HW_TRIG_PIN__
@@ -144,7 +142,6 @@ uint8_t get_hw_trig_pin(void)
     return 1;
 #endif
 }
-
 
 void init_uart_if_sel(void)
 {
@@ -182,14 +179,9 @@ uint8_t get_boot_entry_pin(void)
 #endif
 }
 
-
-
 /**
   * @brief  Configures LED GPIO.
-  * @param  Led: Specifies the Led to be configured.
-  *   This parameter can be one of following parameters:
-  *     @arg WIZWIKI-W7500 board: LED1(LED_R) / LED2(LED_G) / Not used(LED_B)
-  *     @arg WIZWIKI-W7500ECO board: LED1 / LED2
+  * @param  - Led: Specifies the Led to be configured.
   * @retval None
   */
 void LED_Init(Led_TypeDef Led)
@@ -210,10 +202,7 @@ void LED_Init(Led_TypeDef Led)
 
 /**
   * @brief  Turns selected LED On.
-  * @param  Led: Specifies the Led to be set on.
-  *   This parameter can be one of following parameters:
-  *     @arg WIZWIKI-W7500 board: LED_R / LED_G / LED_B
-  *     @arg WIZWIKI-W7500ECO board: LED1 / LED2
+  * @param  - Led: Specifies the Led to be set on.
   * @retval None
   */
 void LED_On(Led_TypeDef Led)
@@ -224,10 +213,7 @@ void LED_On(Led_TypeDef Led)
 
 /**
   * @brief  Turns selected LED Off.
-  * @param  Led: Specifies the Led to be set off.
-  *   This parameter can be one of following parameters:
-  *     @arg WIZWIKI-W7500 board: LED_R / LED_G / LED_B
-  *     @arg WIZWIKI-W7500ECO board: LED1 / LED2
+  * @param  - Led: Specifies the Led to be set off.
   * @retval None
   */
 void LED_Off(Led_TypeDef Led)
@@ -238,10 +224,7 @@ void LED_Off(Led_TypeDef Led)
 
 /**
   * @brief  Toggles the selected LED.
-  * @param  Led: Specifies the Led to be toggled.
-  *   This parameter can be one of following parameters:
-  *     @arg WIZWIKI-W7500 board: LED_R / LED_G / LED_B
-  *     @arg WIZWIKI-W7500ECO board: LED1 / LED2
+  * @param  - Led: Specifies the Led to be toggled.
   * @retval None
   */
 void LED_Toggle(Led_TypeDef Led)
@@ -252,10 +235,7 @@ void LED_Toggle(Led_TypeDef Led)
 
 /**
   * @brief  Get the selected LED status
-  * @param  Led: Specifies the Led.
-  *   This parameter can be one of following parameters:
-  *     @arg WIZWIKI-W7500 board: LED_R / LED_G / LED_B
-  *     @arg WIZWIKI-W7500ECO board: LED1 / LED2
+  * @param  - Led: Specifies the Led.
   * @retval Status of LED (on / off)
   */
 uint8_t get_LED_Status(Led_TypeDef Led)

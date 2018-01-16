@@ -91,7 +91,6 @@ typedef enum {SEGCP_MC, SEGCP_VR, SEGCP_MN, SEGCP_IM, SEGCP_OP, SEGCP_DD, SEGCP_
 
 #define SEGCP_DTBIT7    word_len7
 #define SEGCP_DTBIT8    word_len8
-//#define SEGCP_DTBIT9    word_len9
 
 #define SEGCP_NONE      parity_none
 #define SEGCP_ODD       parity_odd

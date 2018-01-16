@@ -98,9 +98,10 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx, uint8_t channel)
 	//UART Tx interrupt
 	if(UART_GetITStatus(UARTx, UART_IT_FLAG_TXI) == SET) 
 	{
-        UART_ClearITPendingBit(UARTx, UART_IT_FLAG_TXI);
+		UART_ClearITPendingBit(UARTx, UART_IT_FLAG_TXI);
         if(RingBuffer_Pop(&txring[channel], &ch_tx) == SUCCESS)
 		{
+			//while(UART_GetFlagStatus(UARTx, UART_FR_TXFF) == SET);
 			UART_SendData(UARTx, ch_tx);
 		}
         else	
@@ -132,6 +133,8 @@ uint32_t UART_Send_RB(UART_TypeDef* UARTx, RINGBUFF_T *pRB, const void *data, in
 	
 	return ret;
 }
+
+
 int UART_Read_RB(RINGBUFF_T *pRB, void *data, int bytes)
 {
 	return RingBuffer_PopMult(pRB, (uint8_t *) data, bytes);
@@ -157,7 +160,6 @@ void S2E_UART_Configuration(uint8_t channel)
     UART_Init(UARTx,&UART_InitStructure);
     /* Configure UART Interrupt Enable */
 	UART_ITConfig(UARTx, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
-	UART_ITConfig(UARTx, UART_IT_FLAG_TXI, DISABLE);
     /* NVIC configuration */
     NVIC_ClearPendingIRQ(UARTx_IRQn);
     NVIC_SetPriority(UARTx_IRQn, 0);

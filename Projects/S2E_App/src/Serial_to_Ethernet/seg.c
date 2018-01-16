@@ -78,7 +78,7 @@ uint8_t isSocketOpen_TCPclient[DEVICE_UART_CNT] = {OFF,};
 
 // ## timeflag for debugging
 uint8_t tmp_timeflag_for_debug = RESET;
-
+uint8_t check_TX[DEVICE_UART_CNT][2] = {0,};
 /* Private functions prototypes ----------------------------------------------*/
 void proc_SEG_tcp_client(uint8_t channel);
 void proc_SEG_tcp_server(uint8_t channel);
@@ -113,15 +113,17 @@ void do_seg(void)
 	
 	uint8_t i;
 	
-#if 0	
+#if 1	
 	if(tmp_timeflag_for_debug == SET) // every 1 sec
 	{
 		tmp_timeflag_for_debug = RESET;
 	
 
+		/*
 		printf("[0]working mode: %s, mixed: %s\r\n", str_working[network_connection[0].working_mode], (network_connection[0].working_mode == 2)?(mixed_state ? "CLIENT":"SERVER"):("NONE"));
 		printf("[1]working mode: %s, mixed: %s\r\n", str_working[network_connection[1].working_mode], (network_connection[1].working_mode == 2)?(mixed_state ? "CLIENT":"SERVER"):("NONE"));
-		
+		*/
+		/*
 		printf("[0]UART2Ether - ringbuf: %d, u2e_size: %d\r\n", RingBuffer_GetCount(&rxring[0]), u2e_size[0]);
 		printf("[1]UART2Ether - ringbuf: %d, u2e_size: %d\r\n", RingBuffer_GetCount(&rxring[1]), u2e_size[1]);
 		
@@ -131,17 +133,27 @@ void do_seg(void)
 		printf("opmode: %d\r\n", opmode);
 		printf("[0]flag_connect_pw_auth: %d\r\n", flag_connect_pw_auth[0]);
 		printf("[1]flag_connect_pw_auth: %d\r\n", flag_connect_pw_auth[1]);
+		
 		printf("[0]Ether2UART - RX_RSR: %d, \t e2u_size: %d, \t ringbuf: %d\r\n", getSn_RX_RSR(0), e2u_size[0], RingBuffer_GetCount(&txring[0]));
 		printf("[1]Ether2UART - RX_RSR: %d, \t e2u_size: %d, \t ringbuf: %d\r\n", getSn_RX_RSR(1), e2u_size[1], RingBuffer_GetCount(&txring[1]));
+		*/
+		printf("[0]Ether2UART - RX_RSR: %d, \t ringbuf: %d\r\n", getSn_RX_RSR(0), RingBuffer_GetCount(&txring[0]));
+		printf("[1]Ether2UART - RX_RSR: %d, \t ringbuf: %d\r\n", getSn_RX_RSR(1), RingBuffer_GetCount(&txring[1]));
+		
 		printf("[0]sock_state: %x\r\n", getSn_SR(0));
 		printf("[1]sock_state: %x\r\n", getSn_SR(1));
 		
+		printf(" UART0 Interrupt Mask Status : \t0x%04x\r\n", UART0->IMSC);
+		printf(" UART1 Interrupt Mask Status : \t0x%04x\r\n", UART1->IMSC);
+		
+		/*
 		printf(" UART0 Raw Interrupt Status : \t0x%04x\r\n", UART0->RIS);
 		printf(" UART0 Raw Interrupt Status : \t0x%04x\r\n", UART1->RIS);
 		printf(" UART0 Receive Status Register : \t0x%04x\r\n", UART0->STATUS.RSR);
 		printf(" UART0 Receive Status Register : \t0x%04x\r\n", UART1->STATUS.RSR);
 		printf(" UART0 Get IT Status : \t\t\t\t0x%04x\r\n", UART0->MIS);
 		printf(" UART0 Get IT Status : \t\t\t\t0x%04x\r\n", UART1->MIS);
+		*/
 		printf("----------------------------\r\n");
 	}
 #endif
@@ -547,10 +559,13 @@ void proc_SEG_tcp_server(uint8_t channel)
             {
                 uart_to_ether(channel);
             }
+			ether_to_uart(channel);
+			/*
 			if(getSn_RX_RSR(channel) || e2u_size[channel])	
             {
                 ether_to_uart(channel);
             }
+			*/
 			
 			// Check the inactivity timer
 			if((enable_inactivity_timer[channel] == ENABLE) && (inactivity_time[channel] >= tcp_option[channel].inactivity))
@@ -1143,10 +1158,9 @@ void ether_to_uart(uint8_t channel)
     struct __network_connection *network_connection = (struct __network_connection *)(get_DevConfig_pointer()->network_connection);
     struct __tcp_option *tcp_option = (struct __tcp_option *)(get_DevConfig_pointer()->tcp_option);
 
-	uint16_t len, recv_len;
+	uint16_t len=0, recv_len;
 	uint16_t i;
     uint8_t sock_state;
-    uint32_t stored_size;
     
     UART_TypeDef* UARTx = (channel==0)?UART0:UART1;
     
@@ -1165,6 +1179,8 @@ void ether_to_uart(uint8_t channel)
 	len = getSn_RX_RSR(channel);
 	if(len > UART_SRB_SIZE)
 		len = UART_SRB_SIZE;
+	
+	
     
 	if((len > 0) && len <= RingBuffer_GetFree(&txring[channel])) 
 	{
@@ -1185,7 +1201,8 @@ void ether_to_uart(uint8_t channel)
 			case SOCK_ESTABLISHED: // TCP_SERVER_MODE, TCP_CLIENT_MODE, TCP_MIXED_MODE
 			case SOCK_CLOSE_WAIT:
 #if 1
-                e2u_size[channel] = recv(channel, g_recv_buf[channel], sizeof(g_recv_buf[channel]));
+                //e2u_size[channel] = recv(channel, g_recv_buf[channel], sizeof(g_recv_buf[channel]));
+				len = recv(channel, g_recv_buf[channel], sizeof(g_recv_buf[channel]));
 #else
 				e2u_size[channel] = e2u_size[channel] + recv(channel, g_recv_buf[channel], sizeof(g_recv_buf[channel]));
 #endif	
@@ -1196,6 +1213,10 @@ void ether_to_uart(uint8_t channel)
 		inactivity_time[channel] = 0;
 		keepalive_time[channel] = 0;
 		flag_sent_first_keepalive[channel] = RESET;
+	}
+	else
+	{
+		len = 0;
 	}
 	
 	if((network_connection[channel].working_state == TCP_SERVER_MODE) 
@@ -1218,7 +1239,8 @@ void ether_to_uart(uint8_t channel)
 			}
 		}
 	}
-	if(e2u_size[channel] != 0)
+	//if(e2u_size[channel] != 0)
+	if(len)
 	{
 		if(serial_option[channel].dsr_en == ENABLE) // DTR / DSR handshake (flowcontrol)
 		{
@@ -1243,14 +1265,15 @@ void ether_to_uart(uint8_t channel)
 			if(isXON[channel] == ENABLE)
 			{
                 UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
-				e2u_size[channel] = e2u_size[channel] - stored_size;
+				e2u_size[channel] = 0;
 			}
 		}
 		else
 		{
 #if 1
-			UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
-			e2u_size[channel] = 0;
+			//UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
+			UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], len);
+			//e2u_size[channel] = 0;
 #else
 			e2u_size[channel] = e2u_size[channel] - UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
 #endif

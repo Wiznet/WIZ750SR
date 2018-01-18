@@ -88,7 +88,7 @@ uint8_t g_recv_buf[DEVICE_UART_CNT][DATA_BUF_SIZE];
 int main(void)
 {
     uint8_t i;
-	
+    uint32_t time;
 	DevConfig *dev_config = get_DevConfig_pointer();
 	
 	/* W7500x MCU Initialization */

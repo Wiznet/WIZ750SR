@@ -33,6 +33,7 @@ uint8_t * flow_ctrl_table[] = {(uint8_t *)"NONE", (uint8_t *)"XON/XOFF", (uint8_
 uint8_t * uart_if_table[] = {(uint8_t *)UART_IF_STR_RS232_TTL, (uint8_t *)UART_IF_STR_RS422_485};
 
 static uint8_t xonoff_status[DEVICE_UART_CNT] = {UART_XON,};
+
 // RTS Status; __USE_GPIO_HARDWARE_FLOWCONTROL__ defined
 #ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
 	static uint8_t rts_status[DEVICE_UART_CNT] = {UART_RTS_LOW,};
@@ -94,7 +95,6 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx, uint8_t channel)
 		init_time_delimiter_timer(channel);
 	}
 
-	//UART Tx interrupt
 	if(UART_GetITStatus(UARTx, UART_IT_FLAG_TXI) == SET) 
 	{
 		UART_ClearITPendingBit(UARTx, UART_IT_FLAG_TXI);
@@ -103,6 +103,10 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx, uint8_t channel)
 			while(UART_GetFlagStatus(UARTx, UART_FR_TXFF) == SET);
 			UART_SendData(UARTx, ch_tx);
 		}
+        else	
+		{			
+            UART_ITConfig(UARTx, UART_IT_FLAG_TXI, DISABLE);
+		}
 	}
 }
 uint32_t UART_Send_RB(UART_TypeDef* UARTx, RINGBUFF_T *pRB, const void *data, int bytes)
@@ -110,7 +114,11 @@ uint32_t UART_Send_RB(UART_TypeDef* UARTx, RINGBUFF_T *pRB, const void *data, in
 	uint32_t ret;
 	uint8_t *p8 = (uint8_t *) data;
 	uint8_t ch;
-	
+
+	/* Don't let UART transmit ring buffer change in the UART IRQ handler */
+	UART_ITConfig(UARTx, UART_IT_FLAG_TXI, DISABLE);
+
+	/* Move as much data as possible into transmit ring buffer */ 
 	ret = RingBuffer_InsertMult(pRB, p8 , bytes);
 	
 	if(RingBuffer_Pop(pRB, &ch))
@@ -118,6 +126,9 @@ uint32_t UART_Send_RB(UART_TypeDef* UARTx, RINGBUFF_T *pRB, const void *data, in
 		while(UART_GetFlagStatus(UARTx, UART_FR_TXFF) == SET);
 		UART_SendData(UARTx, ch);
 	}
+	
+	/* Enable UART transmit interrupt */
+	UART_ITConfig(UARTx, UART_IT_FLAG_TXI, ENABLE);
 	
 	return ret;
 }
@@ -150,7 +161,10 @@ void S2E_UART_Configuration(uint8_t channel)
 	UART_ITConfig(UARTx, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
     /* NVIC configuration */
     NVIC_ClearPendingIRQ(UARTx_IRQn);
-    NVIC_SetPriority(UARTx_IRQn, 0);
+	if(channel==0)
+		NVIC_SetPriority(UARTx_IRQn, 3);
+	else
+		NVIC_SetPriority(UARTx_IRQn, 2);
     NVIC_EnableIRQ(UARTx_IRQn);
 }
 
@@ -267,7 +281,7 @@ void serial_info_init(UART_InitTypeDef* UART_InitStructure, uint8_t channel)
 	{
 		UART_InitStructure->UART_HardwareFlowControl = UART_HardwareFlowControl_None;
 		
-        // GPIO configration (RTS pin -> GPIO: 485SEL)
+        /* GPIO configration (RTS pin -> GPIO: 485SEL) */
 		if((serial_option[channel].flow_control != flow_rtsonly) && (serial_option[channel].flow_control != flow_reverserts)) // Added by James in March 29
 		{
 			if(channel == 0)
@@ -275,7 +289,7 @@ void serial_info_init(UART_InitTypeDef* UART_InitStructure, uint8_t channel)
 			else
 				get_uart_rs485_sel(SEG_DATA_UART1);
 		}
-        else	// Added by James in March 29
+        else
 		{
 			if(serial_option->flow_control == flow_rtsonly)
 				uart_if_mode[channel] = UART_IF_RS485;
@@ -287,7 +301,6 @@ void serial_info_init(UART_InitTypeDef* UART_InitStructure, uint8_t channel)
 			uart_rs485_rs422_init(SEG_DATA_UART0);
 		else
 			uart_rs485_rs422_init(SEG_DATA_UART1);
-		//printf("UART Interface: %s mode\r\n", uart_if_mode?"RS-485":"RS-422");
 	}
 	
 	/* Configure the UARTx */
@@ -318,7 +331,7 @@ void check_uart_flow_control(uint8_t channel, uint8_t flow_ctrl)
 	}
 	else if(flow_ctrl == flow_rts_cts) // RTS pin control
 	{      
-		// Buffer full occurred
+		/* Buffer full occurred */
         if((rts_status[channel] == UART_RTS_LOW) && (RingBuffer_GetCount(&rxring[channel]) > UART_OFF_THRESHOLD))
 		{
 			set_uart_rts_pin_high(channel);
@@ -327,7 +340,7 @@ void check_uart_flow_control(uint8_t channel, uint8_t flow_ctrl)
             printf(" >> UART_RTS_HIGH [%d / %d]\r\n", RingBuffer_GetCount(&rxring[channel]), SEG_DATA_BUF_SIZE);
 #endif
 		}
-		// Clear the buffer full event
+		/* Clear the buffer full event */
         if((rts_status[channel] == UART_RTS_HIGH) && (RingBuffer_GetCount(&rxring[channel]) <= UART_OFF_THRESHOLD))
 		{
 			set_uart_rts_pin_low(channel);

@@ -102,6 +102,7 @@ void set_device_status(uint8_t socket, teDEVSTATUS status);
 uint16_t get_tcp_any_port(uint8_t channel);
 
 static void check_n_clear_uart_recv_status(uint8_t channel);
+
 /* Public & Private functions ------------------------------------------------*/
 
 /**
@@ -558,6 +559,7 @@ void proc_SEG_tcp_server(uint8_t channel)
 				check_tx_rb_old_status[channel] = 0; 
 				check_tx_rb_now_status[channel] = 0;
 				check_tx_rb_status_cnt[channel] = 0;
+
 			}
 			
 			// Serial to Ethernet process        
@@ -566,7 +568,7 @@ void proc_SEG_tcp_server(uint8_t channel)
                 uart_to_ether(channel);
             }
 
-			if(getSn_RX_RSR(channel) || e2u_size[channel])	
+			//if(getSn_RX_RSR(channel) || e2u_size[channel])	
             {
                 ether_to_uart(channel);
             }
@@ -1162,9 +1164,8 @@ void ether_to_uart(uint8_t channel)
     struct __network_connection *network_connection = (struct __network_connection *)(get_DevConfig_pointer()->network_connection);
     struct __tcp_option *tcp_option = (struct __tcp_option *)(get_DevConfig_pointer()->tcp_option);
 
-	uint16_t len=0, rb_free=0;
+	uint16_t len=0;
 	uint16_t i=0;
-    uint8_t sock_state=0;
 	uint8_t ch=0;
     
     UART_TypeDef* UARTx = (channel==0)?UART0:UART1;
@@ -1182,61 +1183,39 @@ void ether_to_uart(uint8_t channel)
 
 	len = getSn_RX_RSR(channel);
 	
+	if(len==0)
+		return;
+	
 	if(len > UART_SRB_SIZE)
 		len = UART_SRB_SIZE;
 	
-	rb_free = RingBuffer_GetFree(&txring[channel]);
+	if(RingBuffer_GetFree(&txring[channel])!=UART_SRB_SIZE)
+		return;
 	
-    if(rb_free > 0)
-	{	
-		check_tx_rb_now_status[channel] = rb_free;
-		if(check_tx_rb_old_status[channel] == check_tx_rb_now_status[channel])
-		{
-			check_tx_rb_status_cnt[channel]++;
-			if(check_tx_rb_status_cnt[channel]==3)
-			{
-				UART_ITConfig(UARTx, UART_IT_FLAG_TXI, DISABLE);
-				if(RingBuffer_Pop(&txring[channel], &ch))
-				{
-					while(UART_GetFlagStatus(UARTx, UART_FR_TXFF) == SET);
-					UART_SendData(UARTx, ch);
-				}
-				UART_ITConfig(UARTx, UART_IT_FLAG_TXI, ENABLE);
-			}
-		}
-		else
-		{
-			check_tx_rb_status_cnt[channel] = 0;
-			check_tx_rb_old_status[channel] = check_tx_rb_now_status[channel];
-		}
-	}
-	
-	if((len > 0) && (len <= rb_free)) 
+	switch(getSn_SR(channel))
 	{
-		switch(getSn_SR(channel))
-		{
-			case SOCK_UDP: // UDP_MODE
-                e2u_size[channel] = recvfrom(channel, g_recv_buf[channel], len, peerip, &peerport);
-				if(memcmp(peerip_tmp, peerip, 4) !=  0)
+		case SOCK_UDP: // UDP_MODE
+			e2u_size[channel] = recvfrom(channel, g_recv_buf[channel], len, peerip, &peerport);
+			if(memcmp(peerip_tmp, peerip, 4) !=  0)
+			{
+				memcpy(peerip_tmp, peerip, 4);
+				if(serial_common->serial_debug_en == ENABLE) 
 				{
-					memcpy(peerip_tmp, peerip, 4);
-					if(serial_common->serial_debug_en == ENABLE) 
-                    {
-                        printf(" > [%d]UDP Peer IP/Port: %d.%d.%d.%d : %d\r\n", channel, peerip[0], peerip[1], peerip[2], peerip[3], peerport);
-                    }
+					printf(" > [%d]UDP Peer IP/Port: %d.%d.%d.%d : %d\r\n", channel, peerip[0], peerip[1], peerip[2], peerip[3], peerport);
 				}
-				break;
-			case SOCK_ESTABLISHED: // TCP_SERVER_MODE, TCP_CLIENT_MODE, TCP_MIXED_MODE
-			case SOCK_CLOSE_WAIT:
-                e2u_size[channel] = recv(channel, g_recv_buf[channel], sizeof(g_recv_buf[channel]));
-				break;
-			default:
-				break;
-		}
-		inactivity_time[channel] = 0;
-		keepalive_time[channel] = 0;
-		flag_sent_first_keepalive[channel] = RESET;
+			}
+			break;
+		case SOCK_ESTABLISHED: // TCP_SERVER_MODE, TCP_CLIENT_MODE, TCP_MIXED_MODE
+		case SOCK_CLOSE_WAIT:
+			len = recv(channel, g_recv_buf[channel], sizeof(g_recv_buf[channel]));
+			break;
+		default:
+			break;
 	}
+	inactivity_time[channel] = 0;
+	keepalive_time[channel] = 0;
+	flag_sent_first_keepalive[channel] = RESET;
+
 	
 	if((network_connection[channel].working_state == TCP_SERVER_MODE) 
         || ((network_connection[channel].working_state == TCP_MIXED_MODE) && (mixed_state[channel] == MIXED_SERVER)))
@@ -1259,40 +1238,37 @@ void ether_to_uart(uint8_t channel)
 		}
 	}
 	
-	if(e2u_size[channel] != 0)
+	if(serial_option[channel].dsr_en == ENABLE) // DTR / DSR handshake (flowcontrol)
 	{
-		if(serial_option[channel].dsr_en == ENABLE) // DTR / DSR handshake (flowcontrol)
+		if(get_flowcontrol_dsr_pin() == 0) 
 		{
-			if(get_flowcontrol_dsr_pin() == 0) 
-            {
-                return;
-            }
+			return;
 		}
-		if(serial_option[channel].uart_interface == UART_IF_RS422_485)
-		{
-			uart_rs485_enable(channel);
-            UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
-            
-            for(i = 0; i < 65535; i++); //wait
-            
-			uart_rs485_disable(channel);
-			
-			e2u_size[channel] = 0;
-		}
-		else if(serial_option[channel].flow_control == flow_xon_xoff) 
-		{
-			if(isXON[channel] == ENABLE)
-			{
-                UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
-				e2u_size[channel] = 0;
-			}
-		}
-		else
+	}
+	if(serial_option[channel].uart_interface == UART_IF_RS422_485)
+	{
+		uart_rs485_enable(channel);
+		UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
+		
+		for(i = 0; i < 65535; i++); //wait
+		
+		uart_rs485_disable(channel);
+		
+		e2u_size[channel] = 0;
+	}
+	else if(serial_option[channel].flow_control == flow_xon_xoff) 
+	{
+		if(isXON[channel] == ENABLE)
 		{
 			UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], e2u_size[channel]);
 			e2u_size[channel] = 0;
 		}
 	}
+	else
+	{
+		UART_Send_RB(UARTx, &txring[channel], g_recv_buf[channel], len);
+	}
+
 }
 
 uint16_t get_tcp_any_port(uint8_t channel)
@@ -1388,7 +1364,8 @@ void init_trigger_modeswitch(uint8_t mode)
 		if(serial_common->serial_debug_en == ENABLE)
 		{
 			printf(" > SEG:AT Mode\r\n");
-            UART_Send_RB(UART0, &txring[0], (uint8_t *)"SEG:AT Mode\r\n", sizeof("SEG:AT Mode\r\n"));
+            //UART_Send_RB(UART0, &txring[0], (uint8_t *)"SEG:AT Mode\r\n", sizeof("SEG:AT Mode\r\n"));
+			UartPuts(UART0, (uint8_t *)"SEG:AT Mode\r\n");
 		}
 #if (DEVICE_BOARD_NAME == WIZ752SR_12x)
         LED_On(LED2);
@@ -1406,7 +1383,8 @@ void init_trigger_modeswitch(uint8_t mode)
 		if(serial_common->serial_debug_en)
 		{
 			printf(" > SEG:GW Mode\r\n");
-            UART_Send_RB(UART0, &txring[0], (uint8_t *)"SEG:GW Mode\r\n", sizeof("SEG:GW Mode\r\n"));
+            //UART_Send_RB(UART0, &txring[0], (uint8_t *)"SEG:GW Mode\r\n", sizeof("SEG:GW Mode\r\n"));
+			UartPuts(UART0, (uint8_t *)"SEG:GW Mode\r\n");
 		}
 #if (DEVICE_BOARD_NAME == WIZ752SR_12x)
         LED_Off(LED2);

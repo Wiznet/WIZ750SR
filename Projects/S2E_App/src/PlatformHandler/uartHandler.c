@@ -33,7 +33,6 @@ uint8_t * flow_ctrl_table[] = {(uint8_t *)"NONE", (uint8_t *)"XON/XOFF", (uint8_
 uint8_t * uart_if_table[] = {(uint8_t *)UART_IF_STR_RS232_TTL, (uint8_t *)UART_IF_STR_RS422_485};
 
 static uint8_t xonoff_status[DEVICE_UART_CNT] = {UART_XON,};
-
 // RTS Status; __USE_GPIO_HARDWARE_FLOWCONTROL__ defined
 #ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
 	static uint8_t rts_status[DEVICE_UART_CNT] = {UART_RTS_LOW,};
@@ -101,11 +100,8 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx, uint8_t channel)
 		UART_ClearITPendingBit(UARTx, UART_IT_FLAG_TXI);
         if(RingBuffer_Pop(&txring[channel], &ch_tx) == SUCCESS)
 		{
+			while(UART_GetFlagStatus(UARTx, UART_FR_TXFF) == SET);
 			UART_SendData(UARTx, ch_tx);
-		}
-        else	
-		{			
-            UART_ITConfig(UARTx, UART_IT_FLAG_TXI, DISABLE);
 		}
 	}
 }
@@ -114,11 +110,7 @@ uint32_t UART_Send_RB(UART_TypeDef* UARTx, RINGBUFF_T *pRB, const void *data, in
 	uint32_t ret;
 	uint8_t *p8 = (uint8_t *) data;
 	uint8_t ch;
-
-	/* Don't let UART transmit ring buffer change in the UART IRQ handler */
-	UART_ITConfig(UARTx, UART_IT_FLAG_TXI, DISABLE);
-
-	/* Move as much data as possible into transmit ring buffer */ 
+	
 	ret = RingBuffer_InsertMult(pRB, p8 , bytes);
 	
 	if(RingBuffer_Pop(pRB, &ch))
@@ -126,9 +118,6 @@ uint32_t UART_Send_RB(UART_TypeDef* UARTx, RINGBUFF_T *pRB, const void *data, in
 		while(UART_GetFlagStatus(UARTx, UART_FR_TXFF) == SET);
 		UART_SendData(UARTx, ch);
 	}
-	
-	/* Enable UART transmit interrupt */
-	UART_ITConfig(UARTx, UART_IT_FLAG_TXI, ENABLE);
 	
 	return ret;
 }

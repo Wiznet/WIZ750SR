@@ -222,7 +222,8 @@ void do_segcp(void)
 				if(dev_config->serial_common.serial_debug_en == ENABLE) 
                 {
                     //uart_puts(SEG_DATA_UART0, "REBOOT\r\n", 8);
-                    UART_Send_RB(UART0, &txring[0], (uint8_t *)"REBOOT\r\n", sizeof("REBOOT\r\n"));
+                    //UART_Send_RB(UART0, &txring[0], (uint8_t *)"REBOOT\r\n", sizeof("REBOOT\r\n"));
+					UartPuts(UART0, (uint8_t *)"REBOOT\r\n");
                 }
 			}
 			
@@ -1625,7 +1626,8 @@ uint16_t proc_SEGCP_uart(uint8_t * segcp_rep)
 				}
 				
 				//uart_puts(SEG_DATA_UART0, segcp_rep, strlen(segcp_rep));
-                UART_Send_RB(UART0, &txring[0], segcp_rep, strlen(segcp_rep));
+                //UART_Send_RB(UART0, &txring[0], segcp_rep, strlen(segcp_rep));
+				UartPuts(UART0, segcp_rep);
 			}
 		}
 	}
@@ -1667,7 +1669,8 @@ uint16_t uart_get_commandline(uint8_t uartNum, uint8_t* buf, uint16_t maxSize)
 			//for(j = 0; j < i; j++) uart_putc(uartNum, buf[j]);
 			//uart_puts(uartNum, buf, i);
             //if(uartNum)
-            UART_Send_RB(UART0, &txring[0], buf, i);
+            //UART_Send_RB(UART0, &txring[0], buf, i);
+			UartPuts(UART0, buf);
 		}
 	}
 	else

@@ -454,7 +454,6 @@ void display_Dev_Info_main(void)
     
     uint8_t i;
 	uint32_t baud_table[] = {300, 600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400};
-	//uint32_t baud_table[14] = {460800, 921600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400};
 	    
 	printf(" - Device name: %s\r\n", dev_config->device_common.module_name);
 	printf(" - Network settings: \r\n");

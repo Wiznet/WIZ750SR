@@ -92,7 +92,7 @@ void set_DevConfig_to_factory_value(void)
 		// Default Settings for Data UART: 115200-8-N-1, No flowctrl
 		dev_config.serial_option[i].uart_interface = UART_IF_RS232_TTL;
 		//dev_config.serial_option[i].baud_rate = baud_115200;baud_230400
-		dev_config.serial_option[i].baud_rate = baud_230400;
+		dev_config.serial_option[i].baud_rate = baud_115200;
 		dev_config.serial_option[i].data_bits = word_len8;
 		dev_config.serial_option[i].parity = parity_none;
 		dev_config.serial_option[i].stop_bits = stop_bit1;
@@ -159,6 +159,7 @@ void set_DevConfig_to_factory_value(void)
 void load_DevConfig_from_storage(void)
 {
     uint8_t i;
+	
 	init_uart_if_sel();
 	
 	read_storage(STORAGE_CONFIG, 0, &dev_config, sizeof(DevConfig));
@@ -304,14 +305,14 @@ void set_dhcp_mode(void)
 {
 	DevConfig *value = get_DevConfig_pointer();
 
-	value->network_option.dhcp_use = 1;
+	value->network_option.dhcp_use = ENABLE;
 }
 
 void set_static_mode(void)
 {
 	DevConfig *value = get_DevConfig_pointer();
 
-	value->network_option.dhcp_use = 0;
+	value->network_option.dhcp_use = DISABLE;
 }
 
 void set_mac(uint8_t *mac)

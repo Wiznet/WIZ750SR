@@ -101,7 +101,6 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * UARTx, uint8_t channel)
 		UART_ClearITPendingBit(UARTx, UART_IT_FLAG_TXI);
         if(RingBuffer_Pop(&txring[channel], &ch_tx) == SUCCESS)
 		{
-			//while(UART_GetFlagStatus(UARTx, UART_FR_TXFF) == SET);
 			UART_SendData(UARTx, ch_tx);
 		}
         else	

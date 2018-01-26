@@ -17,7 +17,11 @@
 
 	uint8_t        USER_IO_SEL[USER_IOn] =     {USER_IO_A, USER_IO_B, USER_IO_C, USER_IO_D};
 	const char*    USER_IO_STR[USER_IOn] =     {"a", "b", "c", "d"};
-	const char*    USER_IO_PIN_STR[USER_IOn] = {"p28\0", "p27\0", "p26\0", "p25\0",}; 
+	#if (DEVICE_BOARD_NAME == WIZ750SR_1xx)
+		const char*    USER_IO_PIN_STR[USER_IOn] = {"PC15\0", "PC14\0", "PC13\0", "PC12\0"}; // WIZ750SR_1xx
+	#else
+		const char*    USER_IO_PIN_STR[USER_IOn] = {"PC28\0", "PC27\0", "PC26\0", "PC25\0",}; // W(IZ750SR
+	#endif
 	const char*    USER_IO_TYPE_STR[] =        {"Digital", "Analog"};
 	const char*    USER_IO_DIR_STR[] =         {"Input", "Output"};
 #endif
@@ -33,7 +37,7 @@ void IO_Configuration(void)
 	/* GPIOs Initialization */
 	
 	// Status I/O - Shared pin init: Connection status pins or DTR/DSR pins
-	init_connection_status_io(); 
+	init_connection_status_io();
 	
 	// Set the DTR pin to high when the DTR signal enabled (== PHY link status disabled)
 	if(serial->dtr_en == 1) set_flowcontrol_dtr_pin(ON);
@@ -487,7 +491,7 @@ void check_phylink_status(void)
 	static uint8_t prev_link_status = 1;
 	uint8_t link_status;
 	
-#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750MINI) || (DEVICE_BOARD_NAME == WIZ750JR))
+#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750SR_1xx))
 	link_status = get_phylink_in_pin();
 #else
 	link_status = 0;

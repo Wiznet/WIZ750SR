@@ -83,8 +83,13 @@ void set_DevConfig_to_factory_value(void)
 	dev_config.serial_info[0].stop_bits = stop_bit1;
 	dev_config.serial_info[0].flow_control = flow_none;
 	
+#ifdef __USE_DSR_DTR_DEFAULT__
+	dev_config.serial_info[0].dtr_en = SEGCP_ENABLE;
+	dev_config.serial_info[0].dsr_en = SEGCP_ENABLE;
+#else
 	dev_config.serial_info[0].dtr_en = SEGCP_DISABLE;
 	dev_config.serial_info[0].dsr_en = SEGCP_DISABLE;
+#endif
 	
 	//dev_config.serial_info[0].serial_debug_en = SEGCP_DISABLE;
 	dev_config.serial_info[0].serial_debug_en = SEGCP_ENABLE;
@@ -153,8 +158,15 @@ void load_DevConfig_from_storage(void)
 	dev_config.fw_ver[0] = MAJOR_VER;
 	dev_config.fw_ver[1] = MINOR_VER;
 	dev_config.fw_ver[2] = MAINTENANCE_VER;
-	
-	dev_config.serial_info[0].uart_interface = get_uart_if_sel_pin();
+	//dev_config.serial_info[0].uart_interface = get_uart_if_sel_pin();
+	if((dev_config.serial_info->flow_control == flow_rtsonly) || (dev_config.serial_info->flow_control == flow_reverserts))		// Edit for supporting RTS only in 17/3/28 , recommend adapting to WIZ750SR 
+	{
+		dev_config.serial_info[0].uart_interface = 1; // [0] RS-232/TTL mode, [1] RS-422/485 mode
+	}
+	else
+	{
+		dev_config.serial_info[0].uart_interface = get_uart_if_sel_pin();
+	}
 }
 
 void save_DevConfig_to_storage(void)

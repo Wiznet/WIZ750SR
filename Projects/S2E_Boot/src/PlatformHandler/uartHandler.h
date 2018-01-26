@@ -53,7 +53,9 @@ enum parity {
 enum flow_ctrl {
 	flow_none = 0,
 	flow_xon_xoff = 1,
-	flow_rts_cts = 2
+	flow_rts_cts = 2,
+	flow_rtsonly = 3,  // RTS_ONLY
+	flow_reverserts = 4 // Reverse RTS
 };
 
 /*

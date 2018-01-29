@@ -823,7 +823,7 @@ void uart_to_ether(uint8_t sock)
 	//uint16_t ret;
 	//uint16_t i; // ## for debugging
 	
-#if (DEVICE_BOARD_NAME == WIZ750SR)
+#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == WIZ750SR_1xx))
 	if(get_phylink_in_pin() != 0) return; // PHY link down
 #endif
 	
@@ -1096,6 +1096,7 @@ void ether_to_uart(uint8_t sock)
 			uart_rs485_enable(SEG_DATA_UART);
 			//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
 			for(i = 0; i < e2u_size; i++) uart_putc(SEG_DATA_UART, g_recv_buf[i]);
+			for(i = 0; i < 65535; i++)  ; //wait
 			uart_rs485_disable(SEG_DATA_UART);
 			
 			add_data_transfer_bytecount(SEG_ETHER_TX, e2u_size);

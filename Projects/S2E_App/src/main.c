@@ -1,13 +1,14 @@
 /**
   ******************************************************************************
   * @file    W7500x Serial to Ethernet Project - WIZ750SR App
-  * @author  Eric Jung, Team Module
-  * @version v1.1.1
-  * @date    Dec-2017
+  * @author  Eric Jung, Team CS
+  * @version v1.1.2
+  * @date    Jan-2018
   * @brief   Main program body
   ******************************************************************************
   * @attention
   * @par Revision history
+  *    <2018/01/26> v1.1.2 Added WIZ750SR_1xx function by Edward Ahn
   *    <2017/12/13> v1.1.1 Develop by Eric Jung
   *    <2016/11/18> v1.1.0 Develop by Eric Jung
   *    <2016/03/29> v1.0.0 Develop by Eric Jung
@@ -410,7 +411,7 @@ void display_Dev_Info_header(void)
 	printf("\r\n");
 	printf("%s\r\n", STR_BAR);
 	
-#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750MINI) || (DEVICE_BOARD_NAME == WIZ750JR))
+#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750SR_1xx))
 	printf(" %s \r\n", DEVICE_ID_DEFAULT);
 	printf(" >> WIZnet Serial to Ethernet Device\r\n");
 #else
@@ -492,7 +493,7 @@ void display_Dev_Info_main(void)
 		printf("\t- %s\r\n", (dev_config->options.serial_command == 1)?STR_ENABLED:STR_DISABLED);
 		printf("\t- [%.2X][%.2X][%.2X] (Hex only)\r\n", dev_config->options.serial_trigger[0], dev_config->options.serial_trigger[1], dev_config->options.serial_trigger[2]);
 	
-#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750MINI) || (DEVICE_BOARD_NAME == WIZ750JR))
+#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750SR_1xx))
 	printf(" - Hardware information: Status pins\r\n");
 		printf("\t- Status 1: [%s] - %s\r\n", "PA_10", dev_config->serial_info[0].dtr_en?"DTR":"PHY link");
 		printf("\t- Status 2: [%s] - %s\r\n", "PA_01", dev_config->serial_info[0].dsr_en?"DSR":"TCP connection"); // shared pin; HW_TRIG (input) / TCP connection indicator (output)

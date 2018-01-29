@@ -853,7 +853,8 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						break;
 					case SEGCP_FL:
 						tmp_byte = is_hex(*param);
-						if(param_len != 1 || tmp_byte > flow_rts_cts)
+						//if(param_len != 1 || tmp_byte > flow_rts_cts)
+						if(param_len != 1 || tmp_byte > flow_reverserts)
 						{
 							ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						}
@@ -861,7 +862,15 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						{
 							if(dev_config->serial_info[0].uart_interface == UART_IF_RS422_485)
 							{
-								dev_config->serial_info[0].flow_control = flow_none;
+								//dev_config->serial_info[0].flow_control = flow_none;
+								if((tmp_byte != flow_rtsonly) && (tmp_byte != flow_reverserts))
+								{
+									dev_config->serial_info[0].flow_control = flow_none;
+								}
+								else
+								{
+									dev_config->serial_info[0].flow_control = tmp_byte;
+								}
 							}
 							else
 							{
@@ -958,7 +967,8 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 #endif
 							dev_config->firmware_update.fwup_flag = SEGCP_ENABLE;
 							ret |= SEGCP_RET_FWUP;
-							sprintf(trep,"FW%d.%d.%d.%d:%d\r\n", dev_config->network_info_common.local_ip[0], dev_config->network_info_common.local_ip[1]
+							//sprintf(trep,"FW%d.%d.%d.%d:%d\r\n", dev_config->network_info_common.local_ip[0], dev_config->network_info_common.local_ip[1]
+							sprintf(trep,"FW%d.%d.%d.%d:%d:%d\r\n", dev_config->network_info_common.local_ip[0], dev_config->network_info_common.local_ip[1]
 							,dev_config->network_info_common.local_ip[2] , dev_config->network_info_common.local_ip[3], (uint16_t)DEVICE_FWUP_PORT);
 							
 							process_socket_termination(SEG_SOCK);

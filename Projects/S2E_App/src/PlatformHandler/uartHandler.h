@@ -27,6 +27,7 @@
 
 #define UART_IF_RS422				0
 #define UART_IF_RS485				1
+#define UART_IF_RS485_REVERSE	2				//Added by James in March 29
 
 // If the define '__USE_UART_IF_SELECTOR__' disabled, default UART interface is selected to be 'UART_IF_DEFAULT'
 #define UART_IF_DEFAULT				UART_IF_RS232_TTL
@@ -95,7 +96,9 @@ enum parity {
 enum flow_ctrl {
 	flow_none = 0,
 	flow_xon_xoff = 1,
-	flow_rts_cts = 2
+	flow_rts_cts = 2,
+	flow_rtsonly = 3,  // RTS_ONLY
+	flow_reverserts = 4 // Reverse RTS
 };
 
 

@@ -46,7 +46,7 @@ BUFFER_DEFINITION(data_rx, SEG_DATA_BUF_SIZE);
 uint8_t word_len_table[] = {7, 8, 9};
 uint8_t * parity_table[] = {(uint8_t *)"N", (uint8_t *)"ODD", (uint8_t *)"EVEN"};
 uint8_t stop_bit_table[] = {1, 2};
-uint8_t * flow_ctrl_table[] = {(uint8_t *)"NONE", (uint8_t *)"XON/XOFF", (uint8_t *)"RTS/CTS"};
+uint8_t * flow_ctrl_table[] = {(uint8_t *)"NONE", (uint8_t *)"XON/XOFF", (uint8_t *)"RTS/CTS", (uint8_t *)"RTS Only"};
 uint8_t * uart_if_table[] = {(uint8_t *)UART_IF_STR_RS232_TTL, (uint8_t *)UART_IF_STR_RS422_485};
 
 // XON/XOFF Status; 
@@ -258,6 +258,7 @@ void serial_info_init(UART_TypeDef *pUART, struct __serial_info *serial)
 				break;
 			case flow_rts_cts:
 #ifdef __USE_GPIO_HARDWARE_FLOWCONTROL__
+				UART_InitStructure.UART_HardwareFlowControl = UART_HardwareFlowControl_None;
 				if(pUART == UART0)
 				{
 					GPIO_Configuration(UART0_RTS_PORT, UART0_RTS_PIN, GPIO_Mode_OUT, UART0_RTS_PAD_AF);
@@ -287,11 +288,25 @@ void serial_info_init(UART_TypeDef *pUART, struct __serial_info *serial)
 		UART_InitStructure.UART_HardwareFlowControl = UART_HardwareFlowControl_None;
 		
 		// GPIO configration (RTS pin -> GPIO: 485SEL)
-		get_uart_rs485_sel(SEG_DATA_UART);
+		//get_uart_rs485_sel(SEG_DATA_UART);
+		if((serial->flow_control != flow_rtsonly) && (serial->flow_control != flow_reverserts)) // Added by James in March 29
+		{
+			get_uart_rs485_sel(SEG_DATA_UART);
+		}else	// Added by James in March 29
+		{
+			if(serial->flow_control == flow_rtsonly)
+			{
+				uart_if_mode = UART_IF_RS485;
+			}else
+			{
+				uart_if_mode = UART_IF_RS485_REVERSE;
+			}
+		}
 		uart_rs485_rs422_init(SEG_DATA_UART);
 		//printf("UART Interface: %s mode\r\n", uart_if_mode?"RS-485":"RS-422");
 	}
 	
+	GPIO_Configuration(GPIOC, GPIO_Pin_14, GPIO_Mode_IN, PAD_AF1);
 	/* Configure the UARTx */
 	UART_InitStructure.UART_Mode = UART_Mode_Rx | UART_Mode_Tx;
 	UART_Init(pUART, &UART_InitStructure);
@@ -495,12 +510,26 @@ void uart_rs485_rs422_init(uint8_t uartNum)
 	if(uartNum == 0) // UART0
 	{
 		GPIO_Configuration(UART0_RTS_PORT, UART0_RTS_PIN, GPIO_Mode_OUT, UART0_RTS_PAD_AF); // UART0 RTS pin: GPIO / Output
-		GPIO_ResetBits(UART0_RTS_PORT, UART0_RTS_PIN); // UART0 RTS pin init, Set the signal low
+		//GPIO_ResetBits(UART0_RTS_PORT, UART0_RTS_PIN); // UART0 RTS pin init, Set the signal low
+		if(uart_if_mode == UART_IF_RS485)   // Added by James in March 29
+		{
+			GPIO_ResetBits(UART0_RTS_PORT, UART0_RTS_PIN); // UART0 RTS pin init, Set the signal low
+		}else // Added by James in March 29
+		{
+			GPIO_SetBits(UART0_RTS_PORT, UART0_RTS_PIN); // UART0 RTS pin init, Set the signal low
+		}
 	}
 	else if(uartNum == 1) // UART1
 	{
 		GPIO_Configuration(UART1_RTS_PORT, UART1_RTS_PIN, GPIO_Mode_OUT, UART1_RTS_PAD_AF); // UART1 RTS pin: GPIO / Output
-		GPIO_ResetBits(UART1_RTS_PORT, UART1_RTS_PIN); // UART1 RTS pin init, Set the signal low
+		//GPIO_ResetBits(UART1_RTS_PORT, UART1_RTS_PIN); // UART1 RTS pin init, Set the signal low
+		if(uart_if_mode == UART_IF_RS485) // Added by James in March 29
+		{
+			GPIO_ResetBits(UART1_RTS_PORT, UART1_RTS_PIN); // UART1 RTS pin init, Set the signal low
+		}else // Added by James in March 29
+		{
+			GPIO_SetBits(UART1_RTS_PORT, UART1_RTS_PIN); // UART1 RTS pin init, Set the signal low
+		}
 	}
 }
 
@@ -517,6 +546,19 @@ void uart_rs485_enable(uint8_t uartNum)
 		else if(uartNum == 1) // UART1
 		{
 			GPIO_SetBits(UART1_RTS_PORT, UART1_RTS_PIN);
+		}
+		delay(1);
+	}
+	else if(uart_if_mode == UART_IF_RS485_REVERSE)
+	{
+		// RTS pin -> High
+		if(uartNum == 0) // UART0
+		{
+			GPIO_ResetBits(UART0_RTS_PORT, UART0_RTS_PIN);
+		}
+		else if(uartNum == 1) // UART1
+		{
+			GPIO_ResetBits(UART1_RTS_PORT, UART1_RTS_PIN);
 		}
 		delay(1);
 	}
@@ -537,6 +579,19 @@ void uart_rs485_disable(uint8_t uartNum)
 		else if(uartNum == 1) // UART1
 		{
 			GPIO_ResetBits(UART1_RTS_PORT, UART1_RTS_PIN);
+		}
+		delay(1);
+	}
+	else if(uart_if_mode == UART_IF_RS485_REVERSE)
+	{
+		// RTS pin -> High
+		if(uartNum == 0) // UART0
+		{
+			GPIO_SetBits(UART0_RTS_PORT, UART0_RTS_PIN);
+		}
+		else if(uartNum == 1) // UART1
+		{
+			GPIO_SetBits(UART1_RTS_PORT, UART1_RTS_PIN);
 		}
 		delay(1);
 	}

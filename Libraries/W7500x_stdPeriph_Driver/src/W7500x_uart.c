@@ -212,7 +212,7 @@ void UART_ITConfig(UART_TypeDef* UARTx, uint16_t UART_IT, FunctionalState NewSta
     }
     else
     {
-        UARTx->ICR |= UART_IT;
+			UARTx->IMSC &= ~UART_IT;
     }
 }
 

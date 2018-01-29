@@ -39,7 +39,7 @@ void W7500x_Board_Init(void)
 	flag_hw_trig_enable = (get_hw_trig_pin()?0:1);
 	
 	/* PHY link input pin */
-#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750MINI) || (DEVICE_BOARD_NAME == WIZ750JR))
+#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750SR_1xx))
 	init_phylink_in_pin();
 #endif
 	

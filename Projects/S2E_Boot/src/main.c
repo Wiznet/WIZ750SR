@@ -3,11 +3,12 @@
   * @file    W7500x Serial to Ethernet Project - WIZ750SR Boot
   * @author  Eric Jung, Team CS
   * @version v1.1.2
-  * @date    Jan-2018
+  * @date    Fab-2018
   * @brief   Boot program body
   ******************************************************************************
   * @attention
   * @par Revision history
+  *    <2018/02/08> v1.1.2 Bugfix by Eric Jung
   *    <2018/01/26> v1.1.2 Added WIZ750SR-1xx function by Edward Ahn
   *    <2017/12/13> v1.1.1 Develop by Eric Jung
   *    <2016/11/18> v1.1.0 Develop by Eric Jung
@@ -110,7 +111,7 @@ int main(void)
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// W7500x Hardware Initialize
-	////////////////////////////////////////////////////////////////////////////////////////////////////	
+	////////////////////////////////////////////////////////////////////////////////////////////////////
 	
 	/* W7500x MCU Initialization */
 	W7500x_Init(); // includes UART2 init code for debugging
@@ -496,16 +497,20 @@ uint8_t check_mac_address(void)
 	uint8_t trep[MACSTR_SIZE] = {0, };
 	uint8_t ret = 0;
 	
-	if(((dev_config->network_info_common.mac[0] != 0x00) || (dev_config->network_info_common.mac[1] != 0x08) || (dev_config->network_info_common.mac[2] != 0xDC))  ||
-		((dev_config->network_info_common.mac[0] == 0xff) && (dev_config->network_info_common.mac[1] == 0xff) && (dev_config->network_info_common.mac[2] == 0xff)))
+    // ## 20180208 Modified by Eric, WIZnet MAC address check procedure removed  
+//	if(((dev_config->network_info_common.mac[0] != 0x00) || (dev_config->network_info_common.mac[1] != 0x08) || (dev_config->network_info_common.mac[2] != 0xDC))  ||
+//		((dev_config->network_info_common.mac[0] == 0xff) && (dev_config->network_info_common.mac[1] == 0xff) && (dev_config->network_info_common.mac[2] == 0xff)))
+	if((dev_config->network_info_common.mac[0] == 0xff) && (dev_config->network_info_common.mac[1] == 0xff) && (dev_config->network_info_common.mac[2] == 0xff))
 	{
 		read_storage(STORAGE_MAC, 0, mac_buf, 0);
 		
 		//printf("Storage MAC: %.2x:%.2x:%.2x:%.2x:%.2x:%.2x\r\n", mac_buf[0], mac_buf[1], mac_buf[2], mac_buf[3], mac_buf[4], mac_buf[5]);
 		
 		// Initial stage: Input the MAC address
-		if(((mac_buf[0] != 0x00) || (mac_buf[1] != 0x08) || (mac_buf[2] != 0xDC)) ||
-			((mac_buf[0] == 0xff) && (mac_buf[1] == 0xff) && (mac_buf[2] == 0xff)))
+        // ## 20180208 Modified by Eric, WIZnet MAC address check procedure removed
+//		if(((mac_buf[0] != 0x00) || (mac_buf[1] != 0x08) || (mac_buf[2] != 0xDC)) ||
+//			((mac_buf[0] == 0xff) && (mac_buf[1] == 0xff) && (mac_buf[2] == 0xff)))
+		if((mac_buf[0] == 0xff) && (mac_buf[1] == 0xff) && (mac_buf[2] == 0xff))
 		{
 			gSEGCPPRIVILEGE = SEGCP_PRIVILEGE_CLR;
 			gSEGCPPRIVILEGE = (SEGCP_PRIVILEGE_SET|SEGCP_PRIVILEGE_WRITE);
@@ -541,8 +546,16 @@ uint8_t check_mac_address(void)
 		}
 		else // Lost the MAC address, MAC address restore
 		{
-			memcpy(dev_config->network_info_common.mac, mac_buf, 6);
-			save_DevConfig_to_storage();
+			//memcpy(dev_config->network_info_common.mac, mac_buf, 6);
+			//save_DevConfig_to_storage();
+            
+            // ## 20180208 Modified by Eric, MAC address check and re-save procedure removed
+            dev_config->network_info_common.mac[0] = mac_buf[0];
+            dev_config->network_info_common.mac[1] = mac_buf[1];
+            dev_config->network_info_common.mac[2] = mac_buf[2];
+            dev_config->network_info_common.mac[3] = mac_buf[3];
+            dev_config->network_info_common.mac[4] = mac_buf[4];
+            dev_config->network_info_common.mac[5] = mac_buf[5];
 		}
 		
 	}

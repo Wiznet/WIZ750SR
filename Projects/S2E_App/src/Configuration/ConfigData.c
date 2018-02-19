@@ -13,6 +13,8 @@
 #include "segcp.h"
 #include "uartHandler.h"
 
+extern void delay(__IO uint32_t milliseconds);
+
 static DevConfig dev_config;
 
 DevConfig* get_DevConfig_pointer(void)
@@ -144,9 +146,11 @@ void set_DevConfig_to_factory_value(void)
 
 void load_DevConfig_from_storage(void)
 {
+
 	init_uart_if_sel_pin();
 	
 	read_storage(STORAGE_CONFIG, 0, &dev_config, sizeof(DevConfig));
+	read_storage(STORAGE_MAC, 0, &dev_config.network_info_common.mac, 6);
 
 	if(dev_config.packet_size == 0x0000 || dev_config.packet_size == 0xFFFF){
 		set_DevConfig_to_factory_value();
@@ -158,6 +162,7 @@ void load_DevConfig_from_storage(void)
 	dev_config.fw_ver[0] = MAJOR_VER;
 	dev_config.fw_ver[1] = MINOR_VER;
 	dev_config.fw_ver[2] = MAINTENANCE_VER;
+    
 	//dev_config.serial_info[0].uart_interface = get_uart_if_sel_pin();
 	if((dev_config.serial_info->flow_control == flow_rtsonly) || (dev_config.serial_info->flow_control == flow_reverserts))		// Edit for supporting RTS only in 17/3/28 , recommend adapting to WIZ750SR 
 	{
@@ -169,9 +174,36 @@ void load_DevConfig_from_storage(void)
 	}
 }
 
+
 void save_DevConfig_to_storage(void)
 {
-	write_storage(STORAGE_CONFIG, 0, &dev_config, sizeof(DevConfig));
+#ifndef __USE_SAFE_SAVE__
+    write_storage(STORAGE_CONFIG, 0, &dev_config, sizeof(DevConfig));
+#else
+    DevConfig dev_config_tmp;
+    uint8_t update_success = SEGCP_DISABLE;
+    uint8_t retry_cnt = 0;
+    
+    do {
+            write_storage(STORAGE_CONFIG, 0, &dev_config, sizeof(DevConfig));
+            
+            // ## 20180208 Added by Eric, Added the verify function to flash write (Device config-data)
+            read_storage(STORAGE_CONFIG, 0, &dev_config_tmp, sizeof(DevConfig));
+        
+            if(memcmp(&dev_config, &dev_config_tmp, sizeof(DevConfig)) == 0) { // Config-data set is successfully updated.
+                update_success = SEGCP_ENABLE;
+                if(dev_config.serial_info[0].serial_debug_en) {printf(" > DevConfig is successfully updated\r\n");}
+            } else {
+                retry_cnt++;
+                if(dev_config.serial_info[0].serial_debug_en) {printf(" > DevConfig update failed, Retry: %d\r\n", retry_cnt);}
+            }
+            delay(SAVE_INTERVAL_MS);
+            
+            if(retry_cnt >= MAX_SAVE_RETRY) {
+                break;
+            }
+    } while(update_success != SEGCP_ENABLE);
+#endif
 }
 
 void get_DevConfig_value(void *dest, const void *src, uint16_t size)

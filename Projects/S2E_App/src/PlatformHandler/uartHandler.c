@@ -43,6 +43,7 @@ BUFFER_DEFINITION(data_rx, SEG_DATA_BUF_SIZE);
 #endif
 
 //uint32_t baud_table[] = {300, 600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400};
+//uint32_t baud_table[] = {300, 600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400, 460800};
 uint8_t word_len_table[] = {7, 8, 9};
 uint8_t * parity_table[] = {(uint8_t *)"N", (uint8_t *)"ODD", (uint8_t *)"EVEN"};
 uint8_t stop_bit_table[] = {1, 2};
@@ -189,7 +190,7 @@ void serial_info_init(UART_TypeDef *pUART, struct __serial_info *serial)
 {
 	UART_InitTypeDef UART_InitStructure;
 	uint32_t valid_arg = 0;
-	uint32_t baud_table[] = {300, 600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400};
+    uint32_t baud_table[] = {300, 600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400, 460800};;
 
 	/* Set Baud Rate */
 	if(serial->baud_rate < (sizeof(baud_table) / sizeof(baud_table[0])))
@@ -655,3 +656,23 @@ void set_uart_rts_pin_low(uint8_t uartNum)
 
 #endif
 
+
+/**
+  * @brief  None
+  * @param  None
+  * @retval None
+  */
+void check_n_clear_uart_recv_status(uint8_t channel)
+{
+	uint16_t dummy;
+	
+	UART_TypeDef* UARTx = (channel==0)?UART0:UART1;
+	
+	if(UARTx->STATUS.RSR != RESET)
+	{
+		if(UART_GetRecvStatus(UARTx, UART_RECV_STATUS_OE))
+			dummy = UART_ReceiveData(UARTx);
+		
+		UARTx->STATUS.ECR = ~UARTx->STATUS.RSR;
+	}
+}

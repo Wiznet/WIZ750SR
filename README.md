@@ -3,29 +3,29 @@ WIZnet Serial to Ethernet(S2E) module based on W7500 chip, WIZ107/108SR S2E comp
 
 - 48(W) x 30mm(L) x 18mm(H)
 <!-- WIZ750SR pic -->
-![WIZ750SR](http://wizwiki.net/wiki/lib/exe/fetch.php?media=products:wiz750sr:wiz750sr_rev1.0_main_1024x693.png)
+![WIZ750SR](https://wizwiki.net/wiki/lib/exe/fetch.php?media=products:wiz750sr:wiz750sr_rev1.0_main_1024x693.png)
  
  
 ## WIZ750SR EVB (Separate purchases)
 
-- WIZ750SR Developer Board.
-- USB to UART chip, CP2104.
-- RESET Tact SW.
-- BOOT0 Slide SW.
-- H/W Trig Slide SW.
-- Expansion GPIO TEST (Digital / Analog)
-- Micro USB.
+- WIZ750SR Developer Board
+- USB to UART chip, CP2104
+- RESET Tact Switch
+- BOOT0 Slide Switch
+- H/W Trig Slide Switch
+- Buttons/LEDs for Expansion GPIO TEST (Digital / Analog)
+- Micro USB Connector
 - WIZ750SR-EVB (TTL/RS232)
-- RS-232C Connector, D-SUB9-MALE.
+ - RS-232C Connector, D-SUB9-MALE.
 - WIZ750SR-EVB (RS422/485)
-- RS-422/485 Connector, ECH381R.
+ - RS-422/485 Connector, ECH381R.
 
 <!-- WIZ750SR EVB pic -->
 <p align="center">
-  <img width="70%" src="http://wizwiki.net/wiki/lib/exe/fetch.php?media=products:wiz750sr:gettingstarted:wiz750sr-ttl-evb_1_1024x816.png" />
+  <img width="70%" src="https://wizwiki.net/wiki/lib/exe/fetch.php?media=products:wiz750sr:gettingstarted:wiz750sr-ttl-evb_1_1024x816.png" />
 </p>
  
-For more details, please refer to [WIZ750SR Wiki page](http://wizwiki.net/wiki/doku.php?id=products:wiz750sr:start) in [WIZnet Wiki](http://wizwiki.net).
+For more details, please refer to [WIZ750SR Wiki page](https://wizwiki.net/wiki/doku.php?id=products:wiz750sr:start) in [WIZnet Wiki](https://wizwiki.net).
  
  
 ## Features
@@ -44,7 +44,7 @@ For more details, please refer to [WIZ750SR Wiki page](http://wizwiki.net/wiki/d
  
  
 ## Hardware material, Documents and Others
-Various materials are could be found at [WIZ750SR Wiki page](http://wizwiki.net/wiki/doku.php?id=products:wiz750sr:start ) in [WIZnet Wiki](http://wizwiki.net).
+Various materials are could be found at [WIZ750SR Wiki page](https://wizwiki.net/wiki/doku.php?id=products:wiz750sr:start ) in [WIZnet Wiki](https://wizwiki.net).
 - Documents
   - Overview
   - Getting Started Guide
@@ -70,11 +70,31 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
  
  
 ## Tool
-- [ISP Download Tool](http://wizwiki.net/wiki/lib/exe/fetch.php?media=products:wiz750sr:download:w7500_isp_20150401.zip)
-- [Configuration Tool](http://wizwiki.net/wiki/lib/exe/fetch.php?tok=7ca6c9&media=http%3A%2F%2Fwww.wiznet.co.kr%2Fwp-content%2Fuploads%2Fwiznethome%2FS2E%2520Module%2FWIZ107_108SR%2FUtility%2FWIZ107_108_config_tool.zip)
-- [WIZVSP](http://wizwiki.net/wiki/doku.php?id=products:wiz750sr:download:start) 
+- [ISP Download Tool](https://wizwiki.net/wiki/lib/exe/fetch.php?media=products:wiz750sr:download:w7500_isp_20150401.zip)
+- [Configuration Tool (GUI)](https://wizwiki.net/wiki/lib/exe/fetch.php?tok=7ca6c9&media=http%3A%2F%2Fwww.wiznet.co.kr%2Fwp-content%2Fuploads%2Fwiznethome%2FS2E%2520Module%2FWIZ107_108SR%2FUtility%2FWIZ107_108_config_tool.zip)
+- [Configuration Tool (CLI)](https://github.com/Wiznet/WIZnet-S2E-Tool)
+- [WIZVSP](https://wizwiki.net/wiki/doku.php?id=products:wiz750sr:download:start) 
  
  
-## Revision History
+## Update History
+
+v1.1.2
+- Bug Fixes:
+ - MAC address changed problem when device settings are saved (very occasionally)
+ - Delayed response to search in config-tool when connecting to server in TCP client mode
+ - Force socket close when fw update fails occurred
+- Improvements:
+ - Supports serial baudrate up to 460.8kbps
+ - Added device profiles of WIZ750SR-1xx series to project source code
+
+v1.1.1
+- Bug Fixes:
+ - Firmware update timeout function error in AppBoot mode
+ - 10M Ethernet fixed error (W7500P only)
+ - Invalid parameter of FW command (firmware update)
+- Improvements:
+ - Command added: AppBoot mode switching function(AB)
+ - Initial boot latency(1500ms) has been removed
+
 v1.1.0
 - First release : 2016

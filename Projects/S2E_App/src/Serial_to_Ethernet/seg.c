@@ -176,7 +176,9 @@ void do_seg(uint8_t sock)
 			default:
 				break;
 		}
-		
+        
+        check_n_clear_uart_recv_status(SEG_DATA_UART);
+        
 		// XON/XOFF Software flow control: Check the Buffer usage and Send the start/stop commands
 		// [WIZnet Device] -> [Peer]
 		if((serial->flow_control == flow_xon_xoff) || serial->flow_control == flow_rts_cts) check_uart_flow_control(serial->flow_control);
@@ -396,7 +398,8 @@ void proc_SEG_tcp_client(uint8_t sock)
 #ifdef _SEG_DEBUG_
 			printf(" > TCP CLIENT: client_any_port = %d\r\n", client_any_port);
 #endif		
-			if(socket(sock, Sn_MR_TCP, source_port, Sn_MR_ND) == sock)
+			// ## 20180208 Added by Eric, TCP Connect function in TCP client/mixed mode operates in non-block mode
+			if(socket(sock, Sn_MR_TCP, source_port, (SF_TCP_NODELAY | SF_IO_NONBLOCK)) == sock)
 			{
 				// Replace the command mode switch code GAP time (default: 500ms)
 				if((option->serial_command == SEG_ENABLE) && net->packing_time) modeswitch_gap_time = net->packing_time;
@@ -548,7 +551,7 @@ void proc_SEG_tcp_server(uint8_t sock)
 			u2e_size = 0;
 			e2u_size = 0;
 
-			if(socket(sock, Sn_MR_TCP, net->local_port, Sn_MR_ND) == sock)
+			if(socket(sock, Sn_MR_TCP, net->local_port, SF_TCP_NODELAY) == sock)
 			{
 				// Replace the command mode switch code GAP time (default: 500ms)
 				if((option->serial_command == SEG_ENABLE) && net->packing_time) modeswitch_gap_time = net->packing_time;
@@ -771,7 +774,8 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 				u2e_size = 0;
 				e2u_size = 0;
 				
-				if(socket(sock, Sn_MR_TCP, net->local_port, Sn_MR_ND) == sock)
+				// ## 20180208 Added by Eric, TCP Connect function in TCP client/mixed mode operates in non-block mode
+				if(socket(sock, Sn_MR_TCP, net->local_port, (SF_TCP_NODELAY | SF_IO_NONBLOCK)) == sock)
 				{
 					// Replace the command mode switch code GAP time (default: 500ms)
 					if((option->serial_command == SEG_ENABLE) && net->packing_time) modeswitch_gap_time = net->packing_time;
@@ -793,7 +797,7 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 #ifdef _SEG_DEBUG_
 				printf(" > TCP CLIENT: any_port = %d\r\n", source_port);
 #endif		
-				if(socket(sock, Sn_MR_TCP, source_port, Sn_MR_ND) == sock)
+				if(socket(sock, Sn_MR_TCP, source_port, SF_TCP_NODELAY) == sock)
 				{
 					// Replace the command mode switch code GAP time (default: 500ms)
 					if((option->serial_command == SEG_ENABLE) && net->packing_time) modeswitch_gap_time = net->packing_time;

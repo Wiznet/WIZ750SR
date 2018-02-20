@@ -18,6 +18,12 @@
 #define FWUP_SERVER_DOMAIN			"device.wizwiki.net"
 #define FWUP_SERVER_BINPATH			"/wiz750sr/fw/W7500x_S2E_App.bin"
 
+// Safe Save
+#define MAX_SAVE_RETRY              5
+#define SAVE_INTERVAL_MS            1000
+
+
+
 struct __network_info_common {
 	uint8_t mac[6];
 	uint8_t local_ip[4];

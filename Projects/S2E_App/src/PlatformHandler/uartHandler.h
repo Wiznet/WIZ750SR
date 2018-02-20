@@ -73,7 +73,8 @@ enum baud {
 	baud_38400 = 10,
 	baud_57600 = 11,
 	baud_115200 = 12,
-	baud_230400 = 13
+	baud_230400 = 13,
+    baud_460800 = 14
 };
 
 enum word_len {
@@ -141,6 +142,7 @@ void set_uart_rts_pin_high(uint8_t uartNum);
 void set_uart_rts_pin_low(uint8_t uartNum);
 #endif
 
+void check_n_clear_uart_recv_status(uint8_t channel);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // Defines: W7500x UART Ring buffer 

@@ -3,11 +3,12 @@
   * @file    W7500x Serial to Ethernet Project - WIZ750SR App
   * @author  Eric Jung, Team CS
   * @version v1.1.2
-  * @date    Jan-2018
+  * @date    Fab-2018
   * @brief   Main program body
   ******************************************************************************
   * @attention
   * @par Revision history
+  *    <2018/02/08> v1.1.2 Bugfix by Eric Jung
   *    <2018/01/26> v1.1.2 Added WIZ750SR_1xx function by Edward Ahn
   *    <2017/12/13> v1.1.1 Develop by Eric Jung
   *    <2016/11/18> v1.1.0 Develop by Eric Jung
@@ -189,7 +190,7 @@ int main(void)
 		init_trigger_modeswitch(DEVICE_AT_MODE);
 		flag_hw_trig_enable = 0;
 	}
-	
+
 	while(1) // main loop
 	{
 		do_segcp();

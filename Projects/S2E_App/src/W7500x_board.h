@@ -31,6 +31,7 @@
 		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
 		#define __USE_USERS_GPIO__
 		//#define __USE_DSR_DTR_DEFAULT__
+        #define __USE_SAFE_SAVE__           // DevConfig Save verify function added
 		#define DEVICE_CLOCK_SELECT	         CLOCK_SOURCE_EXTERNAL
 		#define DEVICE_PLL_SOURCE_CLOCK      PLL_SOURCE_12MHz
 		#define DEVICE_TARGET_SYSTEM_CLOCK   SYSTEM_CLOCK_48MHz
@@ -43,6 +44,7 @@
 		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
 		#define __USE_USERS_GPIO__
 		//#define __USE_DSR_DTR_DEFAULT__
+        #define __USE_SAFE_SAVE__           // DevConfig Save verify function added
 		#define DEVICE_CLOCK_SELECT	         CLOCK_SOURCE_EXTERNAL
 		#define DEVICE_PLL_SOURCE_CLOCK      PLL_SOURCE_12MHz
 		#define DEVICE_TARGET_SYSTEM_CLOCK   SYSTEM_CLOCK_48MHz
@@ -55,6 +57,7 @@
 		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
 		#define __USE_USERS_GPIO__
 		#define __USE_DSR_DTR_DEFAULT__
+        #define __USE_SAFE_SAVE__           // DevConfig Save verify function added
 		#define DEVICE_CLOCK_SELECT	         CLOCK_SOURCE_EXTERNAL
 		#define DEVICE_PLL_SOURCE_CLOCK      PLL_SOURCE_12MHz
 		#define DEVICE_TARGET_SYSTEM_CLOCK   SYSTEM_CLOCK_48MHz
@@ -66,6 +69,7 @@
 		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
 		#define __USE_USERS_GPIO__
 		//#define __USE_DSR_DTR_DEFAULT__
+        #define __USE_SAFE_SAVE__           // DevConfig Save verify function added
 		#define DEVICE_CLOCK_SELECT	         CLOCK_SOURCE_EXTERNAL
 		#define DEVICE_PLL_SOURCE_CLOCK      PLL_SOURCE_12MHz
 		#define DEVICE_TARGET_SYSTEM_CLOCK   SYSTEM_CLOCK_48MHz
@@ -75,6 +79,7 @@
 		#define __USE_EXT_EEPROM__
 		#define __USE_APPBACKUP_AREA__
 		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
+        #define __USE_SAFE_SAVE__           // DevConfig Save verify function added
 		#define DEVICE_CLOCK_SELECT	         CLOCK_SOURCE_EXTERNAL
 		#define DEVICE_PLL_SOURCE_CLOCK      PLL_SOURCE_8MHz
 		#define DEVICE_TARGET_SYSTEM_CLOCK   SYSTEM_CLOCK_48MHz
@@ -82,6 +87,7 @@
 	#endif
 #else
 	#define __USE_APPBACKUP_AREA__
+    #define __USE_SAFE_SAVE__
 	#define DEVICE_CLOCK_SELECT	             CLOCK_SOURCE_INTERNAL
 	#define DEVICE_PLL_SOURCE_CLOCK          PLL_SOURCE_8MHz
 	#define DEVICE_TARGET_SYSTEM_CLOCK       SYSTEM_CLOCK_48MHz

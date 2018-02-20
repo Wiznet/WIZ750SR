@@ -292,6 +292,7 @@ uint16_t    UART_ReceiveData        (UART_TypeDef* UARTx);
 void        UART_SendBreak          (UART_TypeDef* UARTx);
 void        UART_ClearRecvStatus    (UART_TypeDef* UARTx, uint16_t UART_RECV_STATUS);
 FlagStatus  UART_GetFlagStatus      (UART_TypeDef* UARTx, uint16_t UART_FLAG);
+FlagStatus  UART_GetRecvStatus      (UART_TypeDef* UARTx, uint16_t UART_RECV_STATUS);
 void        UART_ITConfig           (UART_TypeDef* UARTx, uint16_t UART_IT, FunctionalState NewState);
 ITStatus    UART_GetITStatus        (UART_TypeDef* UARTx, uint16_t UART_IT);
 void        UART_ClearITPendingBit  (UART_TypeDef* UARTx, uint16_t UART_IT);

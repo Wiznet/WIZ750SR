@@ -176,6 +176,9 @@ void do_segcp(void)
 				*/
 				set_device_status(status_bak);
 				
+				// ## 20180208 Added by Eric, Force socket close when fw update fails occurred
+				close(SOCK_FWUPDATE);
+				
 #ifdef __USE_APPBACKUP_AREA__
 				/* System Core Clock Update - Restore */
 				{
@@ -833,7 +836,8 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						break;
 					case SEGCP_BR:
 						sscanf(param, "%d", &tmp_int);
-						if(param_len > 2 || tmp_int > baud_230400) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						//if(param_len > 2 || tmp_int > baud_230400) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+						if(param_len > 2 || tmp_int > baud_460800) ret |= SEGCP_RET_ERR_INVALIDPARAM; // ## 20180208 Added by Eric, Supports baudrate up to 460.8kbps 
 						else dev_config->serial_info[0].baud_rate = (uint8_t)tmp_int;
 						break;
 					case SEGCP_DB:
@@ -1161,7 +1165,7 @@ uint16_t proc_SEGCP_udp(uint8_t* segcp_req, uint8_t* segcp_rep)
 	
 	uint16_t ret = 0;
 	uint16_t len = 0;
-	//uint16_t i = 0;
+	uint16_t i = 0;
 	
 	uint8_t destip[4];
 	uint16_t destport;
@@ -1180,7 +1184,6 @@ uint16_t proc_SEGCP_udp(uint8_t* segcp_req, uint8_t* segcp_rep)
 				trep = segcp_rep;
 				len = recvfrom(SEGCP_UDP_SOCK, treq, len, destip, &destport);
 				treq[len-1] = 0;
-
 				if(SEGCP_MA == parse_SEGCP(treq, tpar))
 				{
 					if(!memcmp(tpar,"\xFF\xFF\xFF\xFF\xFF\xFF", 6)) gSEGCPPRIVILEGE |= (SEGCP_PRIVILEGE_SET | SEGCP_PRIVILEGE_READ);
@@ -1204,10 +1207,13 @@ uint16_t proc_SEGCP_udp(uint8_t* segcp_req, uint8_t* segcp_rep)
 								treq += (strlen(tpar) + 4);
 								trep += (strlen(tpar) + 4);
 								
-								//printf(" >> treq: [%s]\r\n", treq);
-								//printf(" >> trep: [%s]\r\n", trep);
+                                //printf(" >> treq: [%s]\r\n", treq);
+                                //printf(" >> trep: [%s]\r\n", trep);
 								
 								ret = proc_SEGCP(treq,trep);
+                                
+                                //printf(" >> ret: %d\r\n", ret);
+                                
 								sendto(SEGCP_UDP_SOCK, segcp_rep, 14+strlen(tpar)+strlen(trep), "\xFF\xFF\xFF\xFF", destport);
 								//sendto(SEGCP_UDP_SOCK, segcp_rep, 14+strlen(tpar)+strlen(trep), destip, destport);
 							}
@@ -1332,7 +1338,7 @@ uint16_t proc_SEGCP_tcp(uint8_t* segcp_req, uint8_t* segcp_rep)
 		case SOCK_FIN_WAIT:
 			close(SEGCP_TCP_SOCK);
 			
-			if(socket(SEGCP_TCP_SOCK, Sn_MR_TCP, DEVICE_SEGCP_PORT, Sn_MR_ND) == SEGCP_TCP_SOCK)
+			if(socket(SEGCP_TCP_SOCK, Sn_MR_TCP, DEVICE_SEGCP_PORT, SF_TCP_NODELAY) == SEGCP_TCP_SOCK)
 			{
 				//if(dev_config->serial_info[0].serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:TCP:STARTED\r\n");
 				

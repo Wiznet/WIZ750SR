@@ -40,11 +40,11 @@ For more details, please refer to [WIZ750SR Wiki page](https://wizwiki.net/wiki/
   - WIZ750SR-TTL: TTL Version
   - WIZ750SR-RS232: RS-232 Version
   - WIZ750SR-RS485: RS-485/422 Version
-- For more details ( http://wizwiki.net/wiki/doku.php?id=products:wiz750sr:start )
+- For more details, please refer to the [WIZ750SR Wiki page](http://wizwiki.net/wiki/doku.php?id=products:wiz750sr:start)
  
  
 ## Hardware material, Documents and Others
-Various materials are could be found at [WIZ750SR Wiki page](https://wizwiki.net/wiki/doku.php?id=products:wiz750sr:start ) in [WIZnet Wiki](https://wizwiki.net).
+Various materials are could be found at [WIZ750SR Wiki page](https://wizwiki.net/wiki/doku.php?id=products:wiz750sr:start) in [WIZnet Wiki](https://wizwiki.net).
 - Documents
   - Overview
   - Getting Started Guide
@@ -71,30 +71,45 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
  
 ## Tool
 - [ISP Download Tool](https://wizwiki.net/wiki/lib/exe/fetch.php?media=products:wiz750sr:download:w7500_isp_20150401.zip)
-- [Configuration Tool (GUI)](https://wizwiki.net/wiki/lib/exe/fetch.php?tok=7ca6c9&media=http%3A%2F%2Fwww.wiznet.co.kr%2Fwp-content%2Fuploads%2Fwiznethome%2FS2E%2520Module%2FWIZ107_108SR%2FUtility%2FWIZ107_108_config_tool.zip)
+- [Configuration Tool (GUI)](https://github.com/Wiznet/WIZnet-S2E-Tool-GUI) (New!)
 - [Configuration Tool (CLI)](https://github.com/Wiznet/WIZnet-S2E-Tool)
 - [WIZVSP](https://wizwiki.net/wiki/doku.php?id=products:wiz750sr:download:start) 
  
  
 ## Update History
 
+v1.2.0
+- Bug Fixes:
+  - Data loss problem due to unintended delay in RS-485 mode (WIZ750SR-RS485 only)
+  - Incorrect command processing problem: If the processing of a command set containing unsupported commands via Ethernet is sent to WIZ750SR, the device only responds a result until the error occurs
+- Improvements:
+  - Command added:
+    - TR: TCP retransmission retry count adjustment function(WR, param range: 1 ~ 255)
+    - BU: AppBoot update function (WO)
+  - Changed the firmware update mechanism:
+    - The app-backup area is no longer used and flash update operation is only performed in AppBoot mode
+  - Now an error message about command processing will be output only during serial command mode operation  
+- Known Issues:
+  - 'Character' of serial data packing option is not set correctly
+    - This issue will be fixed in firmware version 1.2.1
+
 v1.1.2
 - Bug Fixes:
- - MAC address changed problem when device settings are saved (very occasionally)
- - Delayed response to search in config-tool when connecting to server in TCP client mode
- - Force socket close when fw update fails occurred
+  - MAC address changed problem when device settings are saved (very occasionally)
+  - Delayed response to search in config-tool when connecting to server in TCP client mode
+  - Force socket close when fw update fails occurred
 - Improvements:
- - Supports serial baudrate up to 460.8kbps
- - Added device profiles of WIZ750SR-1xx series to project source code
+  - Supports serial baudrate up to 460.8kbps
+  - Added device profiles of WIZ750SR-1xx series to project source code
 
 v1.1.1
 - Bug Fixes:
- - Firmware update timeout function error in AppBoot mode
- - 10M Ethernet fixed error (W7500P only)
- - Invalid parameter of FW command (firmware update)
+  - Firmware update timeout function error in AppBoot mode
+  - 10M Ethernet fixed error (W7500P only)
+  - Invalid parameter of FW command (firmware update)
 - Improvements:
- - Command added: AppBoot mode switching function(AB)
- - Initial boot latency(1500ms) has been removed
+  - Command added: AppBoot mode switching function(AB)
+  - Initial boot latency(1500ms) has been removed
 
 v1.1.0
 - First release : 2016

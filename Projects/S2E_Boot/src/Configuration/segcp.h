@@ -18,7 +18,7 @@ typedef enum {SEGCP_MC, SEGCP_VR, SEGCP_MN, SEGCP_IM, SEGCP_OP, SEGCP_DD, SEGCP_
               SEGCP_DP, SEGCP_DI, SEGCP_DW, SEGCP_DH, SEGCP_LP, SEGCP_RP, SEGCP_RH, SEGCP_BR, SEGCP_DB, SEGCP_PR, 
               SEGCP_SB, SEGCP_FL, SEGCP_IT, SEGCP_PT, SEGCP_PS, SEGCP_PD, SEGCP_TE, SEGCP_SS, SEGCP_NP, SEGCP_SP, 
               SEGCP_LG, SEGCP_ER, SEGCP_FW, SEGCP_MA, SEGCP_PW, SEGCP_SV, SEGCP_EX, SEGCP_RT, SEGCP_UN, SEGCP_ST, 
-              SEGCP_FR, SEGCP_EC, SEGCP_K1, SEGCP_UE, SEGCP_AB, SEGCP_UNKNOWN=255
+              SEGCP_FR, SEGCP_EC, SEGCP_K1, SEGCP_UE, SEGCP_UI, SEGCP_AB, SEGCP_TR, SEGCP_UNKNOWN=255
 } teSEGCPCMDNUM;
 
 #define SEGCP_ER_NULL         0
@@ -39,6 +39,7 @@ typedef enum {SEGCP_MC, SEGCP_VR, SEGCP_MN, SEGCP_IM, SEGCP_OP, SEGCP_DD, SEGCP_
 #define SEGCP_RET_ERR_NOPRIVILEGE   (SEGCP_RET_ERR | (SEGCP_ER_NOPRIVILEGE << 8))
 #define SEGCP_RET_REBOOT            0x0080
 #define SEGCP_RET_FWUP              0x0040
+#define SEGCP_RET_FWUP_SERVER       0x0041
 #define SEGCP_RET_SWITCH            0x0020
 #define SEGCP_RET_SAVE              0x0010
 #define SEGCP_RET_FACTORY           0x0008
@@ -71,10 +72,10 @@ typedef enum {SEGCP_MC, SEGCP_VR, SEGCP_MN, SEGCP_IM, SEGCP_OP, SEGCP_DD, SEGCP_
 #define SEGCP_57600     baud_57600
 #define SEGCP_115200    baud_115200
 #define SEGCP_230400    baud_230400
+#define SEGCP_460800    baud_460800
 
 #define SEGCP_DTBIT7    word_len7
 #define SEGCP_DTBIT8    word_len8
-//#define SEGCP_DTBIT9    word_len9
 
 #define SEGCP_NONE      parity_none
 #define SEGCP_ODD       parity_odd
@@ -83,12 +84,8 @@ typedef enum {SEGCP_MC, SEGCP_VR, SEGCP_MN, SEGCP_IM, SEGCP_OP, SEGCP_DD, SEGCP_
 #define SEGCP_STBIT1    stop_bit1
 #define SEGCP_STBIT2    stop_bit2
 
-//#define SEGCP_NONE      flow_none
 #define SEGCP_XONOFF    flow_xon_xoff
 #define SEGCP_RTSCTS    flow_rts_cts
-//#define SEGCP_RS422     flow_rs422
-//#define SEGCP_RS485     flow_rs485
-
 
 #define SEGCP_PRIVILEGE_SET   0x80
 #define SEGCP_PRIVILEGE_CLR   0x00
@@ -105,11 +102,13 @@ void do_segcp(void);
 uint8_t parse_SEGCP(uint8_t * pmsg, uint8_t * param);
 uint16_t proc_SEGCP(uint8_t * segcp_req, uint8_t * segcp_rep);
 
-uint16_t proc_SEGCP_tcp(uint8_t * segcp_req, uint8_t * segcp_rep);
 uint16_t proc_SEGCP_udp(uint8_t * segcp_req, uint8_t * segcp_rep);
-uint16_t proc_SEGCP_uart(uint8_t * segcp_rep);
 
-void send_keepalive_packet_configtool(uint8_t sock);
+/* TCP search function is not supported in AppBoot mode */
+#ifdef __USE_APPBOOT_TCP_SEARCH__
+    uint16_t proc_SEGCP_tcp(uint8_t * segcp_req, uint8_t * segcp_rep);
+    void send_keepalive_packet_configtool(uint8_t sock);
+#endif
 
 void segcp_timer_msec(void); // for timer
 #endif

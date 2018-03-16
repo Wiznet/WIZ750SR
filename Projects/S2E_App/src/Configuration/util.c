@@ -234,7 +234,7 @@ uint8_t conv_hexstr(uint8_t * hexstr, uint8_t * hexarray)
  * @param sub The string between s1 and s2
  * @return The length value atfer working
  */
-void mid(char* src, char* s1, char* s2, char* sub)
+void _mid(char* src, char* s1, char* s2, char* sub)
 {
 	char* sub1;
 	char* sub2;

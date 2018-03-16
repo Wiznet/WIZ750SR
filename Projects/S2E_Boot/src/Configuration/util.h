@@ -13,6 +13,5 @@ uint8_t is_ipaddr(uint8_t * ipaddr, uint8_t * ret_ip);
 uint8_t is_hexstr(uint8_t* hexstr);
 uint8_t str_to_hex(uint8_t * str, uint8_t * hex);
 uint8_t is_hex(uint8_t hex);
-uint8_t conv_hexstr(uint8_t* hexstr, uint8_t* hexarray); // Does not use
 
 #endif

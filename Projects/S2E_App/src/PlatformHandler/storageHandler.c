@@ -91,12 +91,11 @@ uint32_t write_storage(teDATASTORAGE stype, uint32_t addr, void *data, uint16_t 
 			break;
 		
 		case STORAGE_APP_MAIN:
-			ret_len = write_flash(addr, data, size);
-			break;
-		
 		case STORAGE_APP_BACKUP:
-			ret_len = write_flash(addr, data, size);
-			break;
+        case STORAGE_APPBOOT:
+            ret_len = write_flash(addr, data, size);
+            break;
+        
 		default:
 			break;
 	}
@@ -143,6 +142,11 @@ void erase_storage(teDATASTORAGE stype)
 		case STORAGE_APP_BACKUP:
 			address = DEVICE_APP_BACKUP_ADDR;
 			break;
+        
+        case STORAGE_APPBOOT:
+            address = DEVICE_BOOT_ADDR;
+            break;
+        
 		default:
 			break;
 	}
@@ -189,6 +193,27 @@ void erase_storage(teDATASTORAGE stype)
 			printf(" > STORAGE:ERASE_END:ADDR_RANGE - [0x%x ~ 0x%x]\r\n", address, working_address-1);
 #endif
 	}
+    else if(stype == STORAGE_APPBOOT)
+    {
+        working_address = address;
+        sectors = DEVICE_BOOT_SIZE / SECT_SIZE;
+        
+        // Flash sector erase operation
+        if(sectors > 0)
+        {
+            for(i = 1; i < sectors; i++)
+            {
+                erase_flash_sector(working_address + (SECT_SIZE * i));
+#ifdef _STORAGE_DEBUG_
+            printf(" > STORAGE:SECTOR_ERASE:ADDR - 0x%x\r\n", working_address + (SECT_SIZE * i));
+#endif
+            }
+            working_address += (sectors * SECT_SIZE);
+        }
+#ifdef _STORAGE_DEBUG_
+        printf(" > STORAGE:ERASE_END:ADDR_RANGE - [0x%x ~ 0x%x]\r\n", address, working_address-1);
+#endif
+    }
 }
 
 #ifdef __USE_EXT_EEPROM__

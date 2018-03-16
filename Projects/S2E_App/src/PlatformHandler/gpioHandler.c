@@ -373,6 +373,11 @@ void init_connection_status_io(void)
 
 	if(serial->dsr_en == 0)	init_tcpconnection_status_pin();
 	else					init_flowcontrol_dsr_pin();
+
+#if (DEVICE_BOARD_NAME == WIZ750SR_1xx)
+	// TCP connection status pin for WIZ750SR-10x series only
+	init_status_pin();
+#endif
 }
 
 // This function is intended only for output connection status pins; PHYlink, TCPconnection
@@ -398,14 +403,19 @@ void set_connection_status_io(uint16_t pin, uint8_t set)
 	{
 		if(set == ON)
 		{
-			
-			if(serial->dsr_en == 0) GPIO_ResetBits(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN); 
+			if(serial->dsr_en == 0) GPIO_ResetBits(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN);
+#if (DEVICE_BOARD_NAME == WIZ750SR_1xx)
+			GPIO_ResetBits(STATUS_PORT, STATUS_PIN);
+#endif
 			LED_On(LED2);
 		}
 		else // OFF
 		{
 			
 			if(serial->dsr_en == 0) GPIO_SetBits(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN);
+#if (DEVICE_BOARD_NAME == WIZ750SR_1xx)
+			GPIO_SetBits(STATUS_PORT, STATUS_PIN);
+#endif
 			LED_Off(LED2);
 		}
 	}
@@ -451,8 +461,23 @@ void init_tcpconnection_status_pin(void)
 	
 	// Pin initial state; High
 	GPIO_SetBits(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN); 
+
+#if (DEVICE_BOARD_NAME == WIZ750SR_1xx)
+	GPIO_Configuration(STATUS_PORT, STATUS_PIN, GPIO_Mode_OUT, STATUS_PAD_AF);
+	GPIO_SetBits(STATUS_PORT, STATUS_PIN);
+#endif
 }
 
+#if (DEVICE_BOARD_NAME == WIZ750SR_1xx)
+// TCP connection status pin for WIZ750SR-10x series only
+void init_status_pin(void)
+{
+	GPIO_Configuration(STATUS_PORT, STATUS_PIN, GPIO_Mode_OUT, STATUS_PAD_AF);
+	
+	// Pin initial state; High
+	GPIO_SetBits(STATUS_PORT, STATUS_PIN);
+}
+#endif
 
 // DTR pin
 // output (shared pin with PHY link status)

@@ -42,8 +42,6 @@ BUFFER_DEFINITION(data_rx, SEG_DATA_BUF_SIZE);
 	IRQn_Type 			UART_data_irq = UART1_IRQn;
 #endif
 
-//uint32_t baud_table[] = {300, 600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400};
-//uint32_t baud_table[] = {300, 600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400, 460800};
 uint8_t word_len_table[] = {7, 8, 9};
 uint8_t * parity_table[] = {(uint8_t *)"N", (uint8_t *)"ODD", (uint8_t *)"EVEN"};
 uint8_t stop_bit_table[] = {1, 2};
@@ -118,26 +116,6 @@ void S2E_UART_IRQ_Handler(UART_TypeDef * s2e_uart)
 			}
 		}
 		init_time_delimiter_timer();
-
-/*		else
-		{
-			//ch = UartGetc(s2e_uart);
-			ch = UART_ReceiveData(s2e_uart);
-			
-#ifdef _SEG_DEBUG_
-			UART_SendData(s2e_uart, ch);	// ## UART echo; for debugging
-#endif
-			if(!(check_modeswitch_trigger(ch))) // ret: [0] data / [!0] trigger code
-			{
-				if(check_serial_store_permitted(ch)) // ret: [0] not permitted / [1] permitted
-				{
-					BUFFER_IN(data_rx) = ch;
-					BUFFER_IN_MOVE(data_rx, 1);
-				}
-			}
-		}
-		init_time_delimiter_timer();
-*/
 		
 		UART_ClearITPendingBit(s2e_uart, UART_IT_FLAG_RXI);
 	}
@@ -158,25 +136,13 @@ void S2E_UART_Configuration(void)
 	serial_info_init(UART_data, &(value->serial_info[0])); // Load the UART_data Settings from Flash
 	
 	/* Configure UARTx Interrupt Enable */
-	//UART_ITConfig(UART_data, (UART_IT_FLAG_TXI | UART_IT_FLAG_RXI), ENABLE);
-	UART_ITConfig(UART_data, UART_IT_FLAG_RXI, ENABLE);
+	UART_ITConfig(UART_data, UART_IT_FLAG_RXI, ENABLE); // Enable the UARTx Rx interrupt only
 	
 	/* NVIC configuration */
 	NVIC_ClearPendingIRQ(UART_data_irq);
 	NVIC_SetPriority(UART_data_irq, 1);
 	NVIC_EnableIRQ(UART_data_irq);
 }
-
-/*
-void UART1_Configuration(void)
-{
-	UART_InitTypeDef UART_InitStructure;
-
-	// UART Initialization
-	UART_StructInit(&UART_InitStructure);
-	UART_Init(UART1, &UART_InitStructure);
-}
-*/
 
 void UART2_Configuration(void)
 {
@@ -190,7 +156,7 @@ void serial_info_init(UART_TypeDef *pUART, struct __serial_info *serial)
 {
 	UART_InitTypeDef UART_InitStructure;
 	uint32_t valid_arg = 0;
-    uint32_t baud_table[] = {300, 600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400, 460800};;
+    uint32_t baud_table[] = {300, 600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400, 460800};
 
 	/* Set Baud Rate */
 	if(serial->baud_rate < (sizeof(baud_table) / sizeof(baud_table[0])))
@@ -289,11 +255,11 @@ void serial_info_init(UART_TypeDef *pUART, struct __serial_info *serial)
 		UART_InitStructure.UART_HardwareFlowControl = UART_HardwareFlowControl_None;
 		
 		// GPIO configration (RTS pin -> GPIO: 485SEL)
-		//get_uart_rs485_sel(SEG_DATA_UART);
-		if((serial->flow_control != flow_rtsonly) && (serial->flow_control != flow_reverserts)) // Added by James in March 29
+		if((serial->flow_control != flow_rtsonly) && (serial->flow_control != flow_reverserts))
 		{
 			get_uart_rs485_sel(SEG_DATA_UART);
-		}else	// Added by James in March 29
+		}
+		else
 		{
 			if(serial->flow_control == flow_rtsonly)
 			{
@@ -304,10 +270,10 @@ void serial_info_init(UART_TypeDef *pUART, struct __serial_info *serial)
 			}
 		}
 		uart_rs485_rs422_init(SEG_DATA_UART);
-		//printf("UART Interface: %s mode\r\n", uart_if_mode?"RS-485":"RS-422");
 	}
 	
 	GPIO_Configuration(GPIOC, GPIO_Pin_14, GPIO_Mode_IN, PAD_AF1);
+
 	/* Configure the UARTx */
 	UART_InitStructure.UART_Mode = UART_Mode_Rx | UART_Mode_Tx;
 	UART_Init(pUART, &UART_InitStructure);
@@ -511,11 +477,12 @@ void uart_rs485_rs422_init(uint8_t uartNum)
 	if(uartNum == 0) // UART0
 	{
 		GPIO_Configuration(UART0_RTS_PORT, UART0_RTS_PIN, GPIO_Mode_OUT, UART0_RTS_PAD_AF); // UART0 RTS pin: GPIO / Output
-		//GPIO_ResetBits(UART0_RTS_PORT, UART0_RTS_PIN); // UART0 RTS pin init, Set the signal low
-		if(uart_if_mode == UART_IF_RS485)   // Added by James in March 29
+
+		if(uart_if_mode == UART_IF_RS485)
 		{
 			GPIO_ResetBits(UART0_RTS_PORT, UART0_RTS_PIN); // UART0 RTS pin init, Set the signal low
-		}else // Added by James in March 29
+		}
+		else
 		{
 			GPIO_SetBits(UART0_RTS_PORT, UART0_RTS_PIN); // UART0 RTS pin init, Set the signal low
 		}
@@ -523,11 +490,12 @@ void uart_rs485_rs422_init(uint8_t uartNum)
 	else if(uartNum == 1) // UART1
 	{
 		GPIO_Configuration(UART1_RTS_PORT, UART1_RTS_PIN, GPIO_Mode_OUT, UART1_RTS_PAD_AF); // UART1 RTS pin: GPIO / Output
-		//GPIO_ResetBits(UART1_RTS_PORT, UART1_RTS_PIN); // UART1 RTS pin init, Set the signal low
-		if(uart_if_mode == UART_IF_RS485) // Added by James in March 29
+
+		if(uart_if_mode == UART_IF_RS485)
 		{
 			GPIO_ResetBits(UART1_RTS_PORT, UART1_RTS_PIN); // UART1 RTS pin init, Set the signal low
-		}else // Added by James in March 29
+		}
+		else
 		{
 			GPIO_SetBits(UART1_RTS_PORT, UART1_RTS_PIN); // UART1 RTS pin init, Set the signal low
 		}

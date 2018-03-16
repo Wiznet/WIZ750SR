@@ -255,7 +255,7 @@ void proc_SEG_udp(uint8_t sock)
 				
 				if(net->packing_time) modeswitch_gap_time = net->packing_time; // replace the GAP time (default: 500ms)
 				
-				if(serial->serial_debug_en == SEG_ENABLE)
+				if(serial->serial_debug_en)
 				{
 					printf(" > SEG:UDP_MODE:SOCKOPEN\r\n");
 				}
@@ -320,7 +320,7 @@ void proc_SEG_tcp_client(uint8_t sock)
 				}
 				
 				// Serial debug message printout
-				if(serial->serial_debug_en == SEG_ENABLE)
+				if(serial->serial_debug_en)
 				{
 					getsockopt(sock, SO_DESTIP, &destip);
 					getsockopt(sock, SO_DESTPORT, &destport);
@@ -407,7 +407,7 @@ void proc_SEG_tcp_client(uint8_t sock)
 				// Enable the reconnection Timer
 				if((enable_reconnection_timer == SEG_DISABLE) && net->reconnection) enable_reconnection_timer = SEG_ENABLE;
 				
-				if(serial->serial_debug_en == SEG_ENABLE)
+				if(serial->serial_debug_en)
 				{
 					if(isSocketOpen_TCPclient == OFF)
 					{
@@ -465,7 +465,7 @@ void proc_SEG_tcp_server(uint8_t sock)
 				}
 				
 				// Serial debug message printout
-				if(serial->serial_debug_en == SEG_ENABLE)
+				if(serial->serial_debug_en)
 				{
 					getsockopt(sock, SO_DESTIP, &destip);
 					getsockopt(sock, SO_DESTPORT, &destport);
@@ -559,7 +559,7 @@ void proc_SEG_tcp_server(uint8_t sock)
 				// TCP Server listen
 				listen(sock);
 				
-				if(serial->serial_debug_en == SEG_ENABLE)
+				if(serial->serial_debug_en)
 				{
 					printf(" > SEG:TCP_SERVER_MODE:SOCKOPEN\r\n");
 				}
@@ -667,7 +667,7 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 				}
 				
 				// Serial debug message printout
-				if(serial->serial_debug_en == SEG_ENABLE)
+				if(serial->serial_debug_en)
 				{
 					getsockopt(sock, SO_DESTIP, &destip);
 					getsockopt(sock, SO_DESTPORT, &destport);
@@ -783,7 +783,7 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 					// TCP Server listen
 					listen(sock);
 					
-					if(serial->serial_debug_en == SEG_ENABLE)
+					if(serial->serial_debug_en)
 					{
 						printf(" > SEG:TCP_MIXED_MODE:SERVER_SOCKOPEN\r\n");
 					}
@@ -805,7 +805,7 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 					// Enable the reconnection Timer
 					if((enable_reconnection_timer == SEG_DISABLE) && net->reconnection) enable_reconnection_timer = SEG_ENABLE;
 					
-					if(serial->serial_debug_en == SEG_ENABLE)
+					if(serial->serial_debug_en)
 					{
 						printf(" > SEG:TCP_MIXED_MODE:CLIENT_SOCKOPEN\r\n");
 					}
@@ -834,28 +834,10 @@ void uart_to_ether(uint8_t sock)
 	// UART ring buffer -> user's buffer
 	len = get_serial_data();
 	add_data_transfer_bytecount(SEG_UART_RX, len);
-	
-	/*
-	// ## for debugging
-	if(len)
-	{
-		printf("flag_connect_pw_auth: %d\r\n", flag_connect_pw_auth);
-		printf("uart_to_ether: ");
-		for(i = 0; i < len; i++) printf("%c ", g_send_buf[i]);
-		printf("\r\n");
-	}
-	*/
-	
+
 	
 	if(len > 0)
 	{
-		/*
-		// ## for debugging
-		printf("> U2E len: %d, ", len); // ## for debugging
-		for(i = 0; i < len; i++) printf("%c", g_send_buf[i]);
-		printf("\r\n");
-		*/
-		
 		switch(getSn_SR(sock))
 		{
 			case SOCK_UDP: // UDP_MODE
@@ -863,7 +845,7 @@ void uart_to_ether(uint8_t sock)
 				{
 					if((peerip[0] == 0x00) && (peerip[1] == 0x00) && (peerip[2] == 0x00) && (peerip[3] == 0x00))
 					{
-						if(serial->serial_debug_en == SEG_ENABLE) printf(" > SEG:UDP_MODE:DATA SEND FAILED - UDP Peer IP/Port required (0.0.0.0)\r\n");
+						if(serial->serial_debug_en) printf(" > SEG:UDP_MODE:DATA SEND FAILED - UDP Peer IP/Port required (0.0.0.0)\r\n");
 					}
 					else
 					{
@@ -886,29 +868,11 @@ void uart_to_ether(uint8_t sock)
 				// Connection password is only checked in the TCP SERVER MODE / TCP MIXED MODE (MIXED_SERVER)
 				if(flag_connect_pw_auth == SEG_ENABLE)
 				{
-					
-					/* ## 1
-					len = send(sock, g_send_buf, len);
-					u2e_size = 0;
-					*/
-					
-					// ## 2: TCP send operation- Stability improvements
-					/*
-					do {
-						ret = send(sock, g_send_buf, len);
-					} while(ret != len);
-					u2e_size = 0;
-					*/
-					
-					// ## 3: 
 					sent_len = (int16_t)send(sock, g_send_buf, len);
 					if(sent_len > 0) u2e_size-=sent_len;
 					
 					add_data_transfer_bytecount(SEG_UART_TX, len);
-					//printf("sent len = %d\r\n", len); // ## for debugging
 					
-					//if(!keepalive_time && netinfo->keepalive_en)
-					//if((netinfo->keepalive_en == ENABLE) && (flag_sent_first_keepalive == DISABLE))
 					if(netinfo->keepalive_en == ENABLE)
 					{
 						if(flag_sent_first_keepalive == DISABLE)
@@ -945,7 +909,7 @@ uint16_t get_serial_data(void)
 	
 	len = BUFFER_USED_SIZE(data_rx);
 	
-	if((len + u2e_size) >= DATA_BUF_SIZE) // Avoiding u2e buffer (g_send_buf) overflow	
+	if((len + u2e_size) >= DATA_BUF_SIZE) // Avoiding u2e buffer (g_send_buf) overflow
 	{
 		/* Checking Data packing option: charactor delimiter */
 		if((netinfo->packing_delimiter[0] != 0x00) && (len == 1))
@@ -957,18 +921,12 @@ uint16_t get_serial_data(void)
 			}
 		}
 		
-		//BUFFER_CLEAR(data_rx);
-		//return 0; 
-		
 		// serial data length value update for avoiding u2e buffer overflow
 		len = DATA_BUF_SIZE - u2e_size;
 	}
 	
 	if((!netinfo->packing_time) && (!netinfo->packing_size) && (!netinfo->packing_delimiter[0])) // No Packing delimiters.
 	{
-		//ret = uart_gets(SEG_DATA_UART, g_send_buf, len);
-		//return (uint16_t)ret;
-		
 		// ## 20150427 bugfix: Incorrect serial data storing (UART ring buffer to g_send_buf)
 		for(i = 0; i < len; i++)
 		{
@@ -1026,12 +984,9 @@ void ether_to_uart(uint8_t sock)
 #endif
 	}
 
-
 	// H/W Socket buffer -> User's buffer
 	len = getSn_RX_RSR(sock);
 	if(len > DATA_BUF_SIZE) len = DATA_BUF_SIZE; // avoiding buffer overflow
-	
-	//printf("ether_to_uart: %d\r\n", len); // ## for debugging
 	
 	if(len > 0)
 	{
@@ -1043,7 +998,7 @@ void ether_to_uart(uint8_t sock)
 				if(memcmp(peerip_tmp, peerip, 4) !=  0)
 				{
 					memcpy(peerip_tmp, peerip, 4);
-					if(serial->serial_debug_en == SEG_ENABLE) printf(" > UDP Peer IP/Port: %d.%d.%d.%d : %d\r\n", peerip[0], peerip[1], peerip[2], peerip[3], peerport);
+					if(serial->serial_debug_en) printf(" > UDP Peer IP/Port: %d.%d.%d.%d : %d\r\n", peerip[0], peerip[1], peerip[2], peerip[3], peerport);
 				}
 				break;
 			
@@ -1098,9 +1053,9 @@ void ether_to_uart(uint8_t sock)
 		if(serial->uart_interface == UART_IF_RS422_485)
 		{
 			uart_rs485_enable(SEG_DATA_UART);
-			//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
+			
 			for(i = 0; i < e2u_size; i++) uart_putc(SEG_DATA_UART, g_recv_buf[i]);
-			for(i = 0; i < 65535; i++)  ; //wait
+			
 			uart_rs485_disable(SEG_DATA_UART);
 			
 			add_data_transfer_bytecount(SEG_ETHER_TX, e2u_size);
@@ -1111,7 +1066,6 @@ void ether_to_uart(uint8_t sock)
 		{
 			if(isXON == SEG_ENABLE)
 			{
-				//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
 				for(i = 0; i < e2u_size; i++) uart_putc(SEG_DATA_UART, g_recv_buf[i]);
 				add_data_transfer_bytecount(SEG_ETHER_TX, e2u_size);
 				e2u_size = 0;
@@ -1123,7 +1077,6 @@ void ether_to_uart(uint8_t sock)
 		}
 		else
 		{
-			//uart_puts(SEG_DATA_UART, g_recv_buf, e2u_size);
 			for(i = 0; i < e2u_size; i++) uart_putc(SEG_DATA_UART, g_recv_buf[i]);
 			
 			add_data_transfer_bytecount(SEG_ETHER_TX, e2u_size);
@@ -1154,7 +1107,7 @@ uint16_t get_tcp_any_port(void)
 void send_keepalive_packet_manual(uint8_t sock)
 {
 	setsockopt(sock, SO_KEEPALIVESEND, 0);
-	//keepalive_time = 0;
+	
 #ifdef _SEG_DEBUG_
 	printf(" > SOCKET[%x]: SEND KEEP-ALIVE PACKET\r\n", sock);
 #endif 
@@ -1384,7 +1337,6 @@ void init_time_delimiter_timer(void)
 {
 	struct __network_info *netinfo = (struct __network_info *)&(get_DevConfig_pointer()->network_info);
 	struct __options *option = (struct __options *)&(get_DevConfig_pointer()->options);
-	//DevConfig *s2e = get_DevConfig_pointer();
 	
 	if((option->serial_command == SEG_ENABLE) && (opmode == DEVICE_GW_MODE))
 	{
@@ -1410,25 +1362,25 @@ uint8_t check_tcp_connect_exception(void)
 	// DNS failed
 	if((option->dns_use == SEG_ENABLE) && (flag_process_dns_success != ON))
 	{
-		if(serial->serial_debug_en == SEG_ENABLE) printf(" > SEG:CONNECTION FAILED - DNS Failed\r\n");
+		if(serial->serial_debug_en) printf(" > SEG:CONNECTION FAILED - DNS Failed\r\n");
 		ret = ON;
 	}	
 	// if dhcp failed (0.0.0.0), this case do not connect to peer
 	else if((srcip[0] == 0x00) && (srcip[1] == 0x00) && (srcip[2] == 0x00) && (srcip[3] == 0x00))
 	{
-		if(serial->serial_debug_en == SEG_ENABLE) printf(" > SEG:CONNECTION FAILED - Invalid IP address: Zero IP\r\n");
+		if(serial->serial_debug_en) printf(" > SEG:CONNECTION FAILED - Invalid IP address: Zero IP\r\n");
 		ret = ON;
 	}
 	// Destination zero IP
 	else if((net->remote_ip[0] == 0x00) && (net->remote_ip[1] == 0x00) && (net->remote_ip[2] == 0x00) && (net->remote_ip[3] == 0x00))
 	{
-		if(serial->serial_debug_en == SEG_ENABLE) printf(" > SEG:CONNECTION FAILED - Invalid Destination IP address: Zero IP\r\n");
+		if(serial->serial_debug_en) printf(" > SEG:CONNECTION FAILED - Invalid Destination IP address: Zero IP\r\n");
 		ret = ON;
 	}
 	 // Duplicate IP address
 	else if((srcip[0] == net->remote_ip[0]) && (srcip[1] == net->remote_ip[1]) && (srcip[2] ==net->remote_ip[2]) && (srcip[3] == net->remote_ip[3]))
 	{
-		if(serial->serial_debug_en == SEG_ENABLE) printf(" > SEG:CONNECTION FAILED - Duplicate IP address\r\n");
+		if(serial->serial_debug_en) printf(" > SEG:CONNECTION FAILED - Duplicate IP address\r\n");
 		ret = ON;
 	}
 	else if((srcip[0] == 192) && (srcip[1] == 168)) // local IP address == Class C private IP
@@ -1438,7 +1390,7 @@ uint8_t check_tcp_connect_exception(void)
 		{
 			if(srcip[2] != net->remote_ip[2]) // Class C Private IP network mismatch
 			{
-				if(serial->serial_debug_en == SEG_ENABLE) printf(" > SEG:CONNECTION FAILED - Invalid IP address range (%d.%d.[%d].%d)\r\n", net->remote_ip[0], net->remote_ip[1], net->remote_ip[2], net->remote_ip[3]);
+				if(serial->serial_debug_en) printf(" > SEG:CONNECTION FAILED - Invalid IP address range (%d.%d.[%d].%d)\r\n", net->remote_ip[0], net->remote_ip[1], net->remote_ip[2], net->remote_ip[3]);
 				ret = ON; 
 			}
 		}

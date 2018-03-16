@@ -27,7 +27,7 @@
 		#define __USE_UART_IF_SELECTOR__	// RS-232/TTL or RS-422/485 selector using UART IF selector pin
 		//#define __USE_EXT_EEPROM__			// External EEPROM or Internal Data flash (DAT0/1)
 		#define __USE_BOOT_ENTRY__			// Application boot mode entry pin activated
-		#define __USE_APPBACKUP_AREA__		// If this option activated, Application firmware area is consists of App (50kB) and App backup (50kB). If not, user's application can be 100kB size. (Does not use the backup area)
+		//#define __USE_APPBACKUP_AREA__		// If this option activated, Application firmware area is consists of App (50kB) and App backup (50kB). If not, user's application can be 100kB size. (Does not use the backup area)
 		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
 		#define __USE_USERS_GPIO__
 		//#define __USE_DSR_DTR_DEFAULT__
@@ -40,7 +40,7 @@
 		#define __W7500P__
 		#define __USE_UART_IF_SELECTOR__	// RS-232/TTL or RS-422/485 selector using UART IF selector pin
 		#define __USE_BOOT_ENTRY__			// Application boot mode entry pin activated
-		#define __USE_APPBACKUP_AREA__
+		//#define __USE_APPBACKUP_AREA__
 		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
 		#define __USE_USERS_GPIO__
 		//#define __USE_DSR_DTR_DEFAULT__
@@ -53,7 +53,7 @@
 		//#define __USE_UART_IF_SELECTOR__	// RS-232/TTL or RS-422/485 selector using UART IF selector pin
 		//#define __USE_EXT_EEPROM__			// External EEPROM or Internal Data flash (DAT0/1)
 		#define __USE_BOOT_ENTRY__			// Application boot mode entry pin activated
-		#define __USE_APPBACKUP_AREA__		// If this option activated, Application firmware area is consists of App (50kB) and App backup (50kB). If not, user's application can be 100kB size. (Does not use the backup area)
+		//#define __USE_APPBACKUP_AREA__		// If this option activated, Application firmware area is consists of App (50kB) and App backup (50kB). If not, user's application can be 100kB size. (Does not use the backup area)
 		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
 		#define __USE_USERS_GPIO__
 		#define __USE_DSR_DTR_DEFAULT__
@@ -65,7 +65,7 @@
 	#elif (DEVICE_BOARD_NAME == W7500_S2E) // Chip product
 		//#define __USE_UART_IF_SELECTOR__	// RS-232/TTL or RS-422/485 selector using UART IF selector pin
 		#define __USE_BOOT_ENTRY__			// Application boot mode entry pin activated
-		#define __USE_APPBACKUP_AREA__
+		//#define __USE_APPBACKUP_AREA__
 		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
 		#define __USE_USERS_GPIO__
 		//#define __USE_DSR_DTR_DEFAULT__
@@ -76,8 +76,9 @@
 		#define DEVICE_ID_DEFAULT            "W7500-S2E"
 	#else
 		//#define __USE_UART_IF_SELECTOR__
-		#define __USE_EXT_EEPROM__
-		#define __USE_APPBACKUP_AREA__
+		//#define __USE_EXT_EEPROM__
+		//#define __USE_APPBACKUP_AREA__
+		#define __USE_BOOT_ENTRY__			// Application boot mode entry pin activated
 		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
         #define __USE_SAFE_SAVE__           // DevConfig Save verify function added
 		#define DEVICE_CLOCK_SELECT	         CLOCK_SOURCE_EXTERNAL
@@ -146,6 +147,12 @@
 	#define HW_TRIG_PIN					GPIO_Pin_9
 	#define HW_TRIG_PORT				GPIOA
 	#define HW_TRIG_PAD_AF				PAD_AF1
+
+	// TCP Connection status indicator pin (WIZ750SR-10x series only)
+	// Direction: Output
+	#define STATUS_PIN			GPIO_Pin_7
+	#define STATUS_PORT			GPIOA
+	#define STATUS_PAD_AF		PAD_AF1
 
 #else // Original pins
 	// PHY link status pin: Input (PHYLINK_IN_PIN -> STATUS_PHYLINK_PIN)

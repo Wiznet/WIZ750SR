@@ -78,6 +78,10 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
  
 ## Update History
 
+v1.2.1
+- Bug Fixes:
+  - 'Character' of serial data packing option is not set correctly 
+
 v1.2.0
 - Bug Fixes:
   - Data loss problem due to unintended delay in RS-485 mode (WIZ750SR-RS485 only)

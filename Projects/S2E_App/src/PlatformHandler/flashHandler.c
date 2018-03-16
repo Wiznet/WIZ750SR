@@ -96,6 +96,35 @@ uint32_t read_flash(uint32_t addr, uint8_t *data, uint32_t data_len)
 	return i;
 }
 
+
+void Copy_Interrupt_VectorTable(uint32_t start_addr, uint8_t * vectortable)
+{
+    uint32_t i;
+    uint8_t flash_vector_area[SECT_SIZE];
+
+    if(vectortable != NULL)
+    {
+        for (i = 0x00; i < 0x08; i++)			flash_vector_area[i] = vectortable[i];
+        for (i = 0x08; i < 0xA8; i++) 			flash_vector_area[i] = *(volatile uint8_t *)(start_addr+i); // Actual address range; Interrupt vector table is located here
+        for (i = 0xA8; i < SECT_SIZE; i++)	flash_vector_area[i] = vectortable[i];
+    }
+    else
+    {
+        for (i = 0x00; i < 0x08; i++)			flash_vector_area[i] = *(volatile uint8_t *)(0x00000000+i);
+        for (i = 0x08; i < 0xA8; i++) 			flash_vector_area[i] = *(volatile uint8_t *)(start_addr+i); // Actual address range; Interrupt vector table is located here
+        for (i = 0xA8; i < SECT_SIZE; i++)	flash_vector_area[i] = *(volatile uint8_t *)(0x00000000+i);
+    }
+
+
+    __disable_irq();
+
+    DO_IAP(IAP_ERAS_SECT, 0x00000000, 0, 0); 						// Erase the interrupt vector table area : Sector 0
+    DO_IAP(IAP_PROG, 0x00000000, flash_vector_area , SECT_SIZE);	// Write the applicaion vector table to 0x00000000
+
+    __enable_irq(); 
+}
+
+
 /**
   * @brief  DO IAP Function
   */

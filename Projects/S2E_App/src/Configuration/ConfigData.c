@@ -111,6 +111,8 @@ void set_DevConfig_to_factory_value(void)
 	memset(dev_config.options.dns_domain_name, 0x00, 50);
 	//memcpy(dev_config.options.dns_domain_name, "www.google.com", 14);
 
+    dev_config.options.tcp_rcr_val = 8; // Default RCR(TCP retransmission retry count) value: 8
+
 	dev_config.options.serial_command = SEGCP_ENABLE;
 	dev_config.options.serial_command_echo = SEGCP_DISABLE;
 	dev_config.options.serial_trigger[0] = 0x2b;	// Defualt serial command mode trigger code: '+++' (0x2b, 0x2b, 0x2b)
@@ -157,13 +159,10 @@ void load_DevConfig_from_storage(void)
 		write_storage(STORAGE_CONFIG, 0, &dev_config, sizeof(DevConfig));
 	}
 	
-	//dev_config.network_info[0].state = ST_OPEN;
-	
 	dev_config.fw_ver[0] = MAJOR_VER;
 	dev_config.fw_ver[1] = MINOR_VER;
 	dev_config.fw_ver[2] = MAINTENANCE_VER;
-    
-	//dev_config.serial_info[0].uart_interface = get_uart_if_sel_pin();
+
 	if((dev_config.serial_info->flow_control == flow_rtsonly) || (dev_config.serial_info->flow_control == flow_reverserts))		// Edit for supporting RTS only in 17/3/28 , recommend adapting to WIZ750SR 
 	{
 		dev_config.serial_info[0].uart_interface = 1; // [0] RS-232/TTL mode, [1] RS-422/485 mode
@@ -192,7 +191,7 @@ void save_DevConfig_to_storage(void)
         
             if(memcmp(&dev_config, &dev_config_tmp, sizeof(DevConfig)) == 0) { // Config-data set is successfully updated.
                 update_success = SEGCP_ENABLE;
-                if(dev_config.serial_info[0].serial_debug_en) {printf(" > DevConfig is successfully updated\r\n");}
+                //if(dev_config.serial_info[0].serial_debug_en) {printf(" > DevConfig is successfully updated\r\n");}
             } else {
                 retry_cnt++;
                 if(dev_config.serial_info[0].serial_debug_en) {printf(" > DevConfig update failed, Retry: %d\r\n", retry_cnt);}

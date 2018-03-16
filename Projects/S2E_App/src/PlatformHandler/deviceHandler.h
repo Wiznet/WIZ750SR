@@ -58,12 +58,9 @@ void device_socket_termination(void);
 void device_reboot(void);
 
 uint8_t device_firmware_update(teDATASTORAGE stype); // Firmware update by Configuration tool / Flash to Flash
-//uint8_t remote_firmware_update(teDATASTORAGE stype); // Firmware update by HTTP server
+uint8_t device_appboot_update(void);
 
 // function for timer
 void device_timer_msec(void);
-
-//void fw_from_network_time_handler(void); // fw_from_network time counter;
-//uint16_t get_fw_from_network_time(void);
 
 #endif /* DEVICEHANDLER_H_ */

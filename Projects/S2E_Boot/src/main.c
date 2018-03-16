@@ -2,12 +2,13 @@
   ******************************************************************************
   * @file    W7500x Serial to Ethernet Project - WIZ750SR Boot
   * @author  Eric Jung, Team CS
-  * @version v1.1.2
-  * @date    Fab-2018
+  * @version v1.2.0
+  * @date    Mar-2018
   * @brief   Boot program body
   ******************************************************************************
   * @attention
   * @par Revision history
+  *    <2018/03/12> v1.2.0 Bugfix and Improvements by Eric Jung
   *    <2018/02/08> v1.1.2 Bugfix by Eric Jung
   *    <2018/01/26> v1.1.2 Added WIZ750SR-1xx function by Edward Ahn
   *    <2017/12/13> v1.1.1 Develop by Eric Jung
@@ -39,8 +40,10 @@
 #include "common.h"
 #include "W7500x_board.h"
 
-#include "dhcp.h"
-#include "dhcp_cb.h"
+#ifdef __USE_APPBOOT_DHCP__
+    #include "dhcp.h"
+    #include "dhcp_cb.h"
+#endif
 
 #include "timerHandler.h"
 #include "uartHandler.h"
@@ -58,9 +61,6 @@ typedef void (*pFunction)(void);
 /* Private define ------------------------------------------------------------*/
 //#define _MAIN_DEBUG_	// debugging message enable
 
-// Define for Interrupt Vector Table Remap
-#define BOOT_VEC_BACK_ADDR 		(DEVICE_APP_MAIN_ADDR - SECT_SIZE)
-
 // Define for MAC address settings
 #define MACSTR_SIZE		22
 
@@ -70,20 +70,20 @@ uint8_t check_mac_address(void);
 
 static void W7500x_Init(void);
 static void W7500x_WZTOE_Init(void);
-int8_t process_dhcp(void);
 
 // Debug messages
 void display_Dev_Info_header(void);
-void display_Dev_Info_dhcp(void);
+
+#ifdef __USE_APPBOOT_DHCP__
+    int8_t process_dhcp(void);
+    void display_Dev_Info_dhcp(void);
+#endif
 
 // Functions for Interrupt Vector Table Remap
 void Copy_Interrupt_VectorTable(uint32_t start_addr);
-void Backup_Boot_Interrupt_VectorTable(void);
 
 // Delay
 void delay(__IO uint32_t milliseconds); //Notice: used ioLibray
-//void TimingDelay_Decrement(void);
-//void delay_ms(uint32_t ms); // loop delay
 
 /* Private variables ---------------------------------------------------------*/
 static __IO uint32_t TimingDelay;
@@ -106,8 +106,6 @@ int main(void)
 	DevConfig *dev_config = get_DevConfig_pointer();
 	uint8_t appjump_enable = OFF;
 	uint8_t ret = 0;
-	//uint16_t i;
-	//uint8_t buff[512] = {0x00, };
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// W7500x Hardware Initialize
@@ -138,6 +136,8 @@ int main(void)
 	if(check_mac_address())
 	{
 		Copy_Interrupt_VectorTable(DEVICE_APP_MAIN_ADDR);
+		delay(SAVE_INTERVAL_MS/2);
+
 		appjump_enable = ON;
 	}
 	
@@ -147,7 +147,7 @@ int main(void)
 	{
 		// Firmware download has already been done at application routine.
 			// 1. 50kB app mode: Firmware copy: [App backup] -> [App main]
-			// 2. 100kB app mode: Firmware download and write: [Network] -> [App main]
+			// 2. 100kB app mode: Firmware download and write: [Network] -> [App main] (default)
 		ret = device_firmware_update(STORAGE_APP_MAIN);
 		if(ret == DEVICE_FWUP_RET_SUCCESS)
 		{
@@ -158,6 +158,7 @@ int main(void)
 			save_DevConfig_to_storage();
 			
 			Copy_Interrupt_VectorTable(DEVICE_APP_MAIN_ADDR);
+			delay(SAVE_INTERVAL_MS/2);
 			
 			appjump_enable = ON;
 		}
@@ -168,44 +169,24 @@ int main(void)
 	{
 		appjump_enable = ON;
 	}
-	/*
-	else if (*(uint32_t*)DEVICE_APP_BACKUP_ADDR == 0xFFFFFFFF) // genarate application backup storage for device restore
-	{
-		device_firmware_update(STORAGE_APP_BACKUP);
-		appjump_enable = ON;
-	}
-	else if (*(uint32_t*)DEVICE_APP_MAIN_ADDR == 0xFFFFFFFF) // copy the backup to application main storage
-	{
-		device_firmware_update(STORAGE_APP_MAIN);
-		appjump_enable = ON;
-	}
-	*/
 	
-//#ifdef _MAIN_DEBUG_
 	if (*(uint32_t*)DEVICE_APP_MAIN_ADDR == 0xFFFFFFFF) 
 	{
 #ifdef _MAIN_DEBUG_
-		printf("\r\n>> Application Main: Empty [0x%.8x], Jump Failed\r\n", DEVICE_APP_MAIN_ADDR);
+		printf("\r\n >> Application Main: Empty [0x%.8x], Jump Failed\r\n", DEVICE_APP_MAIN_ADDR);
 #endif
 		appjump_enable = OFF;
 	}
 	else
 	{
 #ifdef _MAIN_DEBUG_
-		printf("\r\n>> Application Main: Detected [0x%.8x], Jump Start\r\n", DEVICE_APP_MAIN_ADDR);
+		printf("\r\n >> Application Main: Detected [0x%.8x], Jump Start\r\n", DEVICE_APP_MAIN_ADDR);
 #endif
 		appjump_enable = ON;
 	}
-//#endif
-
-
-//#ifdef __USE_BOOT_ENTRY__
-//	if(get_boot_entry_pin() == 0) appjump_enable = OFF;
-//#endif
 	
 	if(appjump_enable == ON)
 	{
-		//printf("boot state: %d\r\n", dev_config->network_info[0].state);
 		if (dev_config->network_info[0].state == ST_BOOT) // for AppBoot cmd
 		{
 			appjump_enable = OFF;
@@ -220,13 +201,7 @@ int main(void)
 	
 	if(appjump_enable == ON)
 	{
-		// Copy the application code interrupt vector to 0x00000000
-		//printf("\r\n copy the interrupt vector, app area [0x%.8x] ==> boot", DEVICE_APP_MAIN_ADDR);
-		
-		//Copy_Interrupt_VectorTable(DEVICE_APP_MAIN_ADDR);
-		
 		application_jump(DEVICE_APP_MAIN_ADDR);
-		
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -243,9 +218,9 @@ int main(void)
 	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
-	// W7500x Application: DHCP client / DNS client handler
+	// W7500x Application: DHCP client handler
 	////////////////////////////////////////////////////////////////////////////////////////////////////
-	
+#ifdef __USE_APPBOOT_DHCP__
 	/* Network Configuration - DHCP client */
 	// Initialize Network Information: DHCP or Static IP allocation
 	if(dev_config->options.dhcp_use)
@@ -260,17 +235,21 @@ int main(void)
 		}
 	}
 	else
+#endif
 	{
 		Net_Conf(); // Set default static IP settings
 	}
-	
+
 	// Debug UART: Network information print out (includes DHCP IP allocation result)
 	if(dev_config->serial_info[0].serial_debug_en)
 	{
 		display_Net_Info();
+
+#ifdef __USE_APPBOOT_DHCP__
 		display_Dev_Info_dhcp();
+#endif
 	}
-	
+
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// W7500x Boot: Main Routine
 	////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -282,7 +261,9 @@ int main(void)
 	{
 		do_segcp();
 		
+#ifdef __USE_APPBOOT_DHCP__
 		if(dev_config->options.dhcp_use) DHCP_run(); // DHCP client handler for IP renewal
+#endif
 		
 		if(flag_check_main_routine)
 		{
@@ -327,34 +308,11 @@ static void W7500x_Init(void)
 	
 	/* Set System init */
 	SystemInit_User(CLOCK_SOURCE_INTERNAL, PLL_SOURCE_8MHz, SYSTEM_CLOCK_8MHz);
-	//SystemInit();
-	
-	/* Delay for working stabilize */
-	//delay_ms(1500); // 
-	
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-	// W7500x ISR: Interrupt Vector Table Remap (Custom)
-	////////////////////////////////////////////////////////////////////////////////////////////////////
-	
-	/*
-	if (*(uint32_t*)BOOT_VEC_BACK_ADDR == 0xFFFFFFFF) // after boot code first write
-	{
-		Backup_Boot_Interrupt_VectorTable();
-	}
-	else
-	{
-		Copy_Interrupt_VectorTable(BOOT_VEC_BACK_ADDR);
-	}
-	*/
-	
-	/* DualTimer Initialization */
-	//Timer_Configuration();
 	
 	/* Counter Initialization */
 	Time_Counter_Configuration(); // To replace the timer interrupt, inaccurate count value
 	
 	/* UART Initialization */
-	//CRG_FCLK_SourceSelect(CRG_RCLK);
 	UART2_Configuration(); // Simple UART (UART2) for Debugging
 	
 	/* SysTick_Config */
@@ -377,9 +335,12 @@ static void W7500x_WZTOE_Init(void)
 	/* Set Network Configuration: HW Socket Tx/Rx buffer size */
 	//uint8_t tx_size[8] = { 2, 2, 2, 2, 2, 2, 2, 2 };
 	//uint8_t rx_size[8] = { 2, 2, 2, 2, 2, 2, 2, 2 };
-		
+	
 	/* Structure for timeout control: RTR, RCR */
-	wiz_NetTimeout * net_timeout;
+	wiz_NetTimeout net_timeout;
+	
+	/* Software reset the WZTOE(Hardwired TCP/IP core) */
+	wizchip_sw_reset();
 	
 	/* Set WZ_100US Register */
 	setTIC100US((GetSystemClock()/10000));
@@ -388,13 +349,13 @@ static void W7500x_WZTOE_Init(void)
 #endif
 	/* Set TCP Timeout: retry count / timeout val */
 	// Retry count default: [8], Timeout val default: [2000]
-	net_timeout->retry_cnt = 8;
-	net_timeout->time_100us = 2500;
-	wizchip_settimeout(net_timeout);
+	net_timeout.retry_cnt = 8;
+	net_timeout.time_100us = 2500;
+	wizchip_settimeout(&net_timeout);
 	
-	//wizchip_gettimeout(net_timeout); // ## for debugging - check the TCP timeout settings
 #ifdef _MAIN_DEBUG_
-	printf(" Network Timeout Settings - RTR: %d, RCR: %d\r\n", net_timeout->retry_cnt, net_timeout->time_100us);
+	wizchip_gettimeout(&net_timeout); // ## for debugging - check the TCP timeout settings
+	printf(" Network Timeout Settings - RCR: %d, RTR: %d\r\n", net_timeout.retry_cnt, net_timeout.time_100us);
 #endif
 	
 	/* Set Network Configuration */
@@ -402,6 +363,29 @@ static void W7500x_WZTOE_Init(void)
 	
 }
 
+void display_Dev_Info_header(void)
+{
+	DevConfig *dev_config = get_DevConfig_pointer();
+
+	printf("\r\n");
+	printf("%s\r\n", STR_BAR);
+
+#if (DEVICE_BOARD_NAME == WIZ750SR)
+	printf(" WIZ750SR \r\n");
+	printf(" >> WIZnet Serial to Ethernet Device\r\n");
+#else
+	#ifndef __W7500P__
+		printf(" [W7500] Serial to Ethernet Device\r\n");
+	#else
+		printf(" [W7500P] Serial to Ethernet Device\r\n");
+	#endif
+#endif
+	
+	printf(" >> Firmware version: Boot %d.%d.%d %s\r\n", dev_config->fw_ver[0], dev_config->fw_ver[1], dev_config->fw_ver[2], STR_VERSION_STATUS);
+	printf("%s\r\n", STR_BAR);
+}
+
+#ifdef __USE_APPBOOT_DHCP__
 int8_t process_dhcp(void)
 {
 	uint8_t ret = 0;
@@ -448,29 +432,6 @@ int8_t process_dhcp(void)
 	return ret;
 }
 
-void display_Dev_Info_header(void)
-{
-	DevConfig *dev_config = get_DevConfig_pointer();
-
-	printf("\r\n");
-	printf("%s\r\n", STR_BAR);
-
-#if (DEVICE_BOARD_NAME == WIZ750SR)
-	printf(" WIZ750SR \r\n");
-	printf(" >> WIZnet Serial to Ethernet Device\r\n");
-#else
-	#ifndef __W7500P__
-		printf(" [W7500] Serial to Ethernet Device\r\n");
-	#else
-		printf(" [W7500P] Serial to Ethernet Device\r\n");
-	#endif
-#endif
-	
-	printf(" >> Firmware version: Boot %d.%d.%d %s\r\n", dev_config->fw_ver[0], dev_config->fw_ver[1], dev_config->fw_ver[2], STR_VERSION_STATUS);
-	printf("%s\r\n", STR_BAR);
-}
-
-
 void display_Dev_Info_dhcp(void)
 {
 	DevConfig *dev_config = get_DevConfig_pointer();
@@ -481,7 +442,7 @@ void display_Dev_Info_dhcp(void)
 		else printf(" # DHCP Failed\r\n");
 	}
 }
-
+#endif
 
 //////////////////////////////////////////////////////////////////////////////////
 // Functions for MAC address 
@@ -498,18 +459,12 @@ uint8_t check_mac_address(void)
 	uint8_t ret = 0;
 	
     // ## 20180208 Modified by Eric, WIZnet MAC address check procedure removed  
-//	if(((dev_config->network_info_common.mac[0] != 0x00) || (dev_config->network_info_common.mac[1] != 0x08) || (dev_config->network_info_common.mac[2] != 0xDC))  ||
-//		((dev_config->network_info_common.mac[0] == 0xff) && (dev_config->network_info_common.mac[1] == 0xff) && (dev_config->network_info_common.mac[2] == 0xff)))
 	if((dev_config->network_info_common.mac[0] == 0xff) && (dev_config->network_info_common.mac[1] == 0xff) && (dev_config->network_info_common.mac[2] == 0xff))
 	{
 		read_storage(STORAGE_MAC, 0, mac_buf, 0);
-		
-		//printf("Storage MAC: %.2x:%.2x:%.2x:%.2x:%.2x:%.2x\r\n", mac_buf[0], mac_buf[1], mac_buf[2], mac_buf[3], mac_buf[4], mac_buf[5]);
-		
+
 		// Initial stage: Input the MAC address
         // ## 20180208 Modified by Eric, WIZnet MAC address check procedure removed
-//		if(((mac_buf[0] != 0x00) || (mac_buf[1] != 0x08) || (mac_buf[2] != 0xDC)) ||
-//			((mac_buf[0] == 0xff) && (mac_buf[1] == 0xff) && (mac_buf[2] == 0xff)))
 		if((mac_buf[0] == 0xff) && (mac_buf[1] == 0xff) && (mac_buf[2] == 0xff))
 		{
 			gSEGCPPRIVILEGE = SEGCP_PRIVILEGE_CLR;
@@ -521,7 +476,6 @@ uint8_t check_mac_address(void)
 				for(i = 0; i < MACSTR_SIZE-1; i++)
 				{
 					mac_str[i] = S_UartGetc();
-					//S_UartPutc(mac_str[i]);
 				}
 				
 				if(!proc_SEGCP(mac_str, trep))
@@ -546,9 +500,6 @@ uint8_t check_mac_address(void)
 		}
 		else // Lost the MAC address, MAC address restore
 		{
-			//memcpy(dev_config->network_info_common.mac, mac_buf, 6);
-			//save_DevConfig_to_storage();
-            
             // ## 20180208 Modified by Eric, MAC address check and re-save procedure removed
             dev_config->network_info_common.mac[0] = mac_buf[0];
             dev_config->network_info_common.mac[1] = mac_buf[1];
@@ -588,49 +539,6 @@ void Copy_Interrupt_VectorTable(uint32_t start_addr)
 	__enable_irq();
 }
 
-void Backup_Boot_Interrupt_VectorTable(void)
-{
-	uint32_t i;
-	uint8_t flash_vector_area[SECT_SIZE];
-	for (i = 0; i < SECT_SIZE; i++)
-	{
-		flash_vector_area[i] = *(volatile uint8_t *)(0x00000000+i);
-	}
-	
-	__disable_irq();
-	
-	DO_IAP(IAP_PROG, BOOT_VEC_BACK_ADDR, flash_vector_area , SECT_SIZE);
-	
-	__enable_irq();
-}
-
-#if 0
-/**
-  * @brief  Inserts a delay time.
-  * @param  nTime: specifies the delay time length, in milliseconds.
-  * @retval None
-  */
-void delay(__IO uint32_t milliseconds)
-{
-	TimingDelay = milliseconds;
-	while(TimingDelay != 0);
-}
-
-
-/**
-  * @brief  Decrements the TimingDelay variable.
-  * @param  None
-  * @retval None
-  */
-void TimingDelay_Decrement(void)
-{
-	if(TimingDelay != 0x00)
-	{
-		TimingDelay--;
-	}
-}
-#endif
-
 /**
   * @brief  Inserts a delay time when the situation cannot use the timer interrupt.
   * @param  ms: specifies the delay time length, in milliseconds.
@@ -643,13 +551,3 @@ void delay(__IO uint32_t milliseconds)
 	nCount=(GetSystemClock()/10000)*milliseconds;
 	for (; nCount!=0; nCount--);
 }
-
-/*
-void delay_ms(uint32_t ms)
-{
-	volatile uint32_t nCount;
-	
-	nCount=(GetSystemClock()/10000)*ms;
-	for (; nCount!=0; nCount--);
-}
-*/

@@ -2,7 +2,7 @@
 #define __FLASHHANDLER_H__
 
 #include <stdint.h>
-#define _FLASH_DEBUG_
+//#define _FLASH_DEBUG_
 
 /* W7500 IAP IDs */
 #define IAP_ENTRY			(0x1FFF1001) // Because Thum code
@@ -35,6 +35,7 @@ void erase_flash_sector(uint32_t sector_addr);
 void erase_flash_block(uint32_t block_addr);
 uint32_t write_flash(uint32_t addr, uint8_t *data, uint32_t data_len);
 uint32_t read_flash(uint32_t addr, uint8_t *data, uint32_t data_len);
+void Copy_Interrupt_VectorTable(uint32_t start_addr, uint8_t * vectortable);
 
 void DO_IAP( uint32_t id, uint32_t dst_addr, uint8_t* src_addr, uint32_t size);
 

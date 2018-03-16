@@ -27,8 +27,7 @@
 
 #define UART_IF_RS422				0
 #define UART_IF_RS485				1
-#define UART_IF_RS485_REVERSE	2				//Added by James in March 29
-
+#define UART_IF_RS485_REVERSE		2				//Added by James in March 29
 // If the define '__USE_UART_IF_SELECTOR__' disabled, default UART interface is selected to be 'UART_IF_DEFAULT'
 #define UART_IF_DEFAULT				UART_IF_RS232_TTL
 //#define UART_IF_DEFAULT				UART_IF_RS422_485
@@ -102,21 +101,8 @@ enum flow_ctrl {
 	flow_reverserts = 4 // Reverse RTS
 };
 
-
-/*
-// old
-enum flow_ctrl {
-	flow_none = 0,
-	flow_xon_xoff = 1,
-	flow_rts_cts = 2,
-	flow_rs422 = 3,
-	flow_rs485 = 4
-};
-*/
-
 extern uint8_t flag_ringbuf_full;
 
-//extern uint32_t baud_table[]; // 14
 extern uint8_t word_len_table[];
 extern uint8_t stop_bit_table[];
 extern uint8_t * parity_table[];

@@ -526,7 +526,7 @@ netmode_type wizchip_getnetmode(void)
 
 void wizchip_settimeout(wiz_NetTimeout* nettime)
 {
-   setRCR(nettime->retry_cnt);
+   if(nettime->retry_cnt) setRCR(nettime->retry_cnt);
    setRTR(nettime->time_100us);
 }
 

@@ -51,7 +51,7 @@
 
 /* Defines for firmware update */
 #define DEVICE_FWUP_SIZE			DEVICE_APP_SIZE // Firmware size - 50kB MAX
-#define DEVICE_FWUP_TIMEOUT			8000 // 3 seconds
+#define DEVICE_FWUP_TIMEOUT			5000 // 5 secs.
 
 #define DEVICE_FWUP_RET_SUCCESS		0x80
 #define DEVICE_FWUP_RET_FAILED		0x40
@@ -67,8 +67,5 @@ uint8_t device_firmware_update(teDATASTORAGE stype);
 
 // function for timer
 void device_timer_msec(void);
-
-//void fw_from_network_time_handler(void); // fw_from_network time counter;
-//uint16_t get_fw_from_network_time(void);
 
 #endif /* DEVICEHANDLER_H_ */

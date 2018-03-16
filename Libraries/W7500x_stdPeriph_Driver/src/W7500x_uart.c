@@ -40,7 +40,7 @@ void UART_StructInit(UART_InitTypeDef* UART_InitStruct)
 
 void UART_DeInit(UART_TypeDef *UARTx)
 {
-    
+    UARTx->CR &= ~(UART_CR_UARTEN);
 }
 
 uint32_t UART_Init(UART_TypeDef *UARTx, UART_InitTypeDef* UART_InitStruct)

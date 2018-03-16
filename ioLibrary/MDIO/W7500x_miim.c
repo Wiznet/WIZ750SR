@@ -13,14 +13,16 @@
 *********************************************************************************************************************************************************/
 #include <stdio.h>
 #include "W7500x_miim.h"
+
 #ifdef __W7500P__
 	// PB_05, PB_12 pull down
 	*(volatile uint32_t *)(0x41003070) = 0x61;
 	*(volatile uint32_t *)(0x41003054) = 0x61;
 #endif
 
-#define __DEF_DBG_LEVEL1__
+#define MAX_PHYID_CHECK_CNT     (2)
 
+#define __DEF_DBG_LEVEL1__
 
 extern void delay(__IO uint32_t nCount);
 
@@ -200,47 +202,50 @@ void mdio_write(GPIO_TypeDef* GPIOx, uint32_t PhyRegAddr, uint32_t val)
 
 int32_t phy_id(void)
 {
-	int32_t data;
-	int i=0;
+    int32_t data;
+    int i = 0;
+    uint8_t cnt = 0;
+    
+    while(cnt < MAX_PHYID_CHECK_CNT)
+    {
+        for(i=0; i<=8; i+=1)
+        {
+            /* 32 Consecutive ones on MDO to establish sync */
+            //printf("mdio read - sync \r\n");
+            output_MDIO(GPIOB, 0xFFFFFFFF, 32);
 
-	while(1)
-	{
-		//for(i=0; i<=11; i+=1)
-		for(i=0; i<=8; i+=1)
-		{
-			/* 32 Consecutive ones on MDO to establish sync */
-			//printf("mdio read - sync \r\n");
-			output_MDIO(GPIOB, 0xFFFFFFFF, 32);
+            /* start code 01, read command (10) */
+            //printf("mdio read - start \r\n");
+            output_MDIO(GPIOB, 0x06, 4);
 
-			/* start code 01, read command (10) */
-			//printf("mdio read - start \r\n");
-			output_MDIO(GPIOB, 0x06, 4);
+            /* write PHY address */
+            //printf("mdio read - PHY address \r\n");
+            output_MDIO(GPIOB, i, 5);
 
-			/* write PHY address */
-			//printf("mdio read - PHY address \r\n");
-			output_MDIO(GPIOB, i, 5);
+            //printf("mdio read - PHY REG address \r\n");
+            output_MDIO(GPIOB, PHYREG_STATUS, 5);
 
-			//printf("mdio read - PHY REG address \r\n");
-			output_MDIO(GPIOB, PHYREG_STATUS, 5);
+            /* turnaround MDO is tristated */
+            //printf("mdio read - turnaround \r\n");
+            turnaround_MDIO(GPIOB);
 
-			/* turnaround MDO is tristated */
-			//printf("mdio read - turnaround \r\n");
-			turnaround_MDIO(GPIOB);
+            /* Read the data value */
+            //printf("mdio read - read the data value \r\n");
+            data = input_MDIO(GPIOB);
+            //printf("mdio read - val : %X\r\n", val );
 
-			/* Read the data value */
-			//printf("mdio read - read the data value \r\n");
-			data = input_MDIO(GPIOB);
-			//printf("mdio read - val : %X\r\n", val );
-
-			/* turnaround MDO is tristated */
-			//printf("mdio read - idle \r\n");
-			idle_MDIO(GPIOB);
-			
-			//printf("\r\nPHY_ID = 0x%.4x , STATUS = %x, MDIO = 0x%.4x, MDC = 0x%.4x", i, data, MDIO, MDC);  //right : 0x786d // ## for debugging        
-			if((data != 0x0) && (data != 0xFFFF)) return i; //if(data != 0) return i; // old
-		}
-		printf("\r\nphy id detect error!!\r\n");
-	}
-	// return 0;
+            /* turnaround MDO is tristated */
+            //printf("mdio read - idle \r\n");
+            idle_MDIO(GPIOB);
+            
+            //printf("\r\nPHY_ID = 0x%.4x , STATUS = %x, MDIO = 0x%.4x, MDC = 0x%.4x", i, data, MDIO, MDC);  //right : 0x786d // ## for debugging        
+            if((data != 0x0) && (data != 0xFFFF)) return i;
+            
+            
+        }
+        cnt++;
+        printf("\r\nphy id detect error!!\r\n");
+    }
+    return i;
 }
 

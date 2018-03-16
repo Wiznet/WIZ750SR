@@ -12,9 +12,12 @@
 #define UART_IF_STR_RS232_TTL		"RS-232/TTL"
 #define UART_IF_STR_RS422_485		"RS-422/485"
 
-// If the define '__USE_UART_IF_SELECTOR__' disabled, UART is selected to be 'UART_IF_DEFAULT'
-//#define UART_IF_DEFAULT				UART_IF_RS422_485
+#define UART_IF_RS422				0
+#define UART_IF_RS485				1
+#define UART_IF_RS485_REVERSE		2				//Added by James in March 29
+// If the define '__USE_UART_IF_SELECTOR__' disabled, default UART interface is selected to be 'UART_IF_DEFAULT'
 #define UART_IF_DEFAULT				UART_IF_RS232_TTL
+//#define UART_IF_DEFAULT				UART_IF_RS422_485
 
 enum baud {
 	baud_300 = 0,
@@ -30,7 +33,8 @@ enum baud {
 	baud_38400 = 10,
 	baud_57600 = 11,
 	baud_115200 = 12,
-	baud_230400 = 13
+	baud_230400 = 13,
+    baud_460800 = 14
 };
 
 enum word_len {
@@ -57,17 +61,6 @@ enum flow_ctrl {
 	flow_rtsonly = 3,  // RTS_ONLY
 	flow_reverserts = 4 // Reverse RTS
 };
-
-/*
-// old
-enum flow_ctrl {
-	flow_none = 0,
-	flow_xon_xoff = 1,
-	flow_rts_cts = 2,
-	flow_rs422 = 3,
-	flow_rs485 = 4
-};
-*/
 
 extern uint8_t * uart_if_table[];
 

@@ -47,9 +47,9 @@ struct __network_info {
 	uint8_t packing_delimiter_length;	// 0~4
 	uint8_t packing_data_appendix;		// 0~2(구분자까지 전송, 구분자 +1바이트 까지 전송, 구분자 +2바이트 까지 전송)
 	
-	uint8_t keepalive_en;				// ## Eric, Field added for compatibility with WIZ107SR
-	uint16_t keepalive_wait_time;		// ## Eric, Field added for compatibility with WIZ107SR
-	uint16_t keepalive_retry_time;		// ## Eric, Field added for compatibility with WIZ107SR
+	uint8_t keepalive_en;
+	uint16_t keepalive_wait_time;
+	uint16_t keepalive_retry_time;
 } __attribute__((packed));
 
 struct __serial_info {
@@ -61,18 +61,18 @@ struct __serial_info {
 	uint8_t flow_control;		// None, RTS/CTS, XON/XOFF, RTS Only for RS422/485l
 	uint8_t dtr_en;				// DTR/DSR Enable, Pins for these signals are shared with [Connection status pins]
 	uint8_t dsr_en;				// DTR/DSR Enable, Pins for these signals are shared with [Connection status pins]
-	uint8_t serial_debug_en;	// ## Eric, Field added for compatibility with WIZ107SR
+	uint8_t serial_debug_en;
 } __attribute__((packed));
 
 struct __options {
-	//char pw_setting[10];
 	char pw_connect[10];
-	char pw_search[10];			// ## Eric, Field added for compatibility with WIZ107SR
+	char pw_search[10];
 	uint8_t pw_connect_en;
 	uint8_t dhcp_use;
 	uint8_t dns_use;
 	uint8_t dns_server_ip[4];
-	char dns_domain_name[50];
+	char dns_domain_name[49];
+	uint8_t tcp_rcr_val;
 	uint8_t serial_command;			// Serial Command Mode 사용 여부
 	uint8_t serial_command_echo;	// Serial Command 입력 echoback 여부
 	uint8_t serial_trigger[3];		// Serial Command Mode 진입을 위한 Trigger 코드
@@ -86,7 +86,6 @@ struct __user_io_info {
 	uint16_t user_io_status;		// Digital Output only
 } __attribute__((packed));
 
-// ## Eric, Field added for compatibility with WIZ107SR
 struct __firmware_update {
 	uint8_t fwup_flag;
 	uint16_t fwup_port;
@@ -103,7 +102,7 @@ struct __firmware_update_extend {
 
 typedef struct __DevConfig {
 	uint16_t packet_size;
-	uint8_t module_type[3];		// 모듈의 종류별로 코드를 부여하고 이를 사용한다.
+	uint8_t module_type[3];		// 모듈의 종류별로 코드를 부여하고 사용한다.
 	uint8_t module_name[15];
 	uint8_t fw_ver[3];			// 10진수. Major Version . Minor Version . Maintenance Version 버전으로 나뉨
 	struct __network_info_common network_info_common;

@@ -284,7 +284,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
     
     uint8_t param[SEGCP_PARAM_MAX*2];
     
-#ifdef _SEGCP_DEBUG_   
+#ifdef _SEGCP_DEBUG_
     printf("SEGCP_REQ : %s\r\n",segcp_req);
 #endif
     memset(trep, 0, sizeof(trep));
@@ -868,8 +868,8 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                         }
                         else
                         {
-                            tmp_int = atoi(param);
-                            dev_config->network_info[0].packing_delimiter[0] = (uint8_t)tmp_int;
+                            str_to_hex(param, &tmp_byte);
+                            dev_config->network_info[0].packing_delimiter[0] = tmp_byte;
                             
                             if(dev_config->network_info[0].packing_delimiter[0] == 0x00) 
                                 dev_config->network_info[0].packing_delimiter_length = 0;
@@ -886,7 +886,6 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                     case SEGCP_SS:
                         if(param_len != 6 || !is_hexstr(param) || !str_to_hex(param, dev_config->options.serial_trigger))
                         {
-                            //printf(">> SEGCP_SS = %.2X %.2X %.2X", dev_config->options.serial_trigger[0], dev_config->options.serial_trigger[1], dev_config->options.serial_trigger[2]);
                             ret |= SEGCP_RET_ERR_INVALIDPARAM;
                         }
                         break;

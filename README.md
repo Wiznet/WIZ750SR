@@ -3,8 +3,9 @@ WIZnet Serial to Ethernet(S2E) module based on W7500 chip, WIZ107/108SR S2E comp
 
 - 48(W) x 30mm(L) x 18mm(H)
 <!-- WIZ750SR pic -->
-![WIZ750SR](https://wizwiki.net/wiki/lib/exe/fetch.php?media=products:wiz750sr:wiz750sr_rev1.0_main_1024x693.png)
- 
+<p align="center">
+  <img width="50%" src="http://www.wiznet.io/wp-content/uploads/2016/11/WIZ750SR_QuarterView.png" />
+</p> 
  
 ## WIZ750SR EVB (Separate purchases)
 
@@ -22,7 +23,7 @@ WIZnet Serial to Ethernet(S2E) module based on W7500 chip, WIZ107/108SR S2E comp
 
 <!-- WIZ750SR EVB pic -->
 <p align="center">
-  <img width="70%" src="https://wizwiki.net/wiki/lib/exe/fetch.php?media=products:wiz750sr:gettingstarted:wiz750sr-ttl-evb_1_1024x816.png" />
+  <img width="60%" src="http://www.wiznet.io/wp-content/uploads/2016/11/1WIZ750SR-TTL-EVB_.png" />
 </p>
  
 For more details, please refer to [WIZ750SR Wiki page](https://wizwiki.net/wiki/doku.php?id=products:wiz750sr:start) in [WIZnet Wiki](https://wizwiki.net).
@@ -77,8 +78,11 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
  
  
 ## Update History
-
 v1.2.1
+- Improvements:
+  - Enhanced operational stability when performing configuration data save and factory reset functions 
+
+v1.2.1 Pre-release
 - Bug Fixes:
   - 'Character' of serial data packing option is not set correctly 
 

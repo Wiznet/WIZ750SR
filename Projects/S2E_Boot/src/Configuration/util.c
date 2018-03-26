@@ -4,6 +4,7 @@
 #include <ctype.h>
 #include "util.h"
 
+
 uint8_t is_ipaddr(uint8_t * ipaddr, uint8_t * ret_ip)
 {
 	uint8_t i = 0;
@@ -58,6 +59,7 @@ uint8_t is_hexstr(uint8_t * hexstr)
 	return 1; 
 }
 
+
 uint8_t is_hex(uint8_t hex)
 {
 	uint8_t ret = hex;
@@ -70,6 +72,7 @@ uint8_t is_hex(uint8_t hex)
 	
 	return ret;
 }
+
 
 uint8_t is_macaddr(uint8_t * macstr, uint8_t * digitstr, uint8_t * mac)
 {

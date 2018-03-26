@@ -8,7 +8,8 @@
   ******************************************************************************
   * @attention
   * @par Revision history
-  *    <2018/03/16> v1.2.1 Bugfix by Eric Jung
+  *    <2018/03/26> v1.2.1 Bugfix by Eric Jung
+  *    <2018/03/16> v1.2.1 Bugfix by Eric Jung(Pre-released Ver.)
   *    <2018/03/12> v1.2.0 Bugfix and Improvements by Eric Jung
   *    <2018/02/08> v1.1.2 Bugfix by Eric Jung
   *    <2018/01/26> v1.1.2 Added WIZ750SR-1xx function by Edward Ahn

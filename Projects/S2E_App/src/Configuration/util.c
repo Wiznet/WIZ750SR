@@ -3,40 +3,6 @@
 #include <stdlib.h>
 #include <ctype.h>
 #include "util.h"
-/*
-uint8_t str_to_ipaddr(uint8_t * ipaddr_str, uint8_t * ip)
-{
-	int8_t * ptr;
-	uint8_t ip_cnt = 0;
-	uint16_t digit, sumchk = 0;
-	uint8_t tmp[16] = {0, };
-	
-	if(is_ipaddr(ipaddr_str))
-	{
-		strcpy((char*)tmp, (char*)ipaddr_str);
-		ptr = (int8_t*)strtok((char*)tmp, ".");
-		
-		while(ptr != NULL)
-		{
-			digit = atoi((char *)ptr);
-			if(digit > 255 || digit < 0) return 0;
-			
-			if(ip) ip[ip_cnt] = digit;
-			sumchk += digit;
-			ip_cnt++;
-			ptr = (int8_t*)strtok(NULL, ".");
-		}
-		
-		if(ip_cnt != 4 || sumchk == 0) return 0;
-	}
-	else
-	{
-		return 0;
-	}
-	
-	return 1;
-}
-*/
 
 
 uint8_t is_ipaddr(uint8_t * ipaddr, uint8_t * ret_ip)
@@ -80,35 +46,7 @@ uint8_t is_ipaddr(uint8_t * ipaddr, uint8_t * ret_ip)
 	
 	return 1;
 }
-/*
-uint8_t is_ipaddr(uint8_t * ipaddr)
-{
-	uint8_t dotcnt = 0;
-	uint8_t i = 0;
-	uint16_t tval = 0;
-	uint8_t len = strlen((char *)ipaddr);
-	
-	if(len > 15 || len < 7) return 0;
-	
-	for(i = 0; i < len ; i++)
-	{
-		if(isdigit(ipaddr[i]))
-		{
-			tval = (tval * 10) + ipaddr[i] - '0';
-			if(tval > 255) return 0;
-		}
-		else if(ipaddr[i] == '.')
-		{
-			if(tval > 255) return 0;
-			if(++dotcnt > 4) return 0;
-			tval = 0;
-		}
-		else return 0;
-	}
-	
-	return 1;
-}
-*/
+
 
 uint8_t is_hexstr(uint8_t * hexstr)
 {
@@ -120,6 +58,7 @@ uint8_t is_hexstr(uint8_t * hexstr)
 	}
 	return 1; 
 }
+
 
 uint8_t is_hex(uint8_t hex)
 {
@@ -133,6 +72,7 @@ uint8_t is_hex(uint8_t hex)
 	
 	return ret;
 }
+
 
 uint8_t is_macaddr(uint8_t * macstr, uint8_t * digitstr, uint8_t * mac)
 {
@@ -151,7 +91,6 @@ uint8_t is_macaddr(uint8_t * macstr, uint8_t * digitstr, uint8_t * mac)
 			tmp_hexstr[2] = 0;
 			if(is_hexstr(tmp_hexstr))
 			{
-				//sscanf(tmp_hexstr,"%x", &tmp_mac[i]);
 				str_to_hex(tmp_hexstr, &tmp_mac[i]);
 			}
 			else
@@ -190,41 +129,6 @@ uint8_t str_to_hex(uint8_t * str, uint8_t * hex)
 	return 1;
 }
 
-/*
-hex_decode(const char *in, size_t len,uint8_t *out)
-{
-	unsigned int i, t, hn, ln;
-
-	for (t = 0,i = 0; i < len; i+=2,++t) {
-
-	hn = in[i] > '9' ? in[i] - 'A' + 10 : in[i] - '0';
-	ln = in[i+1] > '9' ? in[i+1] - 'A' + 10 : in[i+1] - '0';
-
-	out[t] = (hn << 4 ) | ln;
-	}
-
-	return out;
-}
-*/
-
-// Does not use
-uint8_t conv_hexstr(uint8_t * hexstr, uint8_t * hexarray)
-{
-	//uint8_t i = 0;
-	char tmp_hexstr[3];
-	uint8_t len = strlen((char *)hexstr);
-	
-	if((len & 0x01)  || (len > 16) || (*hexstr == 0)) return 0;
-	
-	while(*hexstr)
-	{
-		memcpy(tmp_hexstr,hexstr,2);
-		tmp_hexstr[2] = 0;
-		sscanf(tmp_hexstr, "%x", hexarray++);
-		hexstr+=2;
-	}
-	return 1;
-}
 
 /**
  * @brief Check strings and then execute callback function by each string.

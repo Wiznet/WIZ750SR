@@ -104,6 +104,9 @@ uint16_t get_tcp_any_port(void);
 // UART tx/rx and Ethernet tx/rx data transfer bytes counter
 void add_data_transfer_bytecount(teDATADIR dir, uint16_t len);
 
+// Serial debug messages for verifying data transfer
+uint16_t debugSerial_dataTransfer(uint8_t * buf, uint16_t size, teDEBUGTYPE type);
+
 /* Public & Private functions ------------------------------------------------*/
 
 void do_seg(uint8_t sock)
@@ -824,8 +827,7 @@ void uart_to_ether(uint8_t sock)
 	struct __serial_info *serial = (struct __serial_info *)get_DevConfig_pointer()->serial_info;
 	uint16_t len;
 	int16_t sent_len;
-	//uint16_t ret;
-	//uint16_t i; // ## for debugging
+	uint16_t i; // ## for debugging
 	
 #if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == WIZ750SR_1xx))
 	if(get_phylink_in_pin() != 0) return; // PHY link down
@@ -833,11 +835,15 @@ void uart_to_ether(uint8_t sock)
 	
 	// UART ring buffer -> user's buffer
 	len = get_serial_data();
-	add_data_transfer_bytecount(SEG_UART_RX, len);
-
 	
 	if(len > 0)
 	{
+		add_data_transfer_bytecount(SEG_UART_RX, len);
+		if((serial->serial_debug_en == SEG_DEBUG_S2E) || (serial->serial_debug_en == SEG_DEBUG_ALL))
+		{
+			debugSerial_dataTransfer(g_send_buf, len, SEG_DEBUG_S2E);
+		}
+		
 		switch(getSn_SR(sock))
 		{
 			case SOCK_UDP: // UDP_MODE
@@ -1052,10 +1058,13 @@ void ether_to_uart(uint8_t sock)
 //////////////////////////////////////////////////////////////////////
 		if(serial->uart_interface == UART_IF_RS422_485)
 		{
+			if((serial->serial_debug_en == SEG_DEBUG_E2S) || (serial->serial_debug_en == SEG_DEBUG_ALL))
+			{
+				debugSerial_dataTransfer(g_recv_buf, e2u_size, SEG_DEBUG_E2S);
+			}
+			
 			uart_rs485_enable(SEG_DATA_UART);
-			
 			for(i = 0; i < e2u_size; i++) uart_putc(SEG_DATA_UART, g_recv_buf[i]);
-			
 			uart_rs485_disable(SEG_DATA_UART);
 			
 			add_data_transfer_bytecount(SEG_ETHER_TX, e2u_size);
@@ -1066,6 +1075,11 @@ void ether_to_uart(uint8_t sock)
 		{
 			if(isXON == SEG_ENABLE)
 			{
+				if((serial->serial_debug_en == SEG_DEBUG_E2S) || (serial->serial_debug_en == SEG_DEBUG_ALL))
+				{
+					debugSerial_dataTransfer(g_recv_buf, e2u_size, SEG_DEBUG_E2S);
+				}
+				
 				for(i = 0; i < e2u_size; i++) uart_putc(SEG_DATA_UART, g_recv_buf[i]);
 				add_data_transfer_bytecount(SEG_ETHER_TX, e2u_size);
 				e2u_size = 0;
@@ -1077,6 +1091,11 @@ void ether_to_uart(uint8_t sock)
 		}
 		else
 		{
+			if((serial->serial_debug_en == SEG_DEBUG_E2S) || (serial->serial_debug_en == SEG_DEBUG_ALL))
+			{
+				debugSerial_dataTransfer(g_recv_buf, e2u_size, SEG_DEBUG_E2S);
+			}
+			
 			for(i = 0; i < e2u_size; i++) uart_putc(SEG_DATA_UART, g_recv_buf[i]);
 			
 			add_data_transfer_bytecount(SEG_ETHER_TX, e2u_size);
@@ -1493,6 +1512,28 @@ uint32_t get_data_transfer_bytecount(teDATADIR dir)
 	}
 	return ret;
 }
+
+uint16_t debugSerial_dataTransfer(uint8_t * buf, uint16_t size, teDEBUGTYPE type)
+{
+    uint16_t bytecnt = 0;
+    
+//#ifdef __USE_DEBUG_UPTIME__
+    if(getDeviceUptime_day() > 0)
+        printf(" [%dd/%02d:%02d:%02d]", getDeviceUptime_day(), getDeviceUptime_hour(), getDeviceUptime_min(), getDeviceUptime_sec());
+    else
+        printf(" [%02d:%02d:%02d]", getDeviceUptime_hour(), getDeviceUptime_min(), getDeviceUptime_sec());
+//#endif
+    
+    if((type == SEG_DEBUG_S2E) || (type == SEG_DEBUG_E2S))
+    {
+        printf("[%s][%04d] ", (type == SEG_DEBUG_S2E)?"S2E":"E2S", size);
+        for(bytecnt = 0; bytecnt < size; bytecnt++) printf("%02X ", buf[bytecnt]);
+        printf("\r\n");
+    }
+    
+    return bytecnt;
+}
+
 
 
 // This function have to call every 1 millisecond by Timer IRQ handler routine.

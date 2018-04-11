@@ -386,7 +386,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                         break;
                     case SEGCP_DH:
                         if(dev_config->module_name[0] == 0) sprintf(trep,"%c",SEGCP_NULL);
-                        else sprintf(trep, "%s-%02x%02x%02x", dev_config->module_name, dev_config->network_info_common.mac[3], dev_config->network_info_common.mac[4], dev_config->network_info_common.mac[5]);
+                        else sprintf(trep, "%s-%02X%02X%02X", dev_config->module_name, dev_config->network_info_common.mac[3], dev_config->network_info_common.mac[4], dev_config->network_info_common.mac[5]);
                         break;
                     case SEGCP_LP: sprintf(trep, "%d", dev_config->network_info[0].local_port);
                         break;
@@ -649,7 +649,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                         break;
                     case SEGCP_DG:
                         tmp_byte = is_hex(*param);
-                        if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+                        if(param_len != 1 || tmp_byte > SEG_DEBUG_ALL) ret |= SEGCP_RET_ERR_INVALIDPARAM;
                         else dev_config->serial_info[0].serial_debug_en = tmp_byte;
                         break;
                     case SEGCP_KA:
@@ -997,10 +997,10 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 // Status Pins
                     // SET status pin mode selector
                     case SEGCP_SC:
-                        tmp_int = atoi(param);
+                        str_to_hex(param, &tmp_byte);
                         
-                        tmp_byte = (uint8_t)((tmp_int & 0xF0) >> 4); // [0] PHY link / [1] DTR
-                        tmp_int = (tmp_int & 0x0F); // [0] TCP connection / [1] DSR
+                        tmp_int = (tmp_byte & 0xF0) >> 4; // [0] PHY link / [1] DTR
+                        tmp_byte = (tmp_byte & 0x0F); // [0] TCP connection / [1] DSR
                         
                         if((param_len > 2) || (tmp_byte > IO_HIGH) || (tmp_int > IO_HIGH)) // Invalid parameters
                         {
@@ -1008,8 +1008,8 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                         }
                         else
                         {
-                            dev_config->serial_info[0].dtr_en = tmp_byte;
-                            dev_config->serial_info[0].dsr_en = (uint8_t)tmp_int;
+                            dev_config->serial_info[0].dtr_en = (uint8_t)tmp_int;
+                            dev_config->serial_info[0].dsr_en = tmp_byte;
                             
                             // Status I/O - Shared pin init: Connection status pins or DTR/DSR pins
                             init_connection_status_io(); 
@@ -1072,7 +1072,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                     
                     case SEGCP_TR: // TCP Retransmission retry count
                         tmp_int = atoi(param);
-                        if(param_len > 3 || tmp_int > 0xFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+                        if((param_len > 3) || (tmp_int < 1) || (tmp_int > 0xFF)) ret |= SEGCP_RET_ERR_INVALIDPARAM;
                         else dev_config->options.tcp_rcr_val = (uint8_t)tmp_int;
                         break;
                     

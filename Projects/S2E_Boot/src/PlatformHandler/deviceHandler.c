@@ -261,7 +261,6 @@ uint8_t device_firmware_update(teDATASTORAGE stype)
 		}
 
 		write_fw_len = 0;
-		erase_storage(STORAGE_APP_MAIN); // Erase application backup blocks
 		
 		// init firmware update timer
 		enable_fw_update_timer = SEGCP_ENABLE;
@@ -351,6 +350,9 @@ uint16_t get_firmware_from_network(uint8_t sock, uint8_t * buf)
 			{
 				// init network firmware update timer
 				enable_fw_from_network_timer = SEGCP_ENABLE;
+				
+				// Erase application backup blocks
+				erase_storage(STORAGE_APP_MAIN);
 				setSn_IR(sock, Sn_IR_CON);
 			}
 			

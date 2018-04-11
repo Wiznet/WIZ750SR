@@ -13,7 +13,8 @@
 static volatile uint16_t msec_cnt = 0;
 static volatile uint8_t  sec_cnt = 0;
 static volatile uint8_t  min_cnt = 0;
-static volatile uint32_t hour_cnt = 0;
+static volatile uint8_t  hour_cnt = 0;
+static volatile uint16_t day_cnt = 0;
 static volatile uint32_t devtime_sec = 0;
 static volatile uint32_t devtime_msec = 0;
 
@@ -98,6 +99,13 @@ void Timer_IRQ_Handler(void)
 			min_cnt = 0;
 			hour_cnt++;
 		}
+		
+        /* Day Process */
+		if(hour_cnt >= 24)
+		{
+			hour_cnt = 0;
+			day_cnt++;
+		}
 	}
 
 	if(DUALTIMER_GetIntStatus(DUALTIMER0_1))
@@ -124,6 +132,11 @@ uint32_t getNow(void)
 uint32_t millis(void)
 {
 	return devtime_msec;
+}
+
+uint32_t getDeviceUptime_day(void)
+{
+	return day_cnt;
 }
 
 uint32_t getDeviceUptime_hour(void)

@@ -78,6 +78,22 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
  
  
 ## Update History
+v1.2.2
+- Bug Fixes:
+  - Internal bug fixing (PHY init)
+  - Char serial packing option(delimiter) setting does not correctly apply some hex codes
+    
+- Improvements:
+  - Changed the location of the flash erase operation function during network firmware update
+    - Now the application area flash memory is erased after socket establishment of TCP connection for the firmware update
+  - Extended serial debug message added: 
+    - If this option is selected, users can check the sent and received data via the serial debug port. (WIZnet S2E tool GUI version 0.4.0 or later)
+
+- Changes:
+  - Changed the TCP retransmission timeout-value from 250ms to 200ms(return to default value)
+      - The TCP timeout can be adjusted by the TCP retransmission retry count added in firmware version 1.2.0.
+ 
+
 v1.2.1
 - Improvements:
   - Enhanced operational stability when performing configuration data save and factory reset functions 

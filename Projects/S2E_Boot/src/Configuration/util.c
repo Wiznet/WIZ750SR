@@ -110,16 +110,21 @@ uint8_t str_to_hex(uint8_t * str, uint8_t * hex)
 	uint8_t i;
 	uint8_t hexcnt = 0;
 	uint8_t hn, ln;
+	uint8_t str_tmp[2];
 	uint8_t len = strlen((char *)str);
 	
 	if((len & 0x01)  || (len > 16) || (*str == 0)) return 0;
 	
 	for(i = 0; i < len; i+=2)
 	{
-		hn = str[i] > '9' ? (str[i] - 'A' + 10) : (str[i] - '0');
-		ln = str[i+1] > '9' ? (str[i+1] - 'A' + 10) : (str[i+1] - '0');
-		
-		hex[hexcnt++] = (hn << 4 ) | ln;
+		//Convert each character to uppercase
+		str_tmp[0] = (uint8_t)toupper(str[i]);
+		str_tmp[1] = (uint8_t)toupper(str[i+1]);
+
+		hn = str_tmp[0] > '9' ? (str_tmp[0] - 'A' + 10) : (str_tmp[0] - '0');
+		ln = str_tmp[1] > '9' ? (str_tmp[1] - 'A' + 10) : (str_tmp[1] - '0');
+
+		hex[hexcnt++] = (hn << 4) | ln;
 	}
 	
 	return 1;

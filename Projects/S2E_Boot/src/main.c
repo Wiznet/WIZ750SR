@@ -2,12 +2,13 @@
   ******************************************************************************
   * @file    W7500x Serial to Ethernet Project - WIZ750SR Boot
   * @author  Eric Jung, Team CS
-  * @version v1.2.1
-  * @date    Mar-2018
+  * @version v1.2.2
+  * @date    Apr-2018
   * @brief   Boot program body
   ******************************************************************************
   * @attention
   * @par Revision history
+  *    <2018/04/11> v1.2.2 Bugfix and Improvements by Eric Jung
   *    <2018/03/26> v1.2.1 Bugfix by Eric Jung
   *    <2018/03/16> v1.2.1 Bugfix by Eric Jung(Pre-released Ver.)
   *    <2018/03/12> v1.2.0 Bugfix and Improvements by Eric Jung
@@ -151,19 +152,19 @@ int main(void)
 			// 1. 50kB app mode: Firmware copy: [App backup] -> [App main]
 			// 2. 100kB app mode: Firmware download and write: [Network] -> [App main] (default)
 		ret = device_firmware_update(STORAGE_APP_MAIN);
+		
+		dev_config->firmware_update.fwup_flag = SEGCP_DISABLE;
+		dev_config->firmware_update.fwup_size = 0;
+		
+		dev_config->network_info[0].state = ST_OPEN;
+		save_DevConfig_to_storage();
+		
 		if(ret == DEVICE_FWUP_RET_SUCCESS)
 		{
-			dev_config->firmware_update.fwup_flag = SEGCP_DISABLE;
-			dev_config->firmware_update.fwup_size = 0;
-			
-			dev_config->network_info[0].state = ST_OPEN;
-			save_DevConfig_to_storage();
-			
 			Copy_Interrupt_VectorTable(DEVICE_APP_MAIN_ADDR);
 			delay(SAVE_INTERVAL_MS/2);
-			
-			appjump_enable = ON;
 		}
+		appjump_enable = ON;
 	}
 	
 	

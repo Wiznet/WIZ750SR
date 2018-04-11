@@ -13,6 +13,7 @@ void setDevtime(uint32_t timeval_sec);
 uint32_t millis(void);
 ////////////////////////////////////////
 
+uint32_t getDeviceUptime_day(void);
 uint32_t getDeviceUptime_hour(void);
 uint8_t  getDeviceUptime_min(void);
 uint8_t  getDeviceUptime_sec(void);

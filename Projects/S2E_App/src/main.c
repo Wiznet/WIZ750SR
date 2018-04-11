@@ -2,12 +2,13 @@
   ******************************************************************************
   * @file    W7500x Serial to Ethernet Project - WIZ750SR App
   * @author  Eric Jung, Team CS
-  * @version v1.2.1
-  * @date    Mar-2018
+  * @version v1.2.2
+  * @date    Apr-2018
   * @brief   Main program body
   ******************************************************************************
   * @attention
   * @par Revision history
+  *    <2018/04/11> v1.2.2 Bugfix and Improvements by Eric Jung
   *    <2018/03/26> v1.2.1 Bugfix by Eric Jung
   *    <2018/03/16> v1.2.1 Bugfix by Eric Jung(Pre-released Ver.)
   *    <2018/03/12> v1.2.0 Bugfix and Improvements by Eric Jung
@@ -458,7 +459,7 @@ void display_Dev_Info_main(void)
         printf("\t   + S2E data port: [%d]\r\n", dev_config->network_info[0].local_port);
         printf("\t   + TCP/UDP setting port: [%d]\r\n", DEVICE_SEGCP_PORT);
         printf("\t   + Firmware update port: [%d]\r\n", DEVICE_FWUP_PORT);
-        printf("\t- TCP Retransmission retry: [%d]\r\n", dev_config->options.tcp_rcr_val);
+        printf("\t- TCP Retransmission retry: [%d]\r\n", getRCR());
     
     printf(" - Search ID code: \r\n");
         printf("\t- %s: [%s]\r\n", (dev_config->options.pw_search[0] != 0)?"Enabled":"Disabled", (dev_config->options.pw_search[0] != 0)?dev_config->options.pw_search:"None");

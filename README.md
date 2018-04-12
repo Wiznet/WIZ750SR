@@ -78,7 +78,14 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
  
  
 ## Update History
-v1.2.2
+
+v1.2.2 Stable
+- Bug Fixes:
+  - Stabilize the network operation of the W7500P devices 
+  - Error in setting function in App_Boot mode due to 'TR', 'SC' command processing failure
+  - Applied the missing TCP retransmission timeout-value change
+
+v1.2.2 Pre-release
 - Bug Fixes:
   - Internal bug fixing (PHY init)
   - Char serial packing option(delimiter) setting does not correctly apply some hex codes
@@ -92,7 +99,6 @@ v1.2.2
 - Changes:
   - Changed the TCP retransmission timeout-value from 250ms to 200ms(return to default value)
       - The TCP timeout can be adjusted by the TCP retransmission retry count added in firmware version 1.2.0.
- 
 
 v1.2.1
 - Improvements:

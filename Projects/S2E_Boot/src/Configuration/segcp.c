@@ -34,7 +34,7 @@ uint8_t * tbSEGCPCMD[] = {"MC", "VR", "MN", "IM", "OP", "DD", "CP", "PO", "DG", 
 							"DP", "DI", "DW", "DH", "LP", "RP", "RH", "BR", "DB", "PR",
 							"SB", "FL", "IT", "PT", "PS", "PD", "TE", "SS", "NP", "SP",
 							"LG", "ER", "FW", "MA", "PW", "SV", "EX", "RT", "UN", "ST",
-							"FR", "EC", "K!", "UE", "UI", "AB", "TR", 0};
+							"FR", "EC", "K!", "UE", "UI", "AB", "SC", "TR", 0};
 
 uint8_t * tbSEGCPERR[] = {"ERNULL", "ERNOTAVAIL", "ERNOPARAM", "ERIGNORED", "ERNOCOMMAND", "ERINVALIDPARAM", "ERNOPRIVILEGE"};
 
@@ -430,7 +430,10 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 							ret |= SEGCP_RET_SAVE | SEGCP_RET_REBOOT;
 						}
 						else ret |= SEGCP_RET_ERR_NOPRIVILEGE;
-						break;
+						break;                    
+                    case SEGCP_SC: // mode select, GET Status pins settings
+                        sprintf(trep, "%d%d", dev_config->serial_info[0].dtr_en, dev_config->serial_info[0].dsr_en);
+                        break;
 					case SEGCP_TR: sprintf(trep, "%d", dev_config->options.tcp_rcr_val);
 						break;
 					default:
@@ -803,12 +806,27 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 						if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
 						else ;
 						break;
+                    case SEGCP_SC: // SET status pin mode selector
+                        str_to_hex(param, &tmp_byte);
                     
-					case SEGCP_TR: // TCP Retransmission retry count
-						sscanf(param, "%d", &tmp_int);
-						if(param_len > 3 || tmp_int > 0xFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
-						else dev_config->options.tcp_rcr_val = (uint8_t)tmp_int;
-                    
+                        tmp_int = (tmp_byte & 0xF0) >> 4; // [0] PHY link / [1] DTR
+                        tmp_byte = (tmp_byte & 0x0F); // [0] TCP connection / [1] DSR
+                        
+                        if((param_len > 2) || (tmp_byte > 1) || (tmp_int > 1)) // Invalid parameters
+                        {
+                            ret |= SEGCP_RET_ERR_INVALIDPARAM;
+                        }
+                        else
+                        {
+                            dev_config->serial_info[0].dtr_en = (uint8_t)tmp_int;
+                            dev_config->serial_info[0].dsr_en = tmp_byte;
+                        }
+                        break;
+                    case SEGCP_TR: // TCP Retransmission retry count
+                        tmp_int = atoi(param);
+                        if((param_len > 3) || (tmp_int < 1) || (tmp_int > 0xFF)) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+                        else dev_config->options.tcp_rcr_val = (uint8_t)tmp_int;
+                        break;
 					case SEGCP_UN:
 					case SEGCP_ST:
 					case SEGCP_LG:

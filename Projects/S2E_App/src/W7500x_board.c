@@ -80,9 +80,6 @@ static void PHY_Init(void)
 	// PB_05, PB_12 pull down
 	*(volatile uint32_t *)(0x41003070) = 0x61; // RXDV - set pull down (PB_12)
 	*(volatile uint32_t *)(0x41003054) = 0x61; // COL  - set pull down (PB_05)
-    
-    GPIO_Configuration(GPIOB, GPIO_Pin_5, GPIO_Mode_IN, PAD_AF1); // COL (PB_05)
-    GPIO_Configuration(GPIOB, GPIO_Pin_6, GPIO_Mode_IN, PAD_AF1); // DUP (PB_06)
 #endif
 
 #ifdef __DEF_USED_MDIO__ 

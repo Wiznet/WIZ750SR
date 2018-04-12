@@ -8,7 +8,8 @@
   ******************************************************************************
   * @attention
   * @par Revision history
-  *    <2018/04/11> v1.2.2 Bugfix and Improvements by Eric Jung
+  *    <2018/04/12> v1.2.2 Bugfix by Eric Jung
+  *    <2018/04/11> v1.2.2 Bugfix and Improvements by Eric Jung(Pre-released Ver.)
   *    <2018/03/26> v1.2.1 Bugfix by Eric Jung
   *    <2018/03/16> v1.2.1 Bugfix by Eric Jung(Pre-released Ver.)
   *    <2018/03/12> v1.2.0 Bugfix and Improvements by Eric Jung
@@ -274,9 +275,13 @@ static void W7500x_WZTOE_Init(void)
     uint8_t i;
 #endif
     
-    
     /* Software reset the WZTOE(Hardwired TCP/IP core) */
     wizchip_sw_reset();
+    
+#ifdef __W7500P__ // W7500P
+    GPIO_Configuration(GPIOB, GPIO_Pin_5, GPIO_Mode_IN, PAD_AF1); // COL (PB_05)
+    GPIO_Configuration(GPIOB, GPIO_Pin_6, GPIO_Mode_IN, PAD_AF1); // DUP (PB_06)
+#endif
     
     /* Set WZ_100US Register */
     setTIC100US((GetSystemClock()/10000));
@@ -309,7 +314,7 @@ static void set_WZTOE_NetTimeout(void)
     /* Set TCP Timeout: retry count / timeout val */
     // W7500x Retransmission retry count default: [8], Timeout val default: [2000]
     net_timeout.retry_cnt = dev_config->options.tcp_rcr_val;
-    net_timeout.time_100us = 2500;
+    net_timeout.time_100us = 2000;
     wizchip_settimeout(&net_timeout);
     
 #ifdef _MAIN_DEBUG_

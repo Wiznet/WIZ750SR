@@ -78,7 +78,20 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
  
  
 ## Update History
+v1.2.3 Stable
+- Bug Fixes:
+  - Fixed an issue where the pin states could not be saved correctly if the user's GPIO is set to 'Digital Output'
 
+- Improvements:
+  - From this version, AppBoot mode supports TCP unicast search function
+  	- Until the previous version, AppBoot mode only supported the UDP search function
+  	- This is an enhancement to enable firmware update even in device control using TCP unicast search function in new configuration tool
+
+- Changes:
+  - The function of the STATUS pin that was responsible for the TCP connection status indicator function has been changed to Command mode switch trigger pin (HW_Trigger).
+    - This changes only apply to the WIZ750SR-1xx product family (WIZ750SR-100/105/110, change to maintain compatibility with WIZ100SR)
+    - The HW_Trigger pin up to v1.2.2 will no longer work with v1.2.3. The STATUS pin acts as the HW_Trigger.
+    
 v1.2.2 Stable
 - Bug Fixes:
   - Stabilize the network operation of the W7500P devices 

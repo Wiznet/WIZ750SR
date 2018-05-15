@@ -2,12 +2,13 @@
   ******************************************************************************
   * @file    W7500x Serial to Ethernet Project - WIZ750SR App
   * @author  Eric Jung, Team CS
-  * @version v1.2.2
+  * @version v1.2.3
   * @date    Apr-2018
   * @brief   Main program body
   ******************************************************************************
   * @attention
   * @par Revision history
+  *    <2018/04/27> v1.2.3 Bugfix and Improvements by Eric Jung
   *    <2018/04/12> v1.2.2 Bugfix by Eric Jung
   *    <2018/04/11> v1.2.2 Bugfix and Improvements by Eric Jung(Pre-released Ver.)
   *    <2018/03/26> v1.2.1 Bugfix by Eric Jung
@@ -129,9 +130,6 @@ int main(void)
     /* UART Initialization */
     S2E_UART_Configuration();
     
-    /* GPIO Initialization*/
-    IO_Configuration();
-    
     if(dev_config->serial_info[0].serial_debug_en)
     {
         // Debug UART: Device information print out
@@ -199,6 +197,9 @@ int main(void)
         init_trigger_modeswitch(DEVICE_AT_MODE);
         flag_hw_trig_enable = 0;
     }
+    
+    /* GPIO Initialization*/
+    IO_Configuration();
 
     while(1) // main loop
     {

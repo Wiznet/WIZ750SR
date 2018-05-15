@@ -94,12 +94,13 @@ void init_user_io(uint8_t io_sel)
 			if((user_io_info->user_io_direction & io_sel) == io_sel) // IO_OUTPUT == 1
 			{
 				GPIO_Configuration(USER_IO_PORT[idx], USER_IO_PIN[idx], GPIO_Mode_OUT, USER_IO_DEFAULT_PAD_AF);
-				io_status = user_io_info->user_io_status;
+				io_status = ((user_io_info->user_io_status & (uint16_t)io_sel) == (uint16_t)io_sel)?IO_HIGH:IO_LOW;
 				
-				if(io_status == IO_HIGH)
+				if(io_status == IO_HIGH) {
 					GPIO_SetBits(USER_IO_PORT[idx], USER_IO_PIN[idx]);
-				else
+				} else {
 					GPIO_ResetBits(USER_IO_PORT[idx], USER_IO_PIN[idx]);
+				}
 			}
 			else
 			{
@@ -318,12 +319,12 @@ uint8_t set_user_io_val(uint16_t io_sel, uint16_t * val)
 			
 			if(*val == 0)
 			{
-				user_io_info->user_io_status = IO_LOW;
+				user_io_info->user_io_status &= ~(io_sel);
 				GPIO_ResetBits(USER_IO_PORT[idx], USER_IO_PIN[idx]);
 			}
 			else if(*val == 1)
 			{
-				user_io_info->user_io_status = IO_HIGH;
+				user_io_info->user_io_status |= io_sel;
 				GPIO_SetBits(USER_IO_PORT[idx], USER_IO_PIN[idx]);
 			}
 			
@@ -375,8 +376,10 @@ void init_connection_status_io(void)
 	else					init_flowcontrol_dsr_pin();
 
 #if (DEVICE_BOARD_NAME == WIZ750SR_1xx)
-	// TCP connection status pin for WIZ750SR-10x series only
-	init_status_pin();
+    #ifdef __USE_TCPCONNECT_STATUS_PIN__
+        // TCP connection status pin for WIZ750SR-10x series only
+        init_status_pin();
+    #endif
 #endif
 }
 
@@ -405,7 +408,9 @@ void set_connection_status_io(uint16_t pin, uint8_t set)
 		{
 			if(serial->dsr_en == 0) GPIO_ResetBits(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN);
 #if (DEVICE_BOARD_NAME == WIZ750SR_1xx)
-			GPIO_ResetBits(STATUS_PORT, STATUS_PIN);
+    #ifdef __USE_TCPCONNECT_STATUS_PIN__
+            GPIO_ResetBits(STATUS_PORT, STATUS_PIN);
+    #endif
 #endif
 			LED_On(LED2);
 		}
@@ -414,7 +419,9 @@ void set_connection_status_io(uint16_t pin, uint8_t set)
 			
 			if(serial->dsr_en == 0) GPIO_SetBits(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN);
 #if (DEVICE_BOARD_NAME == WIZ750SR_1xx)
-			GPIO_SetBits(STATUS_PORT, STATUS_PIN);
+    #ifdef __USE_TCPCONNECT_STATUS_PIN__
+            GPIO_SetBits(STATUS_PORT, STATUS_PIN);
+    #endif
 #endif
 			LED_Off(LED2);
 		}
@@ -463,8 +470,10 @@ void init_tcpconnection_status_pin(void)
 	GPIO_SetBits(STATUS_TCPCONNECT_PORT, STATUS_TCPCONNECT_PIN); 
 
 #if (DEVICE_BOARD_NAME == WIZ750SR_1xx)
-	GPIO_Configuration(STATUS_PORT, STATUS_PIN, GPIO_Mode_OUT, STATUS_PAD_AF);
-	GPIO_SetBits(STATUS_PORT, STATUS_PIN);
+    #ifdef __USE_TCPCONNECT_STATUS_PIN__
+        GPIO_Configuration(STATUS_PORT, STATUS_PIN, GPIO_Mode_OUT, STATUS_PAD_AF);
+        GPIO_SetBits(STATUS_PORT, STATUS_PIN);
+    #endif
 #endif
 }
 

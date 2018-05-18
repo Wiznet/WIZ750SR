@@ -1357,7 +1357,7 @@ void init_time_delimiter_timer(void)
 	struct __network_info *netinfo = (struct __network_info *)&(get_DevConfig_pointer()->network_info);
 	struct __options *option = (struct __options *)&(get_DevConfig_pointer()->options);
 	
-	if((option->serial_command == SEG_ENABLE) && (opmode == DEVICE_GW_MODE))
+	if(opmode == DEVICE_GW_MODE)
 	{
 		if(netinfo->packing_time != 0)
 		{

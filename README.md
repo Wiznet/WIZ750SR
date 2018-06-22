@@ -78,6 +78,16 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
  
  
 ## Update History
+v1.2.4 Stable
+- Bug fixes:
+  - Serial data packing 'time' option does not work if serial command mode switching code is disabled.
+  - Fixed typo of debug message
+
+- Improvements
+  - Added the PHY init stabilization code
+  - Restore TCP connection status function to Status Pin (WIZ750SR-100/105/110 only)
+    - The Status pin now acts as an 'HW_Trigger' pin(Input at booting) and a TCP connection status pin(output). 
+
 v1.2.3 Stable
 - Bug Fixes:
   - Fixed an issue where the pin states could not be saved correctly if the user's GPIO is set to 'Digital Output'

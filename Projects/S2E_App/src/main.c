@@ -2,12 +2,13 @@
   ******************************************************************************
   * @file    W7500x Serial to Ethernet Project - WIZ750SR App
   * @author  Eric Jung, Team CS
-  * @version v1.2.3
-  * @date    Apr-2018
+  * @version v1.2.4
+  * @date    Jun-2018
   * @brief   Main program body
   ******************************************************************************
   * @attention
   * @par Revision history
+  *    <2018/06/22> v1.2.4 Bugfix by Eric Jung
   *    <2018/04/27> v1.2.3 Bugfix and Improvements by Eric Jung
   *    <2018/04/12> v1.2.2 Bugfix by Eric Jung
   *    <2018/04/11> v1.2.2 Bugfix and Improvements by Eric Jung(Pre-released Ver.)
@@ -242,7 +243,7 @@ static void W7500x_Init(void)
     
     /* Set System init */
     SystemInit_User(DEVICE_CLOCK_SELECT, DEVICE_PLL_SOURCE_CLOCK, DEVICE_TARGET_SYSTEM_CLOCK);
-
+    
     /* DualTimer Initialization */
     Timer_Configuration();
     
@@ -251,7 +252,7 @@ static void W7500x_Init(void)
     
     /* SysTick_Config */
     SysTick_Config((GetSystemClock()/1000));
-    
+    delay(10); // delay for system clock stabilization
 
 #ifdef _MAIN_DEBUG_
     printf("\r\n >> W7500x MCU Clock Settings ===============\r\n"); 
@@ -278,11 +279,6 @@ static void W7500x_WZTOE_Init(void)
     
     /* Software reset the WZTOE(Hardwired TCP/IP core) */
     wizchip_sw_reset();
-    
-#ifdef __W7500P__ // W7500P
-    GPIO_Configuration(GPIOB, GPIO_Pin_5, GPIO_Mode_IN, PAD_AF1); // COL (PB_05)
-    GPIO_Configuration(GPIOB, GPIO_Pin_6, GPIO_Mode_IN, PAD_AF1); // DUP (PB_06)
-#endif
     
     /* Set WZ_100US Register */
     setTIC100US((GetSystemClock()/10000));
@@ -507,7 +503,7 @@ void display_Dev_Info_main(void)
             if(dev_config->network_info[0].packing_delimiter_length == 1) printf("[%.2X] (hex only)\r\n", dev_config->network_info[0].packing_delimiter[0]);
             else printf("%s\r\n", STR_DISABLED);
         
-        printf(" - Serial command mode swtich code:\r\n");
+        printf(" - Serial command mode switch code:\r\n");
         printf("\t- %s\r\n", (dev_config->options.serial_command == 1)?STR_ENABLED:STR_DISABLED);
         printf("\t- [%.2X][%.2X][%.2X] (Hex only)\r\n", dev_config->options.serial_trigger[0], dev_config->options.serial_trigger[1], dev_config->options.serial_trigger[2]);
     

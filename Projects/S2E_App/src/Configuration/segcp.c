@@ -312,14 +312,23 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                                             dev_config->network_info_common.mac[3], dev_config->network_info_common.mac[4], dev_config->network_info_common.mac[5]);
                         break;
                     case SEGCP_VR: 
-                        if(strcmp(STR_VERSION_STATUS, "Develop") == 0)
+                        if(strcmp(STR_VERSION_STATUS, "Stable") == 0)
+                        {
+#ifndef __USE_APPBACKUP_AREA__
+                            sprintf(trep,"%d.%d.%d", dev_config->fw_ver[0], dev_config->fw_ver[1], dev_config->fw_ver[2]); // Standard stable version
+#else
+                            sprintf(trep,"%d.%d.%dA", dev_config->fw_ver[0], dev_config->fw_ver[1], dev_config->fw_ver[2]); // Stable version for support users prior to v1.2.0
+#endif
+                        }
+                        else if(strcmp(STR_VERSION_STATUS, "Develop") == 0)
                         {
                             // Develop version 
                             sprintf(trep,"%d.%d.%ddev", dev_config->fw_ver[0], dev_config->fw_ver[1], dev_config->fw_ver[2]);
                         }
                         else
                         {
-                            sprintf(trep,"%d.%d.%d", dev_config->fw_ver[0], dev_config->fw_ver[1], dev_config->fw_ver[2]);
+                            // Custom version 
+                            sprintf(trep,"%d.%d.%d%s", dev_config->fw_ver[0], dev_config->fw_ver[1], dev_config->fw_ver[2], STR_VERSION_STATUS);
                         }
                         break;
                     case SEGCP_MN: sprintf(trep,"%s", dev_config->module_name);

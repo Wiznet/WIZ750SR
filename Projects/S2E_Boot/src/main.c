@@ -2,12 +2,13 @@
   ******************************************************************************
   * @file    W7500x Serial to Ethernet Project - WIZ750SR Boot
   * @author  Eric Jung, Team CS
-  * @version v1.2.3
-  * @date    Apr-2018
+  * @version v1.2.4
+  * @date    Jun-2018
   * @brief   Boot program body
   ******************************************************************************
   * @attention
   * @par Revision history
+  *    <2018/06/22> v1.2.4 Bugfix by Eric Jung
   *    <2018/04/27> v1.2.3 Bugfix and Improvements by Eric Jung
   *    <2018/04/12> v1.2.2 Bugfix by Eric Jung
   *    <2018/04/11> v1.2.2 Bugfix and Improvements by Eric Jung(Pre-released Ver.)
@@ -259,11 +260,6 @@ int main(void)
 	// W7500x Boot: Main Routine
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-#ifdef __W7500P__ // W7500P
-    GPIO_Configuration(GPIOB, GPIO_Pin_5, GPIO_Mode_IN, PAD_AF1); // COL (PB_05)
-    GPIO_Configuration(GPIOB, GPIO_Pin_6, GPIO_Mode_IN, PAD_AF1); // DUP (PB_06)
-#endif
-    
 	flag_s2e_application_running = ON;
 	LED_On(LED1);
 	
@@ -318,6 +314,7 @@ static void W7500x_Init(void)
 	
 	/* Set System init */
 	SystemInit_User(CLOCK_SOURCE_INTERNAL, PLL_SOURCE_8MHz, SYSTEM_CLOCK_8MHz);
+	delay(10); // delay for system clock stabilization
 	
 	/* Counter Initialization */
 	Time_Counter_Configuration(); // To replace the timer interrupt, inaccurate count value

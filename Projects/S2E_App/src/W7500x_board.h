@@ -61,7 +61,7 @@
 		#define __USE_DSR_DTR_DEFAULT__
         #define __USE_SAFE_SAVE__             // DevConfig Save verify function added
         #define __USE_APPBOOT_TCP_SEARCH__
-        //#define __USE_TCPCONNECT_STATUS_PIN__ // When this option is enabled, the STATUS pin acts as a pin to indicate the TCP connection status of socket. (WIZ750SR-1xx series only)
+        #define __USE_TCPCONNECT_STATUS_PIN__ // When this option is enabled, the STATUS pin acts as a pin to indicate the TCP connection status of socket. (WIZ750SR-1xx series only)
 		#define DEVICE_CLOCK_SELECT	         CLOCK_SOURCE_EXTERNAL
 		#define DEVICE_PLL_SOURCE_CLOCK      PLL_SOURCE_12MHz
 		#define DEVICE_TARGET_SYSTEM_CLOCK   SYSTEM_CLOCK_48MHz

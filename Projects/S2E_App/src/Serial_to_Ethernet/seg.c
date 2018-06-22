@@ -1347,6 +1347,7 @@ void reset_SEG_timeflags(void)
 	
 	// Timer value clear
 	inactivity_time = 0;
+    
 	serial_input_time = 0;
 	keepalive_time = 0;
 	connection_auth_time = 0;

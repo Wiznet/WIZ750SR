@@ -238,6 +238,9 @@ void proc_SEG_udp(uint8_t sock)
 	struct __serial_info *serial = (struct __serial_info *)get_DevConfig_pointer()->serial_info;
 	
 	uint8_t state = getSn_SR(sock);
+	uint8_t multicast_mac[6];
+	uint8_t flag=0;
+	
 	switch(state)
 	{
 		case SOCK_UDP:
@@ -252,7 +255,21 @@ void proc_SEG_udp(uint8_t sock)
 			u2e_size = 0;
 			e2u_size = 0;
 			
-			if(socket(sock, Sn_MR_UDP, net->local_port, 0) == sock)
+			// If remote ip is multicast address, enable the multicasting
+			if( net->remote_ip[0]>=224 && net->remote_ip[0] <=239){
+			  multicast_mac[0]=0x01;
+				multicast_mac[1]=0x00;
+				multicast_mac[2]=0x5e;
+				multicast_mac[3]=net->remote_ip[1] &0x7F;
+				multicast_mac[4]=net->remote_ip[2];
+				multicast_mac[5]=net->remote_ip[3];
+				setSn_DIPR(sock, net->remote_ip);
+				setSn_DPORT(sock, net->remote_port);
+				setSn_DHAR(sock, multicast_mac);
+				flag|=SF_MULTI_ENABLE;
+			}
+			
+			if(socket(sock, Sn_MR_UDP, net->local_port, flag) == sock)
 			{
 				set_device_status(ST_UDP);
 				

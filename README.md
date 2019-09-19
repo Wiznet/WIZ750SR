@@ -78,6 +78,13 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
  
  
 ## Update History
+v1.2.5 Stable
+- Bug fixes:
+  - Modyfied the setSn_DHAR() Address offset.
+
+- Improvements:
+  - If remote ip address is multicast address, enable multicating and set Sn_DHAR, Sn_DIPR, Sn_DPORTR before open socket 
+  
 v1.2.4 Stable
 - Bug fixes:
   - Serial data packing 'time' option does not work if serial command mode switching code is disabled.

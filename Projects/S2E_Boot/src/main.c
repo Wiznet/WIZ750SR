@@ -2,12 +2,13 @@
   ******************************************************************************
   * @file    W7500x Serial to Ethernet Project - WIZ750SR Boot
   * @author  Eric Jung, Team CS
-  * @version v1.2.4
-  * @date    Jun-2018
+  * @version v1.2.5
+  * @date    Sep-2019
   * @brief   Boot program body
   ******************************************************************************
   * @attention
   * @par Revision history
+  *    <2019/09/19> v1.2.5 Bugfix and Improvements by Becky	
   *    <2018/06/22> v1.2.4 Bugfix by Eric Jung
   *    <2018/04/27> v1.2.3 Bugfix and Improvements by Eric Jung
   *    <2018/04/12> v1.2.2 Bugfix by Eric Jung

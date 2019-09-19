@@ -933,13 +933,14 @@ uipr[3] = WIZCHIP_READ((WZTOE_UIPR));
  * @param (uint8_t*)dhar Pointer variable to set socket n destination hardware address. It should be allocated 6 bytes.
  * @sa getSn_DHAR()
  */
+//19.09.19 address +value 3 2 1 0 7 6 -> 3 2 1 0 5 4 by becky
 #define setSn_DHAR(sn, dhar) \
     WIZCHIP_WRITE((WZTOE_Sn_DHAR(sn)+3), dhar[0]); \
     WIZCHIP_WRITE((WZTOE_Sn_DHAR(sn)+2), dhar[1]); \
     WIZCHIP_WRITE((WZTOE_Sn_DHAR(sn)+1), dhar[2]); \
     WIZCHIP_WRITE((WZTOE_Sn_DHAR(sn)+0), dhar[3]); \
-    WIZCHIP_WRITE((WZTOE_Sn_DHAR(sn)+7), dhar[4]); \
-    WIZCHIP_WRITE((WZTOE_Sn_DHAR(sn)+6), dhar[5]); 
+    WIZCHIP_WRITE((WZTOE_Sn_DHAR(sn)+5), dhar[4]); \
+    WIZCHIP_WRITE((WZTOE_Sn_DHAR(sn)+4), dhar[5]); 
 
 /**
  * @ingroup Socket_register_access_function

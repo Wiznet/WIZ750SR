@@ -81,6 +81,7 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
 v1.2.5 Stable
 - Bug fixes:
   - Modyfied the setSn_DHAR() Address offset.
+  - Modyfied the WIZ750SR-110 HW_Trigger pin.
 
 - Improvements:
   - If remote ip address is multicast address, enable multicating and set Sn_DHAR, Sn_DIPR, Sn_DPORTR before open socket 

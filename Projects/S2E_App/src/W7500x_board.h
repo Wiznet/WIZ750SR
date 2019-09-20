@@ -19,6 +19,7 @@
 //#define DEVICE_BOARD_NAME	W7500P_S2E
 #define DEVICE_BOARD_NAME	WIZ750SR
 //#define DEVICE_BOARD_NAME	WIZ750SR_1xx
+//#define DEVICE_BOARD_NAME_SUB   WIZ750SR_110  //IF you use the WIWIZ750SR_110, this option activate.
 //#define DEVICE_BOARD_NAME	W7500_S2E
 
 #ifdef DEVICE_BOARD_NAME
@@ -136,7 +137,7 @@
 	#define STATUS_PHYLINK_PORT			GPIOA
 	#define STATUS_PHYLINK_PAD_AF		PAD_AF1
 
-	#define STATUS_TCPCONNECT_PIN		GPIO_Pin_9
+	#define STATUS_TCPCONNECT_PIN		GPIO_Pin_7//GPIO_Pin_9 19.9.5 irina
 	#define STATUS_TCPCONNECT_PORT		STATUS_PHYLINK_PORT
 	#define STATUS_TCPCONNECT_PAD_AF	STATUS_PHYLINK_PAD_AF
 
@@ -150,7 +151,11 @@
 
 	// HW_TRIG - Command mode switch enable pin
 	// Direction: Input (Shared pin with TCP connection status pin)
-	#define HW_TRIG_PIN					GPIO_Pin_7
+	#if (DEVICE_BOARD_NAME_SUB == WIZ750SR_110) 
+		#define HW_TRIG_PIN					GPIO_Pin_9
+	#else
+		#define HW_TRIG_PIN					GPIO_Pin_7
+	#endif
 	#define HW_TRIG_PORT				GPIOA
 	#define HW_TRIG_PAD_AF				PAD_AF1
 
@@ -300,6 +305,12 @@
 	#define LED2_GPIO_PORT		GPIOB
 	#define LED2_GPIO_PAD		PAD_PB
 	#define LED2_GPIO_PAD_AF	PAD_AF1
+	//add
+	#define LED3_PIN			GPIO_Pin_8
+	#define LED3_GPIO_PORT		GPIOC
+	#define LED3_GPIO_PAD		PAD_PC
+	
+	#define LED3_GPIO_PAD_AF	PAD_AF1
 
 #elif (DEVICE_BOARD_NAME == WIZ750SR_1xx) // ##20161031 WIZ750SR-1xx
 	
@@ -312,6 +323,11 @@
 	#define LED2_GPIO_PORT		GPIOC
 	#define LED2_GPIO_PAD		PAD_PC
 	#define LED2_GPIO_PAD_AF	PAD_AF1
+
+	#define LED3_PIN			GPIO_Pin_7
+	#define LED3_GPIO_PORT		GPIOA
+	#define LED3_GPIO_PAD		PAD_PA
+	#define LED3_GPIO_PAD_AF	PAD_AF1
 	
 #elif (DEVICE_BOARD_NAME == WIZwiki_W7500ECO)
 
@@ -366,11 +382,12 @@
 #endif
 	
 	// LED
-	#define LEDn		2
+	#define LEDn		3
 	typedef enum
 	{
 	  LED1 = 0,	// PHY link status
-	  LED2 = 1	// TCP connection status
+	  LED2 = 1,	// blink
+	  LED3 = 2	// TCP connection status
 	} Led_TypeDef;
 
 	extern volatile uint16_t phylink_check_time_msec;

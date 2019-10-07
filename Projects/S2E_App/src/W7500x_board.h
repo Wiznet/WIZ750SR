@@ -136,7 +136,7 @@
 	#define STATUS_PHYLINK_PORT			GPIOA
 	#define STATUS_PHYLINK_PAD_AF		PAD_AF1
 
-	#define STATUS_TCPCONNECT_PIN		GPIO_Pin_9
+	#define STATUS_TCPCONNECT_PIN		GPIO_Pin_7
 	#define STATUS_TCPCONNECT_PORT		STATUS_PHYLINK_PORT
 	#define STATUS_TCPCONNECT_PAD_AF	STATUS_PHYLINK_PAD_AF
 
@@ -150,7 +150,11 @@
 
 	// HW_TRIG - Command mode switch enable pin
 	// Direction: Input (Shared pin with TCP connection status pin)
-	#define HW_TRIG_PIN					GPIO_Pin_7
+	#if (DEVICE_BOARD_NAME_SUB == WIZ750SR_110) 
+		#define HW_TRIG_PIN					GPIO_Pin_9
+	#else
+		#define HW_TRIG_PIN					GPIO_Pin_7
+	#endif
 	#define HW_TRIG_PORT				GPIOA
 	#define HW_TRIG_PAD_AF				PAD_AF1
 

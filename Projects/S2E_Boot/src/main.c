@@ -1,14 +1,16 @@
 /**
   ******************************************************************************
   * @file    W7500x Serial to Ethernet Project - WIZ750SR Boot
-  * @author  Eric Jung, Team CS
-  * @version v1.2.5
-  * @date    Sep-2019
+  * @author  Irina Kim, Team network
+  * @version v1.2.6
+  * @date    Oct-2019
   * @brief   Boot program body
   ******************************************************************************
   * @attention
   * @par Revision history
-  *    <2019/09/19> v1.2.5 Bugfix and Improvements by Becky	
+  *    <2019/10/08> v1.2.6 Bugfix and Improvements by irina
+  *						  Modified Packing time
+  *    <2019/09/19> v1.2.5 Bugfix and Improvements by Becky
   *    <2018/06/22> v1.2.4 Bugfix by Eric Jung
   *    <2018/04/27> v1.2.3 Bugfix and Improvements by Eric Jung
   *    <2018/04/12> v1.2.2 Bugfix by Eric Jung
@@ -33,7 +35,7 @@
   *
   * <h2><center>&copy; COPYRIGHT 2016 WIZnet Co., Ltd.</center></h2>
   ******************************************************************************
-  */ 
+  */
 
 /* Includes ------------------------------------------------------------------*/
 #include <stdio.h>
@@ -138,7 +140,7 @@ int main(void)
 	// W7500x Application: Check the MAC address and Firmware update
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	
-	// 1. MAC address°¡ ¾ø´Â °æ¿ì				-> MAC ÁÖ¼Ò ÀÔ·Â ¹× save
+	// 1. MAC addressï¿½ï¿½ ï¿½ï¿½ï¿½Ø¢ ï¿½Ù†ØŸÙŒ				-> MAC Ø¡Ø¶ï¿½Ø² ï¿½Ø´ï¿½Ø¢ ï¿½Ø· save
 	
 	if(check_mac_address())
 	{
@@ -148,7 +150,7 @@ int main(void)
 		appjump_enable = ON;
 	}
 	
-	// 2. Firmware update flag°¡ 1ÀÎ °æ¿ì 		-> ÀüÃ¼ ¿µ¿ª erase, Fwup_size¸¸Å­ fw update ¼öÇà, app backup (flash) >> app main (flash)
+	// 2. Firmware update flagï¿½ï¿½ 1ï¿½Ø® ï¿½Ù†ØŸÙŒ 		-> ï¿½ï¿½Ø£ï¿½ ØŸï¿½ØŸï¿½ erase, Fwup_sizeï¿½ï¿½Ø¥Â­ fw update ï¿½ï¿½Ø§Ù€, app backup (flash) >> app main (flash)
 	
 	if(dev_config->firmware_update.fwup_flag == 1)
 	{

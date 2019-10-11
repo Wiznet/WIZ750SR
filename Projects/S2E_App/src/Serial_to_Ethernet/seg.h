@@ -36,6 +36,7 @@
 extern uint8_t opmode;
 extern uint8_t flag_s2e_application_running;
 extern uint8_t flag_process_dhcp_success;
+extern uint8_t flag_process_ip_success;
 extern uint8_t flag_process_dns_success;
 extern char * str_working[];
 

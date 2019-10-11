@@ -18,7 +18,7 @@ uint8_t flag_s2e_application_running = 0;
 
 uint8_t opmode = DEVICE_GW_MODE;
 static uint8_t mixed_state = MIXED_SERVER;
-static uint8_t sw_modeswitch_at_mode_on = SEG_DISABLE;
+uint8_t sw_modeswitch_at_mode_on = SEG_DISABLE;
 static uint16_t client_any_port = 0;
 
 // Timer Enable flags / Time
@@ -76,7 +76,7 @@ char * str_working[] = {"TCP_CLIENT_MODE", "TCP_SERVER_MODE", "TCP_MIXED_MODE", 
 
 uint8_t flag_process_dhcp_success = OFF;
 uint8_t flag_process_dns_success = OFF;
-
+uint8_t flag_process_ip_success = OFF;
 uint8_t isSocketOpen_TCPclient = OFF;
 
 // ## timeflag for debugging
@@ -142,17 +142,17 @@ void do_seg(uint8_t sock)
 	// Firmware update: Do not run SEG process
 	if(fwupdate->fwup_flag == SEG_ENABLE) return;
 	// Serial AT command mode enabled, initial settings
-	if((opmode == DEVICE_GW_MODE) && (sw_modeswitch_at_mode_on == SEG_ENABLE))
-	{
-		// Socket disconnect (TCP only) / close
-		process_socket_termination(sock);
+	// if((opmode == DEVICE_GW_MODE) && (sw_modeswitch_at_mode_on == SEG_ENABLE))
+	// {
+	// 	// Socket disconnect (TCP only) / close
+	// 	process_socket_termination(sock);
 		
-		// Mode switch
-		init_trigger_modeswitch(DEVICE_AT_MODE);
+	// 	// Mode switch
+	// 	init_trigger_modeswitch(DEVICE_AT_MODE);
 		
-		// Mode switch flag disabled
-		sw_modeswitch_at_mode_on = SEG_DISABLE;	
-	}
+	// 	// Mode switch flag disabled
+	// 	sw_modeswitch_at_mode_on = SEG_DISABLE;	
+	// }
 	
 	if(opmode == DEVICE_GW_MODE) 
 	{

@@ -76,9 +76,24 @@ void do_segcp(void)
             if(dev_config->serial_info[0].serial_debug_en) printf(" > SEGCP:ERROR:%04X\r\n", segcp_ret);
         }
     }
+    else
+    {
+        segcp_ret = proc_SEGCP_uart(gSEGCPREP);
+        if(segcp_ret !=0)
+            printf("segcp_ret = %x\r\n",segcp_ret);
+    }
     
-    segcp_ret |= proc_SEGCP_udp(gSEGCPREQ, gSEGCPREP);
-    segcp_ret |= proc_SEGCP_tcp(gSEGCPREQ, gSEGCPREP);
+    segcp_ret |= proc_SEGCP_udp(gSEGCPREQ, gSEGCPREP);  //while DHCP operate, device search as possibility.
+    if(dev_config->options.dhcp_use){
+        if(flag_process_dhcp_success == ON){
+            segcp_ret |= proc_SEGCP_tcp(gSEGCPREQ, gSEGCPREP);
+        }
+    }
+    else
+    {
+        segcp_ret |= proc_SEGCP_tcp(gSEGCPREQ, gSEGCPREP);
+    
+    }
     
     if(segcp_ret && ((segcp_ret & SEGCP_RET_ERR) != SEGCP_RET_ERR)) // Command parsing success
     {
@@ -1232,7 +1247,7 @@ uint16_t proc_SEGCP_udp(uint8_t* segcp_req, uint8_t* segcp_rep)
         case SOCK_CLOSED:
             if(socket(SEGCP_UDP_SOCK, Sn_MR_UDP, DEVICE_SEGCP_PORT, 0x00) == SEGCP_UDP_SOCK)
             {
-                ;//if(dev_config->serial_info[0].serial_debug_en) printf(" > SEGCP:UDP:STARTED\r\n");
+                if(dev_config->serial_info[0].serial_debug_en) printf(" > SEGCP:UDP:STARTED\r\n");
             }
             break;
     }

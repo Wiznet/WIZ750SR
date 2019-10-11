@@ -78,6 +78,15 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
  
  
 ## Update History
+v1.2.7 Stable
+- Improvements:
+  - while dhcp operate, device search as possibility.
+  - while DHCP operate, Device mode change(AT mode <-> GW mode) as possibility.
+
+v1.2.6 Stable
+- Improvements:
+  - Modified Packing time
+
 v1.2.5 Stable
 - Bug fixes:
   - Modyfied the setSn_DHAR() Address offset.

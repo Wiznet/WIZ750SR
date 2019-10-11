@@ -8,6 +8,7 @@
   ******************************************************************************
   * @attention
   * @par Revision history
+  *    <2019/10/11> v1.2.7 Bugfix and Improvements by irina
   *    <2019/10/08> v1.2.6 Bugfix and Improvements by irina
   *						  Modified Packing time
   *    <2019/09/19> v1.2.5 Bugfix and Improvements by Becky
@@ -104,6 +105,7 @@ uint8_t g_recv_buf[DATA_BUF_SIZE];
 
 uint8_t flag_s2e_application_running = OFF;
 uint8_t flag_process_dhcp_success = OFF;
+uint8_t flag_process_ip_success = OFF;
 
 /**
   * @brief  Main program

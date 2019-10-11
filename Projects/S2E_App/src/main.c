@@ -77,6 +77,7 @@ static void W7500x_WZTOE_Init(void);
 static void set_WZTOE_NetTimeout(void);
 int8_t process_dhcp(void);
 int8_t process_dns(void);
+void Dev_Mode_Check(uint8_t sock);
 
 // Debug messages
 void display_Dev_Info_header(void);
@@ -89,6 +90,7 @@ void TimingDelay_Decrement(void);
 
 /* Private variables ---------------------------------------------------------*/
 static __IO uint32_t TimingDelay;
+extern uint8_t sw_modeswitch_at_mode_on;
 
 /* Public variables ---------------------------------------------------------*/
 // Shared buffer declaration
@@ -140,7 +142,7 @@ int main(void)
         display_Dev_Info_header();
         display_Dev_Info_main();
     }
-    
+    Net_Conf();
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // W7500x Application: DHCP client / DNS client handler
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -152,17 +154,15 @@ int main(void)
         if(process_dhcp() == DHCP_IP_LEASED) // DHCP success
         {
             flag_process_dhcp_success = ON;
-        }
-        else // DHCP failed
-        {
-            Net_Conf(); // Set default static IP settings
+            flag_process_ip_success = ON;
         }
     }
     else
     {
-        Net_Conf(); // Set default static IP settings
+        flag_process_ip_success = ON;
     }
     
+  
     // Debug UART: Network information print out (includes DHCP IP allocation result)
     if(dev_config->serial_info[0].serial_debug_en)
     {
@@ -208,7 +208,9 @@ int main(void)
     while(1) // main loop
     {
         do_segcp();
-        do_seg(SOCK_DATA);
+        Dev_Mode_Check(SOCK_DATA); // while DHCP operate, Device mode change(AT mode <-> GW mode) as possibility. This took it out in do_seg funcion.
+        if(flag_process_ip_success)
+            do_seg(SOCK_DATA);
         
         if(dev_config->options.dhcp_use) DHCP_run(); // DHCP client handler for IP renewal
         
@@ -365,6 +367,7 @@ int8_t process_dhcp(void)
         }
 
         do_segcp(); // Process the requests of configuration tool during the DHCP client run.
+        Dev_Mode_Check(SOCK_DATA);
     }
     
     set_device_status(ST_OPEN);
@@ -527,8 +530,20 @@ void display_Dev_Info_main(void)
     
     printf("%s\r\n", STR_BAR);
 }
-
-
+void Dev_Mode_Check(uint8_t sock)
+{
+    if((opmode == DEVICE_GW_MODE) && (sw_modeswitch_at_mode_on == SEG_ENABLE))
+	{
+		// Socket disconnect (TCP only) / close
+		process_socket_termination(sock);
+		
+		// Mode switch
+		init_trigger_modeswitch(DEVICE_AT_MODE);
+		
+		// Mode switch flag disabled
+		sw_modeswitch_at_mode_on = SEG_DISABLE;	
+	}
+}
 void display_Dev_Info_dhcp(void)
 {
     DevConfig *dev_config = get_DevConfig_pointer();

@@ -85,7 +85,7 @@ v1.2.6 Stable
 
 - Improvements:
   - While IP address allocation using DHCP,
-    the device can be searchable using the Configuration tool and it can change the mode(AT mode <-> GW mode).
+    the device can be made searchable using the Configuration tool and it can change the mode(AT mode <-> GW mode).
  
 
 v1.2.5 Stable

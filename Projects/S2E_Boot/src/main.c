@@ -8,8 +8,7 @@
   ******************************************************************************
   * @attention
   * @par Revision history
-  *    <2019/10/11> v1.2.7 Bugfix and Improvements by irina
-  *    <2019/10/08> v1.2.6 Bugfix and Improvements by irina
+  *    <2019/10/11> v1.2.6 Bugfix and Improvements by irina
   *						  Modified Packing time
   *    <2019/09/19> v1.2.5 Bugfix and Improvements by Becky
   *    <2018/06/22> v1.2.4 Bugfix by Eric Jung

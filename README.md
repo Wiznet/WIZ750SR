@@ -78,14 +78,15 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
  
  
 ## Update History
-v1.2.7 Stable
-- Improvements:
-  - while dhcp operate, device search as possibility.
-  - while DHCP operate, Device mode change(AT mode <-> GW mode) as possibility.
 
 v1.2.6 Stable
+- Bug fixes:
+  - If serial data packing 'time' option  is less than 500ms, the first serial data(+++) ignored in GW mode.
+
 - Improvements:
-  - Modified Packing time
+  - While IP address allocation using DHCP,
+    the device can be searchable using the Configuration tool and it can change the mode(AT mode <-> GW mode).
+ 
 
 v1.2.5 Stable
 - Bug fixes:

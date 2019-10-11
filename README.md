@@ -84,8 +84,9 @@ v1.2.6 Stable
   - If serial data packing 'time' option  is less than 500ms, the first serial data(+++) ignored in GW mode.
 
 - Improvements:
-  - While IP address allocation using DHCP,
+  - While IP address allocate using DHCP,
     the device can be made searchable using the Configuration tool and it can change the mode(AT mode <-> GW mode).
+    - While IP address is allocating using DHCP , it can change the AT mode. It can show that the status of channel change from ATmode to OPEN in Configuration tool. So AT command didn't operate.    
  
 
 v1.2.5 Stable

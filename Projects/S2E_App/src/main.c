@@ -329,6 +329,7 @@ int8_t process_dhcp(void)
 {
     uint8_t ret = 0;
     uint8_t dhcp_retry = 0;
+    struct __network_info *net = (struct __network_info *)get_DevConfig_pointer()->network_info;
 
 #ifdef _MAIN_DEBUG_
     printf(" - DHCP Client running\r\n");
@@ -369,8 +370,8 @@ int8_t process_dhcp(void)
         do_segcp(); // Process the requests of configuration tool during the DHCP client run.
         Dev_Mode_Check(SOCK_DATA);
     }
-    
-    set_device_status(ST_OPEN);
+    if(net->state !=(teDEVSTATUS)ST_ATMODE)
+        set_device_status(ST_OPEN);
     
     return ret;
 }

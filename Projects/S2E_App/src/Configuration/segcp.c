@@ -76,12 +76,12 @@ void do_segcp(void)
             if(dev_config->serial_info[0].serial_debug_en) printf(" > SEGCP:ERROR:%04X\r\n", segcp_ret);
         }
     }
-    else
-    {
-        segcp_ret = proc_SEGCP_uart(gSEGCPREP);
-        if(segcp_ret !=0)
-            printf("segcp_ret = %x\r\n",segcp_ret);
-    }
+    // else
+    // {
+    //     segcp_ret = proc_SEGCP_uart(gSEGCPREP);
+    //     if(segcp_ret !=0)
+    //         printf("segcp_ret = %x\r\n",segcp_ret);
+    // }
     
     segcp_ret |= proc_SEGCP_udp(gSEGCPREQ, gSEGCPREP);  //while DHCP operate, device search as possibility.
     if(dev_config->options.dhcp_use){

@@ -497,6 +497,7 @@ void proc_SEG_tcp_server(uint8_t sock)
 			}
 			
 			// Serial to Ethernet process
+
 			if(BUFFER_USED_SIZE(data_rx) || u2e_size)	uart_to_ether(sock);
 			if(getSn_RX_RSR(sock) || e2u_size)	ether_to_uart(sock);
 			
@@ -1107,13 +1108,11 @@ void ether_to_uart(uint8_t sock)
 		else
 		{
 			if((serial->serial_debug_en == SEG_DEBUG_E2S) || (serial->serial_debug_en == SEG_DEBUG_ALL))
-			{
 				debugSerial_dataTransfer(g_recv_buf, e2u_size, SEG_DEBUG_E2S);
-			}
-			
-			for(i = 0; i < e2u_size; i++) uart_putc(SEG_DATA_UART, g_recv_buf[i]);
-			
+				
+			for(i = 0; i < e2u_size; i++)	uart_putc(SEG_DATA_UART, g_recv_buf[i]);
 			add_data_transfer_bytecount(SEG_ETHER_TX, e2u_size);
+			
 			e2u_size = 0;
 		}
 	}

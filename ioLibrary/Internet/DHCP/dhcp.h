@@ -52,7 +52,7 @@
  * @details If you want to display debug & procssing message, Define _DHCP_DEBUG_ 
  * @note    If defined, it dependens on <stdio.h>
  */
-//#define _DHCP_DEBUG_
+#define _DHCP_DEBUG_
 
 
 /* Retry to processing DHCP */
@@ -68,6 +68,7 @@
 #define MAGIC_COOKIE             0x63825363  ///< Any number. You can be modifyed it any number
 
 #define DCHP_HOST_NAME           "WIZnet\0"
+
 
 /* 
  * @brief return value of @ref DHCP_run()

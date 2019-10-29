@@ -91,7 +91,15 @@ void TimingDelay_Decrement(void);
 /* Private variables ---------------------------------------------------------*/
 static __IO uint32_t TimingDelay;
 extern uint8_t sw_modeswitch_at_mode_on;
+extern uint8_t enable_modeswitch_timer;
+extern uint8_t triggercode_idx;
+extern uint16_t modeswitch_time;
+extern uint16_t modeswitch_gap_time;
+#ifdef _TRIGGER_DEBUG_
+extern uint8_t trigger_error_index;
 
+uint8_t prev_triggercode_idx = 0;
+#endif
 /* Public variables ---------------------------------------------------------*/
 // Shared buffer declaration
 uint8_t g_send_buf[DATA_BUF_SIZE];
@@ -105,6 +113,7 @@ uint8_t g_recv_buf[DATA_BUF_SIZE];
 int main(void)
 {
     DevConfig *dev_config = get_DevConfig_pointer();
+    wiz_NetInfo gWIZNETINFO;
     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // W7500x Hardware Initialize
@@ -118,7 +127,7 @@ int main(void)
     
     /* W7500x Board Initialization */
     W7500x_Board_Init();
-    
+     
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // W7500x Application: Initialize
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -126,7 +135,9 @@ int main(void)
     /* Load the Configuration data */
     load_DevConfig_from_storage();
     dev_config->network_info[0].state = ST_OPEN;
-    
+
+	if(dev_config->network_info[0].packing_time != 0)	modeswitch_gap_time = dev_config->network_info[0].packing_time;
+
     /* Set the MAC address to WIZCHIP */
     Mac_Conf();
     
@@ -143,6 +154,7 @@ int main(void)
         display_Dev_Info_main();
     }
     Net_Conf();
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // W7500x Application: DHCP client / DNS client handler
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -156,6 +168,16 @@ int main(void)
             flag_process_dhcp_success = ON;
             flag_process_ip_success = ON;
         }
+        else
+        {
+           get_DevConfig_value(gWIZNETINFO.mac, dev_config->network_info_common.mac, sizeof(gWIZNETINFO.mac[0]) * 6);
+	       set_DevConfig_value(gWIZNETINFO.ip, dev_config->network_info_common.local_ip, sizeof(gWIZNETINFO.ip));
+	       set_DevConfig_value(gWIZNETINFO.gw, dev_config->network_info_common.gateway, sizeof(gWIZNETINFO.gw));
+	       set_DevConfig_value(gWIZNETINFO.sn, dev_config->network_info_common.subnet, sizeof(gWIZNETINFO.sn));
+           set_DevConfig_value(gWIZNETINFO.dns, dev_config->options.dns_server_ip, sizeof(gWIZNETINFO.dns));
+           ctlnetwork(CN_SET_NETINFO, (void*) &gWIZNETINFO); 
+        }   
+        
     }
     else
     {
@@ -208,10 +230,24 @@ int main(void)
     while(1) // main loop
     {
         do_segcp();
+        
         Dev_Mode_Check(SOCK_DATA); // while DHCP operate, Device mode change(AT mode <-> GW mode) as possibility. This took it out in do_seg funcion.
         if(flag_process_ip_success)
             do_seg(SOCK_DATA);
-        
+#ifdef _TRIGGER_DEBUG_
+            if(prev_triggercode_idx!=triggercode_idx){
+            prev_triggercode_idx=triggercode_idx;
+
+            if(trigger_error_index != 0)
+            {
+                if(trigger_error_index == timeout_occur)
+                    printf("timeout occurred\r\n");
+                else
+                    printf("error in %d th char\r\n", trigger_error_index + 1);
+                trigger_error_index = 0;
+            }
+        }
+#endif        
         if(dev_config->options.dhcp_use) DHCP_run(); // DHCP client handler for IP renewal
         
         // ## debugging: Data echoback
@@ -369,6 +405,20 @@ int8_t process_dhcp(void)
 
         do_segcp(); // Process the requests of configuration tool during the DHCP client run.
         Dev_Mode_Check(SOCK_DATA);
+#ifdef _TRIGGER_DEBUG_
+        if(prev_triggercode_idx!=triggercode_idx){
+            prev_triggercode_idx=triggercode_idx;
+
+            if(trigger_error_index != 0)
+            {
+                if(trigger_error_index == timeout_occur)
+                    printf("timeout occurred\r\n");
+                else
+                    printf("error in %d th char\r\n", trigger_error_index + 1);
+                trigger_error_index = 0;
+            }
+        }
+#endif
     }
     if(net->state !=(teDEVSTATUS)ST_ATMODE)
         set_device_status(ST_OPEN);
@@ -604,3 +654,5 @@ void TimingDelay_Decrement(void)
     }
 }
 
+void rst_isr(void) __attribute__((section("ISR_FUNC at(0x000004)")));
+//const x1 __attribute__((at(0x000004))) = 0;

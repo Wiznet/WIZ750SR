@@ -49,7 +49,7 @@ uint8_t flag_sent_keepalive = SEG_DISABLE;
 uint8_t flag_sent_first_keepalive = SEG_DISABLE;
 
 // static variables for function: check_modeswitch_trigger()
-static uint8_t triggercode_idx;
+uint8_t triggercode_idx;
 static uint8_t ch_tmp[3];
 
 // User's buffer / size idx
@@ -105,6 +105,9 @@ void add_data_transfer_bytecount(teDATADIR dir, uint16_t len);
 
 // Serial debug messages for verifying data transfer
 uint16_t debugSerial_dataTransfer(uint8_t * buf, uint16_t size, teDEBUGTYPE type);
+#ifdef _TRIGGER_DEBUG_
+	uint8_t trigger_error_index = 0;
+#endif
 
 /* Public & Private functions ------------------------------------------------*/
 
@@ -1265,12 +1268,16 @@ uint8_t check_modeswitch_trigger(uint8_t ch)
 			{
 				ch_tmp[triggercode_idx] = ch;
 				triggercode_idx++;
-
-				
 			}
 			else // comparision failed: invalid trigger code
 			{
 				modeswitch_failed = SEG_ENABLE; 
+#ifdef _TRIGGER_DEBUG_
+				if(triggercode_idx == 1)
+					trigger_error_index = second_ch;
+				else if(triggercode_idx == 2)
+					trigger_error_index = third_ch;
+#endif
 			}
 			
 			break;
@@ -1278,9 +1285,13 @@ uint8_t check_modeswitch_trigger(uint8_t ch)
 			if(modeswitch_time < modeswitch_gap_time) // comparision failed: end gap
 			{
 				modeswitch_failed = SEG_ENABLE;
+#ifdef _TRIGGER_DEBUG_
+				trigger_error_index = fourth_ch;
+#endif
 			}
-
+			triggercode_idx++;
 			break;
+		
 
 	}
 	
@@ -1298,7 +1309,6 @@ uint8_t check_modeswitch_trigger(uint8_t ch)
 void restore_serial_data(uint8_t idx)
 {
 	uint8_t i;
-	
 	for(i = 0; i < idx; i++)
 	{
 		BUFFER_IN(data_rx) = ch_tmp[i];
@@ -1306,8 +1316,8 @@ void restore_serial_data(uint8_t idx)
 		ch_tmp[i] = 0x00;
 	}
 	
-	enable_modeswitch_timer = SEG_DISABLE;
-	triggercode_idx = 0;
+	 enable_modeswitch_timer = SEG_DISABLE;
+	 triggercode_idx = 0;
 }
 
 uint8_t check_serial_store_permitted(uint8_t ch)
@@ -1585,14 +1595,24 @@ void seg_timer_msec(void)
 	if((enable_modeswitch_timer) && (modeswitch_time >= modeswitch_gap_time))
 	
 	{
+		  
 		// result of command mode trigger code comparision
-		if(triggercode_idx == 3)	sw_modeswitch_at_mode_on = SEG_ENABLE; 	// success
-
-	    else if(triggercode_idx > 4)
+		if(triggercode_idx == 3){	
+			sw_modeswitch_at_mode_on = SEG_ENABLE; 	// success
+			triggercode_idx = 0;
+			enable_modeswitch_timer = SEG_DISABLE;
+		}
+//	    else if(triggercode_idx >= 4)
+	    else{
 			restore_serial_data(triggercode_idx);	// failed	
+#ifdef _TRIGGER_DEBUG_
+			trigger_error_index = timeout_occur;
+#endif
+		}
 
-		 triggercode_idx = 0;
-		 enable_modeswitch_timer = SEG_DISABLE;
+		// triggercode_idx = 0;
+		// enable_modeswitch_timer = SEG_DISABLE;
+
 		if(netinfo->packing_time != 0)	modeswitch_gap_time = netinfo->packing_time;
 		else		modeswitch_gap_time = DEFAULT_MODESWITCH_INTER_GAP;
 

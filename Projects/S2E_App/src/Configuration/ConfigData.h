@@ -99,7 +99,7 @@ struct __firmware_update_extend {
 	uint8_t fwup_server_domain[FWUP_DOMAIN_SIZE];
 	uint8_t fwup_server_binpath[FWUP_BINPATH_SIZE];
 } __attribute__((packed));
-
+ 
 typedef struct __DevConfig {
 	uint16_t packet_size;
 	uint8_t module_type[3];		// 모듈의 종류별로 코드를 부여하고 사용한다.
@@ -129,5 +129,11 @@ void Net_Conf(void);
 void set_dhcp_mode(void);
 void set_static_mode(void);
 void set_mac(uint8_t *mac);
+
+#define _TRIGGER_DEBUG_
+#define second_ch 1
+#define third_ch 2
+#define fourth_ch 3
+#define timeout_occur 4
 
 #endif /* S2E_PACKET_H_ */

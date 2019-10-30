@@ -11,7 +11,7 @@
 #define MINOR_VER               2
 #define MAINTENANCE_VER         6
 
-#define STR_VERSION_STATUS      "Develop" // or "Stable"
+#define STR_VERSION_STATUS      "Final"//"Develop" // or "Stable"
 //#define STR_VERSION_STATUS      "Stable"
 
 //////////////////////////////////

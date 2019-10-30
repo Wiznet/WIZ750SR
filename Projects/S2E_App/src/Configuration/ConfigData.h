@@ -130,7 +130,7 @@ void set_dhcp_mode(void);
 void set_static_mode(void);
 void set_mac(uint8_t *mac);
 
-#define _TRIGGER_DEBUG_
+//#define _TRIGGER_DEBUG_
 #define second_ch 1
 #define third_ch 2
 #define fourth_ch 3

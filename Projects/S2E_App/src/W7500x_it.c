@@ -44,7 +44,7 @@ extern void TimingDelay_Decrement(void);
   * @param  None
   * @retval None
   */
-void NMI_Handler(void)
+__weak void NMI_Handler(void)
 {}
 
 /**
@@ -52,7 +52,7 @@ void NMI_Handler(void)
   * @param  None
   * @retval None
   */
-void HardFault_Handler(void)
+__weak void HardFault_Handler(void)
 {}
 
 /**
@@ -60,7 +60,7 @@ void HardFault_Handler(void)
   * @param  None
   * @retval None
   */
-void SVC_Handler(void)
+__weak void SVC_Handler(void)
 {}
 
 /**
@@ -68,7 +68,7 @@ void SVC_Handler(void)
   * @param  None
   * @retval None
   */
-void PendSV_Handler(void)
+__weak void PendSV_Handler(void)
 {}
 
 /**
@@ -76,7 +76,7 @@ void PendSV_Handler(void)
   * @param  None
   * @retval None
   */
-void SysTick_Handler(void)
+__weak void SysTick_Handler(void)
 {
 	TimingDelay_Decrement();
 }
@@ -92,7 +92,7 @@ void SysTick_Handler(void)
   * @param  None
   * @retval None
   */
-void SSP0_Handler(void)
+__weak void SSP0_Handler(void)
 {}
 
 /**
@@ -100,7 +100,7 @@ void SSP0_Handler(void)
   * @param  None
   * @retval None
   */
-void SSP1_Handler(void)
+__weak void SSP1_Handler(void)
 {}
 
 
@@ -109,7 +109,7 @@ void SSP1_Handler(void)
   * @param  None
   * @retval None
   */
-void UART0_Handler(void)
+__weak void UART0_Handler(void)
 {
 	S2E_UART_IRQ_Handler(UART0);
 }
@@ -120,7 +120,7 @@ void UART0_Handler(void)
   * @param  None
   * @retval None
   */
-void UART1_Handler(void)
+__weak void UART1_Handler(void)
 {
 	S2E_UART_IRQ_Handler(UART1);
 }
@@ -131,7 +131,7 @@ void UART1_Handler(void)
   * @param  None
   * @retval None
   */
-void UART2_Handler(void)
+__weak void UART2_Handler(void)
 {}
 
 
@@ -140,7 +140,7 @@ void UART2_Handler(void)
   * @param  None
   * @retval None
   */
-void I2C0_Handler(void)
+__weak void I2C0_Handler(void)
 {}
 
 
@@ -149,7 +149,7 @@ void I2C0_Handler(void)
   * @param  None
   * @retval None
   */
-void I2C1_Handler(void)
+__weak void I2C1_Handler(void)
 {}
 
 
@@ -158,7 +158,7 @@ void I2C1_Handler(void)
   * @param  None
   * @retval None
   */
-void PORT0_Handler(void)
+__weak void PORT0_Handler(void)
 {}
 
 
@@ -167,7 +167,7 @@ void PORT0_Handler(void)
   * @param  None
   * @retval None
   */
-void PORT1_Handler(void)
+__weak void PORT1_Handler(void)
 {}
 
 
@@ -176,7 +176,7 @@ void PORT1_Handler(void)
   * @param  None
   * @retval None
   */
-void PORT2_Handler(void)
+__weak void PORT2_Handler(void)
 {}
 
 
@@ -185,7 +185,7 @@ void PORT2_Handler(void)
   * @param  None
   * @retval None
   */
-void PORT3_Handler(void)
+__weak void PORT3_Handler(void)
 {}
 
 
@@ -194,7 +194,7 @@ void PORT3_Handler(void)
   * @param  None
   * @retval None
   */
-void DMA_Handler(void)
+__weak void DMA_Handler(void)
 {}
 
 
@@ -203,7 +203,7 @@ void DMA_Handler(void)
   * @param  None
   * @retval None
   */
-void DUALTIMER0_Handler(void)
+__weak void DUALTIMER0_Handler(void)
 {
 	Timer_IRQ_Handler();
 }
@@ -214,7 +214,7 @@ void DUALTIMER0_Handler(void)
   * @param  None
   * @retval None
   */
-void DUALTIMER1_Handler(void)
+__weak void DUALTIMER1_Handler(void)
 {}
 
 
@@ -223,7 +223,7 @@ void DUALTIMER1_Handler(void)
   * @param  None
   * @retval None
   */
-void PWM0_Handler(void)
+__weak void PWM0_Handler(void)
 {}
 
 /**
@@ -231,7 +231,7 @@ void PWM0_Handler(void)
   * @param  None
   * @retval None
   */
-void PWM1_Handler(void)
+__weak void PWM1_Handler(void)
 {}
 
 /**
@@ -239,7 +239,7 @@ void PWM1_Handler(void)
   * @param  None
   * @retval None
   */
-void PWM2_Handler(void)
+__weak void PWM2_Handler(void)
 {}
 
 /**
@@ -247,7 +247,7 @@ void PWM2_Handler(void)
   * @param  None
   * @retval None
   */
-void PWM3_Handler(void)
+__weak void PWM3_Handler(void)
 {}
 
 /**
@@ -255,7 +255,7 @@ void PWM3_Handler(void)
   * @param  None
   * @retval None
   */
-void PWM4_Handler(void)
+__weak void PWM4_Handler(void)
 {}
 
 /**
@@ -263,7 +263,7 @@ void PWM4_Handler(void)
   * @param  None
   * @retval None
   */
-void PWM5_Handler(void)
+__weak void PWM5_Handler(void)
 {}
 
 /**
@@ -271,7 +271,7 @@ void PWM5_Handler(void)
   * @param  None
   * @retval None
   */
-void PWM6_Handler(void)
+__weak void PWM6_Handler(void)
 {}
 
 /**
@@ -279,7 +279,14 @@ void PWM6_Handler(void)
   * @param  None
   * @retval None
   */
-void PWM7_Handler(void)
+__weak void PWM7_Handler(void)
+{}
+/**
+  * @brief  This function handles RTC Handler.
+  * @param  None
+  * @retval None
+  */
+__weak void RTC_Handler(void)
 {}
 
 /**
@@ -287,7 +294,7 @@ void PWM7_Handler(void)
   * @param  None
   * @retval None
   */
-void ADC_Handler(void)
+__weak void ADC_Handler(void)
 {}
 
 /**
@@ -295,7 +302,7 @@ void ADC_Handler(void)
   * @param  None
   * @retval None
   */
-void WZTOE_Handler(void)
+__weak void WZTOE_Handler(void)
 {}
 
 /**
@@ -303,7 +310,7 @@ void WZTOE_Handler(void)
   * @param  None
   * @retval None
   */
-void EXTI_Handler(void)
+__weak void EXTI_Handler(void)
 {}
 
 

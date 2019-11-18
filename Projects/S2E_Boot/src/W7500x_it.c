@@ -273,6 +273,8 @@ void PWM6_Handler(void)
   */
 void PWM7_Handler(void)
 {}
+void RTC_Handler(void)
+{}
 
 /**
   * @brief  This function handles ADC Handler.

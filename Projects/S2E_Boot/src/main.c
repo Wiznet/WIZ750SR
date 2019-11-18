@@ -123,7 +123,7 @@ int main(void)
 	
 	/* W7500x MCU Initialization */
 	W7500x_Init(); // includes UART2 init code for debugging
-	
+
 	/* W7500x WZTOE (Hardwired TCP/IP stack) Initialization */
 	W7500x_WZTOE_Init();
 	
@@ -145,8 +145,8 @@ int main(void)
 	
 	if(check_mac_address())
 	{
-		Copy_Interrupt_VectorTable(DEVICE_APP_MAIN_ADDR);
-		delay(SAVE_INTERVAL_MS/2);
+		// Copy_Interrupt_VectorTable(DEVICE_APP_MAIN_ADDR);
+		// delay(SAVE_INTERVAL_MS/2);
 
 		appjump_enable = ON;
 	}
@@ -166,11 +166,11 @@ int main(void)
 		dev_config->network_info[0].state = ST_OPEN;
 		save_DevConfig_to_storage();
 		
-		if(ret == DEVICE_FWUP_RET_SUCCESS)
-		{
-			Copy_Interrupt_VectorTable(DEVICE_APP_MAIN_ADDR);
-			delay(SAVE_INTERVAL_MS/2);
-		}
+		// if(ret == DEVICE_FWUP_RET_SUCCESS)
+		// {
+		// 	Copy_Interrupt_VectorTable(DEVICE_APP_MAIN_ADDR);
+		// 	delay(SAVE_INTERVAL_MS/2);
+		// }
 		appjump_enable = ON;
 	}
 	

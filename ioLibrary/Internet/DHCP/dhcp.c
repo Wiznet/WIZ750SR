@@ -372,7 +372,14 @@ void send_DHCP_DISCOVER(void)
 #endif
 	
 	makeDHCPMSG();
-
+	DHCP_SIP[0]=0;
+   	DHCP_SIP[1]=0;
+  	DHCP_SIP[2]=0;
+   	DHCP_SIP[3]=0;
+   	DHCP_REAL_SIP[0]=0;
+   	DHCP_REAL_SIP[1]=0;
+   	DHCP_REAL_SIP[2]=0;
+   	DHCP_REAL_SIP[3]=0;
 	k = 4; // beacaue MAGIC_COOKIE already made by makeDHCPMSG()
 
 	// Option Request Param

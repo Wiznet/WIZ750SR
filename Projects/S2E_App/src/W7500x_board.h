@@ -340,6 +340,7 @@
 	#define LED2_GPIO_PORT		GPIOA
 	#define LED2_GPIO_PAD		PAD_PA
 	#define LED2_GPIO_PAD_AF	PAD_AF1
+	
 
 #else // WIZwiki-W7500 board
 
@@ -380,7 +381,7 @@
 	} Led_TypeDef;
 */
 #endif
-	
+#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) ||(DEVICE_BOARD_NAME == WIZ750SR_1xx))	
 	// LED
 	#define LEDn		3
 	typedef enum
@@ -389,7 +390,14 @@
 	  LED2 = 1,	// blink
 	  LED3 = 2	// TCP connection status
 	} Led_TypeDef;
-
+#else
+	#define LEDn		2
+	typedef enum
+	{
+	  LED1 = 0,	// PHY link status
+	  LED2 = 1	// blink
+	} Led_TypeDef;
+#endif
 	extern volatile uint16_t phylink_check_time_msec;
 	extern uint8_t flag_check_phylink;
 	extern uint8_t flag_hw_trig_enable;

@@ -84,6 +84,7 @@ void Timer_IRQ_Handler(void)
 			DNS_time_handler();		// Time counter for DNS timeout
 			
 			devtime_sec++; // device time counter, Can be updated this counter value by time protocol like NTP.
+			LED_Toggle(LED3) ;
 		}
 		
 		/* Minute Process */

@@ -4,9 +4,6 @@ WIZnet Serial to Ethernet(S2E) module based on W7500 chip, WIZ107/108SR S2E comp
 - 48(W) x 30mm(L) x 18mm(H)
 <!-- WIZ750SR pic -->
 <p align="center">
-  <img width="50%" src="http://www.wiznet.io/wp-content/uploads/2016/11/WIZ750SR_QuarterView.png" />
-</p> 
- 
 ## WIZ750SR EVB (Separate purchases)
 
 - WIZ750SR Developer Board
@@ -80,7 +77,11 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
 ## Update History
 **The Boot of V1.3.0 and less than App of V1.2.6 version can't be used together.**
 **But the Boot of less than V1.2.6 and APP of V1.3.0 version can use together.**
-https://user-images.githubusercontent.com/9648281/69318883-6e5b1980-0c81-11ea-8f7b-b2b866b773da.JPG
+<p align="center">
+  <img width="40%" src="https://user-images.githubusercontent.com/9648281/69318883-6e5b1980-0c81-11ea-8f7b-b2b866b773da.JPG" />
+</p>
+ 
+
 
 v1.3.0 Stable
 - Bug fixes:

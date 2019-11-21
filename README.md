@@ -80,6 +80,7 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
 ## Update History
 **The Boot of V1.3.0 and less than App of V1.2.6 version can't be used together.**
 **But the Boot of less than V1.2.6 and APP of V1.3.0 version can use together.**
+https://user-images.githubusercontent.com/9648281/69318883-6e5b1980-0c81-11ea-8f7b-b2b866b773da.JPG
 
 v1.3.0 Stable
 - Bug fixes:

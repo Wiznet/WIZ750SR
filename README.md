@@ -99,7 +99,9 @@ v1.3.0 Stable
   - Compare DHCP Server IP :  When DHCP OFFER Packet receive from DHCP Server,the DHCP server ip in packet compare with previous DHCP Server IP.
   - The Status LED(PA_07) of  WIZ750SR_1xx is modified. Turning on an LED and making it blink once per second.
 
-=====================================================
+
+* * *
+
 v1.2.7 Stable
 - Bug fixes:
  - When exception situation of TCP Connection - Class C private IP

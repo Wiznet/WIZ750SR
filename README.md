@@ -78,6 +78,24 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
  
  
 ## Update History
+**The Boot of V1.3.0 and less than App of V1.2.6 version can't be used together.**
+**But the Boot of less than V1.2.6 and APP of V1.3.0 version can use together.**
+
+v1.3.0 Stable
+- Bug fixes:
+  - When APP firmware is uploading using the configuration Tool and Board is power off, the product not operate.
+  - DHCP Lease Time :  when _DHCP_DEBUG_ enable, DHCP Lease Time is fixed as 10 second. 
+  - The Status LED(PA_07) of  WIZ750SR_1xx doesn't operate.
+  - When exception situation of TCP Connection - Class C private IP
+When the module IP and Remote IP is 192.168.xx.xx and third ip is different for each, ARP request operation is not transmitted.(This part had deleted)
+
+- Improvements:
+  
+  - The ISR adress have changed to fixed address. The ISR address of APP didn't copy and use at Boot.
+  -  DHCP lease time is modified to use it that information of received packet from DHCP Server.
+  - Compare DHCP Server IP :  When DHCP OFFER Packet receive from DHCP Server,the DHCP server ip in packet compare with previous DHCP Server IP.
+  - The Status LED(PA_07) of  WIZ750SR_1xx is modified. Turning on an LED and making it blink once per second.
+
 
 v1.2.6 Stable
 - Bug fixes:

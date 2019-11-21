@@ -1431,18 +1431,18 @@ uint8_t check_tcp_connect_exception(void)
 		if(serial->serial_debug_en) printf(" > SEG:CONNECTION FAILED - Duplicate IP address\r\n");
 		ret = ON;
 	}
-	else if((srcip[0] == 192) && (srcip[1] == 168)) // local IP address == Class C private IP
-	{
-		// Static IP address obtained
-		if((option->dhcp_use == SEG_DISABLE) && ((net->remote_ip[0] == 192) && (net->remote_ip[1] == 168)))
-		{
-			if(srcip[2] != net->remote_ip[2]) // Class C Private IP network mismatch
-			{
-				if(serial->serial_debug_en) printf(" > SEG:CONNECTION FAILED - Invalid IP address range (%d.%d.[%d].%d)\r\n", net->remote_ip[0], net->remote_ip[1], net->remote_ip[2], net->remote_ip[3]);
-				ret = ON; 
-			}
-		}
-	}
+	// else if((srcip[0] == 192) && (srcip[1] == 168)) // local IP address == Class C private IP
+	// {
+	// 	// Static IP address obtained
+	// 	if((option->dhcp_use == SEG_DISABLE) && ((net->remote_ip[0] == 192) && (net->remote_ip[1] == 168)))
+	// 	{
+	// 		if(srcip[2] != net->remote_ip[2]) // Class C Private IP network mismatch
+	// 		{
+	// 			if(serial->serial_debug_en) printf(" > SEG:CONNECTION FAILED - Invalid IP address range (%d.%d.[%d].%d)\r\n", net->remote_ip[0], net->remote_ip[1], net->remote_ip[2], net->remote_ip[3]);
+	// 			ret = ON; 
+	// 		}
+	// 	}
+	// }
 	
 	return ret;
 }

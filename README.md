@@ -80,7 +80,10 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
 <p align="center">
   <img width="40%" src="https://user-images.githubusercontent.com/9648281/69318883-6e5b1980-0c81-11ea-8f7b-b2b866b773da.JPG" />
 </p>
- 
+v1.3.1 Stable
+- Bug fixes:
+ - When exception situation of TCP Connection - Class C private IP
+When the module IP and Remote IP is 192.168.xx.xx and third ip is different for each, ARP request operation is not transmitted.(This part had deleted)
 
 
 v1.3.0 Stable
@@ -88,9 +91,7 @@ v1.3.0 Stable
   - When APP firmware is uploading using the configuration Tool and Board is power off, the product not operate.
   - DHCP Lease Time :  when _DHCP_DEBUG_ enable, DHCP Lease Time is fixed as 10 second. 
   - The Status LED(PA_07) of  WIZ750SR_1xx doesn't operate.
-  - When exception situation of TCP Connection - Class C private IP
-When the module IP and Remote IP is 192.168.xx.xx and third ip is different for each, ARP request operation is not transmitted.(This part had deleted)
-
+ 
 - Improvements:
   
   - The ISR adress have changed to fixed address. The ISR address of APP didn't copy and use at Boot.
@@ -98,6 +99,11 @@ When the module IP and Remote IP is 192.168.xx.xx and third ip is different for 
   - Compare DHCP Server IP :  When DHCP OFFER Packet receive from DHCP Server,the DHCP server ip in packet compare with previous DHCP Server IP.
   - The Status LED(PA_07) of  WIZ750SR_1xx is modified. Turning on an LED and making it blink once per second.
 
+=====================================================
+v1.2.7 Stable
+- Bug fixes:
+ - When exception situation of TCP Connection - Class C private IP
+When the module IP and Remote IP is 192.168.xx.xx and third ip is different for each, ARP request operation is not transmitted.(This part had deleted)
 
 v1.2.6 Stable
 - Bug fixes:

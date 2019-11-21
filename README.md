@@ -80,9 +80,10 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
 <p align="center">
   <img width="40%" src="https://user-images.githubusercontent.com/9648281/69318883-6e5b1980-0c81-11ea-8f7b-b2b866b773da.JPG" />
 </p>
+
 v1.3.1 Stable
 - Bug fixes:
- - When exception situation of TCP Connection - Class C private IP
+  - When exception situation of TCP Connection - Class C private IP
 When the module IP and Remote IP is 192.168.xx.xx and third ip is different for each, ARP request operation is not transmitted.(This part had deleted)
 
 

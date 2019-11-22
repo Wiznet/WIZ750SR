@@ -1,3 +1,5 @@
+
+
 # WIZ750SR
 WIZnet Serial to Ethernet(S2E) module based on W7500 chip, WIZ107/108SR S2E compatible device
 
@@ -78,7 +80,7 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
 **The Boot of V1.3.0 and less than App of V1.2.6 version can't be used together.**
 **But the Boot of less than V1.2.6 and APP of V1.3.0 version can use together.**
 <p align="center">
-  <img width="40%" src="https://user-images.githubusercontent.com/9648281/69318883-6e5b1980-0c81-11ea-8f7b-b2b866b773da.JPG" />
+  <img width="100%" src="https://user-images.githubusercontent.com/9648281/69403222-58129380-0d3d-11ea-9b08-3ee992eb8e85.jpg" />
 </p>
 
 v1.3.1 Stable
@@ -91,15 +93,16 @@ v1.3.0 Stable
 - Bug fixes:
   - When APP firmware is uploading using the configuration Tool and Board is power off, the product not operate.
   - DHCP Lease Time :  when _DHCP_DEBUG_ enable, DHCP Lease Time is fixed as 10 second. 
+  	- DHCP lease time is modified to use it that information of received packet from DHCP Server.
   - The Status LED(PA_07) of  WIZ750SR_1xx doesn't operate.
- 
-- Improvements:
-  
-  - The ISR adress have changed to fixed address. The ISR address of APP didn't copy and use at Boot.
-  -  DHCP lease time is modified to use it that information of received packet from DHCP Server.
+    - The Status LED(PA_07) of  WIZ750SR_1xx is modified. Turning on an LED and making it blink once per second.
   - Compare DHCP Server IP :  When DHCP OFFER Packet receive from DHCP Server,the DHCP server ip in packet compare with previous DHCP Server IP.
-  - The Status LED(PA_07) of  WIZ750SR_1xx is modified. Turning on an LED and making it blink once per second.
-
+- Improvements:
+  - The ISR adress have changed to fixed address. The ISR address of APP didn't copy and use at Boot.
+  
+<p align="center">
+  <img width="40%" src="https://user-images.githubusercontent.com/9648281/69402311-cefa5d00-0d3a-11ea-9f9e-6d3b08d8ac35.jpg" />
+</p>
 
 * * *
 
@@ -214,3 +217,5 @@ v1.1.1
 
 v1.1.0
 - First release : 2016
+
+

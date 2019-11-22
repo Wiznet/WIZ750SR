@@ -77,8 +77,7 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
  
  
 ## Update History
-**The Boot of V1.3.0 and less than App of V1.2.6 version can't be used together.**
-**But the Boot of less than V1.2.6 and APP of V1.3.0 version can use together.**
+
 <p align="center">
   <img width="100%" src="https://user-images.githubusercontent.com/9648281/69403222-58129380-0d3d-11ea-9b08-3ee992eb8e85.jpg" />
 </p>
@@ -98,11 +97,15 @@ v1.3.0 Stable
     - The Status LED(PA_07) of  WIZ750SR_1xx is modified. Turning on an LED and making it blink once per second.
   - Compare DHCP Server IP :  When DHCP OFFER Packet receive from DHCP Server,the DHCP server ip in packet compare with previous DHCP Server IP.
 - Improvements:
-  - The ISR adress have changed to fixed address. The ISR address of APP didn't copy and use at Boot.
+  - The ISR address have changed to fixed address. The ISR address of APP did no more have to need copy and use in Boot.
   
 <p align="center">
   <img width="40%" src="https://user-images.githubusercontent.com/9648281/69402311-cefa5d00-0d3a-11ea-9f9e-6d3b08d8ac35.jpg" />
 </p>
+
+> The Boot of less than V1.2.7 and APP of more than V1.3.0 version can use together.The Boot of more than V1.3.0 and less than App of V1.2.6 version can't be used together. 
+> The mechanism has been changed about it because the ISR address have changed to fixed address unlike previous ISR address.
+> So Boot works even if the APP doesn't work.
 
 * * *
 

@@ -65,8 +65,8 @@ __heap_limit
 
 __Vectors       DCD     __initial_sp              ; Top of Stack
                 DCD     Reset_Handler             ; Reset Handler
-                DCD     Remap_NMI_Handler               ; NMI Handler
-                DCD     Remap_HardFault_Handler         ; Hard Fault Handler
+                DCD     NMI_Handler               ; NMI Handler
+                DCD     HardFault_Handler         ; Hard Fault Handler
                 DCD     0                         ; Reserved
                 DCD     0                         ; Reserved
                 DCD     0                         ; Reserved
@@ -74,37 +74,37 @@ __Vectors       DCD     __initial_sp              ; Top of Stack
                 DCD     0                         ; Reserved
                 DCD     0                         ; Reserved
                 DCD     0                         ; Reserved
-                DCD     Remap_SVC_Handler               ; SVCall Handler
+                DCD     SVC_Handler               ; SVCall Handler
                 DCD     0                         ; Reserved
                 DCD     0                         ; Reserved
-                DCD     Remap_PendSV_Handler            ; PendSV Handler
-                DCD     Remap_SysTick_Handler           ; SysTick Handler
-                DCD     Remap_SSP0_Handler              ; 16+ 0: SSP 0 Handler                   
-                DCD     Remap_SSP1_Handler              ; 16+ 1: SSP 1 Handler                   
-                DCD     Remap_UART0_Handler             ; 16+ 2: UART 0 Handler                  
-                DCD     Remap_UART1_Handler             ; 16+ 3: UART 1 Handler                  
-                DCD     Remap_UART2_Handler             ; 16+ 4: UART 2 Handler                  
-                DCD     Remap_I2C0_Handler              ; 16+ 5: I2C 0 Handler                   
-                DCD     Remap_I2C1_Handler              ; 16+ 6: I2C 1 Handler                   
-                DCD     Remap_PORT0_Handler             ; 16+ 7: GPIO Port 0 Combined Handler    
-                DCD     Remap_PORT1_Handler             ; 16+ 8: GPIO Port 1 Combined Handler    
-                DCD     Remap_PORT2_Handler             ; 16+ 9: GPIO Port 2 Combined Handler    
-                DCD     Remap_PORT3_Handler             ; 16+10: GPIO Port 3 Combined Handler    
-                DCD     Remap_DMA_Handler               ; 16+11: DMA Combined Handler            
-	            DCD     Remap_DUALTIMER0_Handler        ; 16+12: Dual timer 0 handler             
-	            DCD     Remap_DUALTIMER1_Handler        ; 16+13: Dual timer 1 handler            
-                DCD     Remap_PWM0_Handler              ; 16+14: PWM0 Handler                    
-                DCD     Remap_PWM1_Handler              ; 16+15: PWM1 Handler                    
-                DCD     Remap_PWM2_Handler              ; 16+16: PWM2 Handler                    
-                DCD     Remap_PWM3_Handler              ; 16+17: PWM3 Handler                    
-                DCD     Remap_PWM4_Handler              ; 16+18: PWM4 Handler                    
-                DCD     Remap_PWM5_Handler              ; 16+19: PWM5 Handler                    
-                DCD     Remap_PWM6_Handler              ; 16+20: PWM6 Handler                    
-                DCD     Remap_PWM7_Handler              ; 16+21: PWM7 Handler                    
-                DCD     Remap_RTC_Handler               ; 16+22: RTC Handler                     
-                DCD     Remap_ADC_Handler               ; 16+23: ADC Handler                     
-                DCD     Remap_WZTOE_Handler             ; 16+24: WZTOE_Handler                   
-                DCD     Remap_EXTI_Handler             ; 16+25: EXTI_Handler      					
+                DCD     PendSV_Handler            ; PendSV Handler
+                DCD     SysTick_Handler           ; SysTick Handler
+                DCD     SSP0_Handler              ; 16+ 0: SSP 0 Handler                   
+                DCD     SSP1_Handler              ; 16+ 1: SSP 1 Handler                   
+                DCD     UART0_Handler             ; 16+ 2: UART 0 Handler                  
+                DCD     UART1_Handler             ; 16+ 3: UART 1 Handler                  
+                DCD     UART2_Handler             ; 16+ 4: UART 2 Handler                  
+                DCD     I2C0_Handler              ; 16+ 5: I2C 0 Handler                   
+                DCD     I2C1_Handler              ; 16+ 6: I2C 1 Handler                   
+                DCD     PORT0_Handler             ; 16+ 7: GPIO Port 0 Combined Handler    
+                DCD     PORT1_Handler             ; 16+ 8: GPIO Port 1 Combined Handler    
+                DCD     PORT2_Handler             ; 16+ 9: GPIO Port 2 Combined Handler    
+                DCD     PORT3_Handler             ; 16+10: GPIO Port 3 Combined Handler    
+                DCD     DMA_Handler               ; 16+11: DMA Combined Handler            
+	            DCD     DUALTIMER0_Handler        ; 16+12: Dual timer 0 handler             
+	            DCD     DUALTIMER1_Handler        ; 16+13: Dual timer 1 handler            
+                DCD     PWM0_Handler              ; 16+14: PWM0 Handler                    
+                DCD     PWM1_Handler              ; 16+15: PWM1 Handler                    
+                DCD     PWM2_Handler              ; 16+16: PWM2 Handler                    
+                DCD     PWM3_Handler              ; 16+17: PWM3 Handler                    
+                DCD     PWM4_Handler              ; 16+18: PWM4 Handler                    
+                DCD     PWM5_Handler              ; 16+19: PWM5 Handler                    
+                DCD     PWM6_Handler              ; 16+20: PWM6 Handler                    
+                DCD     PWM7_Handler              ; 16+21: PWM7 Handler                    
+                DCD     RTC_Handler               ; 16+22: RTC Handler                     
+                DCD     ADC_Handler               ; 16+23: ADC Handler                     
+                DCD     WZTOE_Handler             ; 16+24: WZTOE_Handler                   
+                DCD     EXTI_Handler             ; 16+25: EXTI_Handler      					
 __Vectors_End
 
 __Vectors_Size  EQU     __Vectors_End - __Vectors
@@ -127,79 +127,80 @@ Reset_Handler   PROC
 
 ; Dummy Exception Handlers (infinite loops which can be modified)
 
-Remap_NMI_Handler     PROC
-                EXPORT  Remap_NMI_Handler               [WEAK]
+NMI_Handler     PROC
+                EXPORT  NMI_Handler               [WEAK]
                 B       .
                 ENDP
-Remap_HardFault_Handler PROC
-                EXPORT  Remap_HardFault_Handler         [WEAK]
+HardFault_Handler\
+                PROC
+                EXPORT  HardFault_Handler         [WEAK]
                 B       .
                 ENDP
-Remap_SVC_Handler     PROC
-                EXPORT  Remap_SVC_Handler               [WEAK]
+SVC_Handler     PROC
+                EXPORT  SVC_Handler               [WEAK]
                 B       .
                 ENDP
-Remap_PendSV_Handler  PROC
-                EXPORT  Remap_PendSV_Handler            [WEAK]
+PendSV_Handler  PROC
+                EXPORT  PendSV_Handler            [WEAK]
                 B       .
                 ENDP
-Remap_SysTick_Handler PROC
-               EXPORT  Remap_SysTick_Handler            [WEAK]
+SysTick_Handler PROC
+               EXPORT  SysTick_Handler            [WEAK]
                B       .
                ENDP
-Remap_Default_Handler PROC
-                EXPORT Remap_SSP0_Handler               [WEAK]
-                EXPORT Remap_SSP1_Handler               [WEAK]
-                EXPORT Remap_UART0_Handler              [WEAK]
-                EXPORT Remap_UART1_Handler              [WEAK]
-                EXPORT Remap_UART2_Handler              [WEAK]
-                EXPORT Remap_I2C0_Handler               [WEAK]
-                EXPORT Remap_I2C1_Handler               [WEAK]
-                EXPORT Remap_PORT0_Handler              [WEAK]
-                EXPORT Remap_PORT1_Handler              [WEAK]
-                EXPORT Remap_PORT2_Handler              [WEAK]
-                EXPORT Remap_PORT3_Handler              [WEAK]
-                EXPORT Remap_DMA_Handler                [WEAK]
-                EXPORT Remap_DUALTIMER0_Handler         [WEAK]
-                EXPORT Remap_DUALTIMER1_Handler         [WEAK]
-                EXPORT Remap_PWM0_Handler               [WEAK]
-                EXPORT Remap_PWM1_Handler               [WEAK]
-                EXPORT Remap_PWM2_Handler               [WEAK]
-                EXPORT Remap_PWM3_Handler               [WEAK]
-                EXPORT Remap_PWM4_Handler               [WEAK]
-                EXPORT Remap_PWM5_Handler               [WEAK]
-                EXPORT Remap_PWM6_Handler               [WEAK]
-                EXPORT Remap_PWM7_Handler               [WEAK]
-                EXPORT Remap_RTC_Handler                [WEAK]
-                EXPORT Remap_ADC_Handler                [WEAK]
-                EXPORT Remap_WZTOE_Handler              [WEAK]
-                EXPORT Remap_EXTI_Handler              [WEAK]						
-Remap_SSP0_Handler                      
-Remap_SSP1_Handler                      
-Remap_UART0_Handler                     
-Remap_UART1_Handler                     
-Remap_UART2_Handler                     
-Remap_I2C0_Handler                      
-Remap_I2C1_Handler                      
-Remap_PORT0_Handler                     
-Remap_PORT1_Handler                     
-Remap_PORT2_Handler                     
-Remap_PORT3_Handler                     
-Remap_DMA_Handler                       
-Remap_DUALTIMER0_Handler                
-Remap_DUALTIMER1_Handler                
-Remap_PWM0_Handler                      
-Remap_PWM1_Handler                      
-Remap_PWM2_Handler                      
-Remap_PWM3_Handler                      
-Remap_PWM4_Handler                      
-Remap_PWM5_Handler                      
-Remap_PWM6_Handler                      
-Remap_PWM7_Handler                      
-Remap_RTC_Handler                       
-Remap_ADC_Handler                       
-Remap_WZTOE_Handler                
-Remap_EXTI_Handler
+Default_Handler PROC
+                EXPORT SSP0_Handler               [WEAK]
+                EXPORT SSP1_Handler               [WEAK]
+                EXPORT UART0_Handler              [WEAK]
+                EXPORT UART1_Handler              [WEAK]
+                EXPORT UART2_Handler              [WEAK]
+                EXPORT I2C0_Handler               [WEAK]
+                EXPORT I2C1_Handler               [WEAK]
+                EXPORT PORT0_Handler              [WEAK]
+                EXPORT PORT1_Handler              [WEAK]
+                EXPORT PORT2_Handler              [WEAK]
+                EXPORT PORT3_Handler              [WEAK]
+                EXPORT DMA_Handler                [WEAK]
+                EXPORT DUALTIMER0_Handler         [WEAK]
+                EXPORT DUALTIMER1_Handler         [WEAK]
+                EXPORT PWM0_Handler               [WEAK]
+                EXPORT PWM1_Handler               [WEAK]
+                EXPORT PWM2_Handler               [WEAK]
+                EXPORT PWM3_Handler               [WEAK]
+                EXPORT PWM4_Handler               [WEAK]
+                EXPORT PWM5_Handler               [WEAK]
+                EXPORT PWM6_Handler               [WEAK]
+                EXPORT PWM7_Handler               [WEAK]
+                EXPORT RTC_Handler                [WEAK]
+                EXPORT ADC_Handler                [WEAK]
+                EXPORT WZTOE_Handler              [WEAK]
+                EXPORT EXTI_Handler              [WEAK]					
+SSP0_Handler                      
+SSP1_Handler                      
+UART0_Handler                     
+UART1_Handler                     
+UART2_Handler                     
+I2C0_Handler                      
+I2C1_Handler                      
+PORT0_Handler                     
+PORT1_Handler                     
+PORT2_Handler                     
+PORT3_Handler                     
+DMA_Handler                       
+DUALTIMER0_Handler                
+DUALTIMER1_Handler                
+PWM0_Handler                      
+PWM1_Handler                      
+PWM2_Handler                      
+PWM3_Handler                      
+PWM4_Handler                      
+PWM5_Handler                      
+PWM6_Handler                      
+PWM7_Handler                      
+RTC_Handler                       
+ADC_Handler                       
+WZTOE_Handler                
+EXTI_Handler
                 B       .
                 ENDP
 

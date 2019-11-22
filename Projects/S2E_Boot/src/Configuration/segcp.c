@@ -103,7 +103,7 @@ void do_segcp(void)
 				dev_config->network_info[0].state = ST_OPEN;
 				save_DevConfig_to_storage();
 				
-			//	Copy_Interrupt_VectorTable(DEVICE_APP_MAIN_ADDR);
+				Copy_Interrupt_VectorTable(DEVICE_APP_MAIN_ADDR);
 				delay(SAVE_INTERVAL_MS/2);
 
 				device_reboot();

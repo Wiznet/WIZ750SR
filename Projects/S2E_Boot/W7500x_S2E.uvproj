@@ -575,11 +575,6 @@
               <FileType>1</FileType>
               <FilePath>.\src\PlatformHandler\eepromHandler.c</FilePath>
             </File>
-            <File>
-              <FileName>isr_vector.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>.\src\PlatformHandler\isr_vector.c</FilePath>
-            </File>
           </Files>
         </Group>
         <Group>

@@ -110,7 +110,7 @@ v1.3.0 Stable
 * * *
 
 v1.2.7 Stable
-- Bug fixes: All bug fixed described at v1.3.0 and v1.3.1 except Impovements.
+- Bug fixes: All bug fixed described at upper v1.3.0 and v1.3.1 except Impovements.
 
 v1.2.6 Stable
 - Bug fixes:

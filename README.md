@@ -110,9 +110,7 @@ v1.3.0 Stable
 * * *
 
 v1.2.7 Stable
-- Bug fixes:
- - When exception situation of TCP Connection - Class C private IP
-When the module IP and Remote IP is 192.168.xx.xx and third ip is different for each, ARP request operation is not transmitted.(This part had deleted)
+- Bug fixes: All bug fixed described at v1.3.0 and v1.3.1 except Impovements.
 
 v1.2.6 Stable
 - Bug fixes:

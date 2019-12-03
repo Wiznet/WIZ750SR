@@ -2,12 +2,14 @@
   ******************************************************************************
   * @file    W7500x Serial to Ethernet Project - WIZ750SR App
   * @author  Irina Kim, Team network
-  * @version v1.2.6
-  * @date    Oct-2019
+  * @version v1.2.8
+  * @date    Dec-2019
   * @brief   Main program body
   ******************************************************************************
   * @attention
   * @par Revision history
+  *    <2019/12/03> v1.2.8 Bugfix and Improvements by irina
+  *    <2019/11/22> v1.2.7 Bugfix and Improvements by irina
   *    <2019/10/11> v1.2.6 Bugfix and Improvements by irina
   *						  Modified Packing time
   *    <2018/09/19> v1.2.5 Bugfix and Improvements by Becky	

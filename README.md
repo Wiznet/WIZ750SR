@@ -79,8 +79,12 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
 ## Update History
 
 <p align="center">
-  <img width="100%" src="https://user-images.githubusercontent.com/9648281/69403222-58129380-0d3d-11ea-9b08-3ee992eb8e85.jpg" />
+  <img width="100%" src="https://user-images.githubusercontent.com/9648281/70020317-94f94880-15cf-11ea-9dd1-ee18b8221ed0.png" />
 </p>
+
+v1.3.2 Stable
+- Bug fixes:
+   - Fixed pin mapping : DSR pin of WizZ750SR-100/105/110
 
 v1.3.1 Stable
 - Bug fixes:
@@ -98,16 +102,23 @@ v1.3.0 Stable
   - Compare DHCP Server IP :  When DHCP OFFER Packet receive from DHCP Server,the DHCP server ip in packet compare with previous DHCP Server IP.
 - Improvements:
   - The ISR address have changed to fixed address. The ISR address of APP did no more have to need copy and use in Boot.
-  
+
+##Caution
 <p align="center">
-  <img width="40%" src="https://user-images.githubusercontent.com/9648281/69402311-cefa5d00-0d3a-11ea-9f9e-6d3b08d8ac35.jpg" />
+  <img width="70%" src="https://user-images.githubusercontent.com/9648281/70020315-94f94880-15cf-11ea-89cd-6bb3b2f1b7f1.png" />
 </p>
 
-> The Boot of less than V1.2.7 and APP of more than V1.3.0 version can use together.The Boot of more than V1.3.0 and less than App of V1.2.6 version can't be used together. 
-> The mechanism has been changed about it because the ISR address have changed to fixed address unlike previous ISR address.
-> So Boot works even if the APP doesn't work.
+ - V1.2 Boot + V1.2.x App : Working
+ - V1.2 Boot + V1.3.x App : Working
+ - V1.3 Boot + V1.3.x App : Working
+ - V1.3 Boot + V1.2.x App : **Not Working**
+
 
 * * *
+
+v1.2.8 Stable
+- Bug fixes:
+   - Fixed pin mapping : DSR pin of WizZ750SR-100/105/110
 
 v1.2.7 Stable
 - Bug fixes: All bug fixed described at upper v1.3.0 and v1.3.1 except Impovements.

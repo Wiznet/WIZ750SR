@@ -1,12 +1,12 @@
 /*******************************************************************************************************************************************************
- * Copyright ¡§I 2016 <WIZnet Co.,Ltd.> 
- * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ¢®¡ÆSoftware¢®¡¾), 
+ * Copyright ï¿½ï¿½I 2016 <WIZnet Co.,Ltd.> 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the ï¿½ï¿½ï¿½ï¿½Softwareï¿½ï¿½ï¿½ï¿½), 
  * to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, 
  * and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
  *
  * The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
 
- * THE SOFTWARE IS PROVIDED ¢®¡ÆAS IS¢®¡¾, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
+ * THE SOFTWARE IS PROVIDED ï¿½ï¿½ï¿½ï¿½AS ISï¿½ï¿½ï¿½ï¿½, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, 
  * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. 
  * IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
  * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
@@ -78,7 +78,7 @@ int32_t loopback_tcps(uint8_t sn, uint8_t* buf, uint16_t port)
 #ifdef _LOOPBACK_DEBUG_
          //printf("%d:TCP server loopback start\r\n",sn);
 #endif
-         if((ret = socket(sn, Sn_MR_TCP, port, 0x00)) != sn) return ret;
+         if((ret = socket(sn, Sn_MR_TCP, port, SOCK_IO_NONBLOCK)) != sn) return ret;
 #ifdef _LOOPBACK_DEBUG_
          //printf("%d:Socket opened\r\n",sn);
 #endif
@@ -162,7 +162,7 @@ int32_t loopback_tcpc(uint8_t sn, uint8_t* buf, uint8_t* destip, uint16_t destpo
 
       case SOCK_CLOSED:
           close(sn);
-          if((ret=socket(sn, Sn_MR_TCP, any_port++, 0x00)) != sn) return ret; // TCP socket open with 'any_port' port number
+          if((ret=socket(sn, Sn_MR_TCP, any_port++, SOCK_IO_NONBLOCK)) != sn) return ret; // TCP socket open with 'any_port' port number
 #ifdef _LOOPBACK_DEBUG_
          //printf("%d:TCP client loopback start\r\n",sn);
          //printf("%d:Socket opened\r\n",sn);
@@ -216,7 +216,7 @@ int32_t loopback_udps(uint8_t sn, uint8_t* buf, uint16_t port)
 #ifdef _LOOPBACK_DEBUG_
          //printf("%d:UDP loopback start\r\n",sn);
 #endif
-         if((ret = socket(sn, Sn_MR_UDP, port, 0x00)) != sn)
+         if((ret = socket(sn, Sn_MR_UDP, port, SOCK_IO_NONBLOCK)) != sn)
             return ret;
 #ifdef _LOOPBACK_DEBUG_
          printf("%d:Opened, UDP loopback, port [%d]\r\n", sn, port);
@@ -275,7 +275,7 @@ int32_t loopback_iperf(uint8_t sn, uint8_t* buf, uint16_t port)
 #ifdef _LOOPBACK_DEBUG_
          //printf("%d:TCP server loopback start\r\n",sn);
 #endif
-         if((ret = socket(sn, Sn_MR_TCP, port, 0x00)) != sn) return ret;
+         if((ret = socket(sn, Sn_MR_TCP, port, SOCK_IO_NONBLOCK)) != sn) return ret;
 #ifdef _LOOPBACK_DEBUG_
          //printf("%d:Socket opened\r\n",sn);
 #endif

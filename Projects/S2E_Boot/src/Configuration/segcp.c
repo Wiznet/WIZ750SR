@@ -945,7 +945,7 @@ uint16_t proc_SEGCP_udp(uint8_t* segcp_req, uint8_t* segcp_rep)
 			}
 			break;
 		case SOCK_CLOSED:
-			if(socket(SEGCP_UDP_SOCK, Sn_MR_UDP, DEVICE_SEGCP_PORT, 0x00) == SEGCP_UDP_SOCK)
+			if(socket(SEGCP_UDP_SOCK, Sn_MR_UDP, DEVICE_SEGCP_PORT, SOCK_IO_NONBLOCK) == SEGCP_UDP_SOCK)
 			{
 				;//if(dev_config->serial_info[0].serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:UDP:STARTED\r\n");
 			}
@@ -1048,7 +1048,7 @@ uint16_t proc_SEGCP_tcp(uint8_t* segcp_req, uint8_t* segcp_rep)
 		case SOCK_FIN_WAIT:
 			close(SEGCP_TCP_SOCK);
 			
-			if(socket(SEGCP_TCP_SOCK, Sn_MR_TCP, DEVICE_SEGCP_PORT, SF_TCP_NODELAY) == SEGCP_TCP_SOCK)
+			if(socket(SEGCP_TCP_SOCK, Sn_MR_TCP, DEVICE_SEGCP_PORT, SF_TCP_NODELAY|SOCK_IO_NONBLOCK) == SEGCP_TCP_SOCK)
 			{
 				//if(dev_config->serial_info[0].serial_debug_en == SEGCP_ENABLE) printf(" > SEGCP:TCP:STARTED\r\n");
 				

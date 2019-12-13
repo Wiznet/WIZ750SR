@@ -60,9 +60,9 @@ void W7500x_Board_Init(void)
   // STATUS #3 : Blink
 	LED_Init(LED1);
 	LED_Init(LED2);
-#if (DEVICE_BOARD_NAME == WIZ750SR_1xx)
+//#if (DEVICE_BOARD_NAME == WIZ750SR_1xx)
   LED_Init(LED3);
-#endif
+//#endif
 }
 
 void Supervisory_IC_Init(void)

@@ -269,7 +269,7 @@ void proc_SEG_udp(uint8_t sock)
 				setSn_DHAR(sock, multicast_mac);
 				flag|=SF_MULTI_ENABLE;
 			}
-			
+			flag|=SOCK_IO_NONBLOCK;
 			if(socket(sock, Sn_MR_UDP, net->local_port, flag) == sock)
 			{
 				set_device_status(ST_UDP);
@@ -573,7 +573,7 @@ void proc_SEG_tcp_server(uint8_t sock)
 			u2e_size = 0;
 			e2u_size = 0;
 
-			if(socket(sock, Sn_MR_TCP, net->local_port, SF_TCP_NODELAY) == sock)
+			if(socket(sock, Sn_MR_TCP, net->local_port, SF_TCP_NODELAY|SOCK_IO_NONBLOCK) == sock)
 			{
 				// Replace the command mode switch code GAP time (default: 500ms)
 				if(net->packing_time)	modeswitch_gap_time = net->packing_time;
@@ -819,7 +819,7 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 #ifdef _SEG_DEBUG_
 				printf(" > TCP CLIENT: any_port = %d\r\n", source_port);
 #endif		
-				if(socket(sock, Sn_MR_TCP, source_port, SF_TCP_NODELAY) == sock)
+				if(socket(sock, Sn_MR_TCP, source_port, SF_TCP_NODELAY|SOCK_IO_NONBLOCK) == sock)
 				{
 					// Replace the command mode switch code GAP time (default: 500ms)
 					if(net->packing_time) modeswitch_gap_time = net->packing_time;

@@ -406,7 +406,7 @@ uint16_t get_firmware_from_network(uint8_t sock, uint8_t * buf)
 		
 		case SOCK_FIN_WAIT:
 		case SOCK_CLOSED:
-			if(socket(sock, Sn_MR_TCP, DEVICE_FWUP_PORT, Sn_MR_ND) == sock)
+			if(socket(sock, Sn_MR_TCP, DEVICE_FWUP_PORT, Sn_MR_ND|SOCK_IO_NONBLOCK) == sock)
 			{
 				recv_fwsize = 0;
 				listen(sock);

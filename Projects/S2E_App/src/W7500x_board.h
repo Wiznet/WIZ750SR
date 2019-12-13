@@ -17,9 +17,8 @@
 /* Target Board Selector */
 //#define DEVICE_BOARD_NAME	WIZwiki_W7500ECO
 //#define DEVICE_BOARD_NAME	W7500P_S2E
-#define DEVICE_BOARD_NAME	WIZ750SR
-//#define DEVICE_BOARD_NAME	WIZ750SR_1xx
-//#define DEVICE_BOARD_NAME_SUB   WIZ750SR_110  //IF you use the WIWIZ750SR_110, this option activate.
+//#define DEVICE_BOARD_NAME	WIZ750SR
+#define DEVICE_BOARD_NAME	WIZ750SR_1xx
 //#define DEVICE_BOARD_NAME	W7500_S2E
 
 #ifdef DEVICE_BOARD_NAME
@@ -151,11 +150,7 @@
 
 	// HW_TRIG - Command mode switch enable pin
 	// Direction: Input (Shared pin with TCP connection status pin)
-	#if (DEVICE_BOARD_NAME_SUB == WIZ750SR_110) 
-		#define HW_TRIG_PIN					GPIO_Pin_9
-	#else
-		#define HW_TRIG_PIN					GPIO_Pin_7
-	#endif
+	#define HW_TRIG_PIN					GPIO_Pin_9
 	#define HW_TRIG_PORT				GPIOA
 	#define HW_TRIG_PAD_AF				PAD_AF1
 

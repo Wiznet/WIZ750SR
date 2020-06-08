@@ -1204,6 +1204,7 @@ uint16_t proc_SEGCP_udp(uint8_t* segcp_req, uint8_t* segcp_rep)
                 treq = segcp_req;
                 trep = segcp_rep;
                 len = recvfrom(SEGCP_UDP_SOCK, treq, len, destip, &destport);
+                printf("conf recv\r\n");
                 treq[len-1] = 0;
                 if(SEGCP_MA == parse_SEGCP(treq, tpar))
                 {

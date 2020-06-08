@@ -12,7 +12,7 @@
 #define MAINTENANCE_VER         3
 
 //#define STR_VERSION_STATUS      //"Final"//"Develop" // or "Stable"
-#define STR_VERSION_STATUS      "Stable"
+#define STR_VERSION_STATUS      "_DIK"
 
 //////////////////////////////////
 // W7500x HW Socket Definition  //

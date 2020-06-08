@@ -542,15 +542,16 @@ void check_phylink_status(void)
 	}
 }
 
-// This function have to call every 1 millisecond by Timer IRQ handler routine.
-void gpio_handler_timer_msec(void)
-{
-	// PHY link check
-	if(++phylink_check_time_msec >= PHYLINK_CHECK_CYCLE_MSEC)
-	{
-		phylink_check_time_msec = 0;
-		check_phylink_status();
+// // This function have to call every 1 millisecond by Timer IRQ handler routine.
+ void gpio_handler_timer_msec(void)
+ {
+ 	// PHY link check
+ 	if(++phylink_check_time_msec >= PHYLINK_CHECK_CYCLE_MSEC)
+ 	{
+ 		phylink_check_time_msec = 0;
+ 		check_phylink_status();
 		
-		flag_check_phylink = 1;
-	}
-}
+ 		flag_check_phylink = 1;
+ 	}
+
+ }

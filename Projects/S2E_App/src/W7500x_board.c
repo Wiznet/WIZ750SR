@@ -32,6 +32,7 @@ static void PHY_Init(void);
 volatile uint16_t phylink_check_time_msec = 0;
 uint8_t flag_check_phylink = 0;
 uint8_t flag_hw_trig_enable = 0;
+uint8_t flag_toggle = 0;
 
 /* W7500x Board Initialization */
 void W7500x_Board_Init(void)

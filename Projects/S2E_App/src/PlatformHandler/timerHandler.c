@@ -20,7 +20,7 @@ static volatile uint32_t devtime_msec = 0;
 
 static uint8_t enable_phylink_check = 1;
 static volatile uint32_t phylink_down_time_msec;
-
+static uint8_t flag_toggle = 0;
 void Timer_Configuration(void)
 {
 	DUALTIMER_InitTypDef Dualtimer_InitStructure;
@@ -84,7 +84,8 @@ void Timer_IRQ_Handler(void)
 			DNS_time_handler();		// Time counter for DNS timeout
 			
 			devtime_sec++; // device time counter, Can be updated this counter value by time protocol like NTP.
-			LED_Toggle(LED3) ;
+			flag_toggle = 1;
+	
 		}
 		
 		/* Minute Process */

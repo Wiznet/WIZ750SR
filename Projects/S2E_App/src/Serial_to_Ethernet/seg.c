@@ -781,8 +781,11 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 			break;
 		
 		case SOCK_CLOSE_WAIT:
+			printf("dis1\r\n");
 			while(getSn_RX_RSR(sock) || e2u_size) ether_to_uart(sock); // receive remaining packets
+			printf("dis2\r\n");
 			disconnect(sock);
+			printf("dis3\r\n");
 			break;
 		
 		case SOCK_FIN_WAIT:
@@ -853,7 +856,15 @@ void uart_to_ether(uint8_t sock)
 #endif
 	
 	// UART ring buffer -> user's buffer
-	len = get_serial_data();
+	if(sent_len == 0){
+		len = get_serial_data();
+		printf("get_serial_data = %d\r\n",len);
+	}
+	else
+	{
+		printf("len = %d\r\n",sent_len);
+	}
+	
 	
 	if(len > 0)
 	{
@@ -1094,19 +1105,22 @@ void ether_to_uart(uint8_t sock)
 		{
 			if(isXON == SEG_ENABLE)
 			{
+				printf("XON1\r\n");
 				if((serial->serial_debug_en == SEG_DEBUG_E2S) || (serial->serial_debug_en == SEG_DEBUG_ALL))
 				{
 					debugSerial_dataTransfer(g_recv_buf, e2u_size, SEG_DEBUG_E2S);
 				}
 				
+				
 				for(i = 0; i < e2u_size; i++) uart_putc(SEG_DATA_UART, g_recv_buf[i]);
 				add_data_transfer_bytecount(SEG_ETHER_TX, e2u_size);
 				e2u_size = 0;
 			}
-			//else
-			//{
-			//	;//XOFF!!
-			//}
+			else
+			{
+				printf("XOFF\r\n");
+			}
+\
 		}
 		else
 		{
@@ -1342,10 +1356,13 @@ uint8_t check_serial_store_permitted(uint8_t ch)
 	
 	// Software flow control: Check the XON/XOFF start/stop commands
 	// [Peer] -> [WIZnet Device]
+	// Recv XOnN
+	/*
 	if((ret == SEG_ENABLE) && (serial->flow_control == flow_xon_xoff))
 	{
-		if(ch == UART_XON)
+		
 		{
+		if(ch == UART_XON)
 			isXON = SEG_ENABLE;
 			ret = SEG_DISABLE; 
 		}
@@ -1355,7 +1372,7 @@ uint8_t check_serial_store_permitted(uint8_t ch)
 			ret = SEG_DISABLE;
 		}
 	}
-	
+	*/
 	return ret;
 }
 

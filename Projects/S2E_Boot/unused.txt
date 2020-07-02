@@ -1,4 +1,4 @@
-;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Fri Dec 13 15:33:54 2019
+;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Thu Jul 02 16:27:40 2020
 ;VERSION 0.2
 ;FILE configdata.o
 Mac_Conf <= USED 0

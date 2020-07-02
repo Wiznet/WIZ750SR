@@ -135,11 +135,16 @@
 	#define STATUS_PHYLINK_PIN			GPIO_Pin_10
 	#define STATUS_PHYLINK_PORT			GPIOA
 	#define STATUS_PHYLINK_PAD_AF		PAD_AF1
-
+#if 0
 	#define STATUS_TCPCONNECT_PIN		GPIO_Pin_7//GPIO_Pin_9 19.9.5 irina
 	#define STATUS_TCPCONNECT_PORT		STATUS_PHYLINK_PORT
 	#define STATUS_TCPCONNECT_PAD_AF	STATUS_PHYLINK_PAD_AF
+#else
+#define STATUS_TCPCONNECT_PIN			GPIO_Pin_9
+	#define STATUS_TCPCONNECT_PORT		GPIOC
+	#define STATUS_TCPCONNECT_PAD_AF	STATUS_PHYLINK_PAD_AF
 
+#endif
 	#define DTR_PIN						STATUS_PHYLINK_PIN
 	#define DTR_PORT					STATUS_PHYLINK_PORT
 	#define DTR_PAD_AF					STATUS_PHYLINK_PAD_AF
@@ -396,7 +401,7 @@
 	extern volatile uint16_t phylink_check_time_msec;
 	extern uint8_t flag_check_phylink;
 	extern uint8_t flag_hw_trig_enable;
-	
+	extern uint8_t flag_toggle;
 	void W7500x_Board_Init(void);
 	void Supervisory_IC_Init(void);
 	

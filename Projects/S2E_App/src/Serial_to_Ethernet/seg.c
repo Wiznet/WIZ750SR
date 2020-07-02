@@ -82,6 +82,8 @@ uint8_t isSocketOpen_TCPclient = OFF;
 // ## timeflag for debugging
 uint8_t tmp_timeflag_for_debug = 0;
 
+extern uint8_t flag_status;
+
 /* Private functions prototypes ----------------------------------------------*/
 void proc_SEG_tcp_client(uint8_t sock);
 void proc_SEG_tcp_server(uint8_t sock);
@@ -219,10 +221,24 @@ void set_device_status(teDEVSTATUS status)
 	}
 	
 	// Status indicator pins
-	if(net->state == ST_CONNECT)
+	if(net->state == ST_CONNECT){
 		set_connection_status_io(STATUS_TCPCONNECT_PIN, ON); // Status I/O pin to low
-	else
+#if (DEVICE_BOARD_NAME == WIZ750SR_1xx)
+   #ifdef __USE_TCPCONNECT_STATUS_PIN__
+		if(flag_status == OFF)
+			set_connection_status_io(STATUS_PIN, ON); // Status I/O pin to low
+	#endif
+#endif
+	}
+	else{
 		set_connection_status_io(STATUS_TCPCONNECT_PIN, OFF); // Status I/O pin to high
+#if (DEVICE_BOARD_NAME == WIZ750SR_1xx)
+    #ifdef __USE_TCPCONNECT_STATUS_PIN__
+		if(flag_status == OFF)
+			set_connection_status_io(STATUS_PIN, OFF); // Status I/O pin to low
+	#endif
+#endif
+	}
 }
 
 uint8_t get_device_status(void)

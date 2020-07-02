@@ -41,7 +41,7 @@ uint8_t * tbSEGCPCMD[] = {"MC", "VR", "MN", "IM", "OP", "DD", "CP", "PO", "DG", 
                           "LG", "ER", "FW", "MA", "PW", "SV", "EX", "RT", "UN", "ST",
                           "FR", "EC", "K!", "UE", "GA", "GB", "GC", "GD", "CA", "CB", 
                           "CC", "CD", "SC", "S0", "S1", "RX", "FS", "FC", "FP", "FD",
-                          "FH", "UI", "AB", "TR", "BU", 0};
+                          "FH", "UI", "AB", "TR", "BU", "OS",0};
                             
 uint8_t * tbSEGCPERR[] = {"ERNULL", "ERNOTAVAIL", "ERNOPARAM", "ERIGNORED", "ERNOCOMMAND", "ERINVALIDPARAM", "ERNOPRIVILEGE"};
 
@@ -53,7 +53,7 @@ volatile uint16_t configtool_keepalive_time = 0;
 uint8_t flag_send_configtool_keepalive = SEGCP_DISABLE;
 
 extern uint8_t tmp_timeflag_for_debug;
-
+int8_t flag_status = 0;
 static uint32_t temp_interrupt;
 static void flash_update_start(void);
 static void flash_update_end(void);
@@ -608,6 +608,8 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                         break;
                     case SEGCP_BU: ret |= SEGCP_RET_ERR_NOPARAM;
                         break;
+                    case SEGCP_OS: sprintf(trep,"%d", flag_status); // Not used
+                        break;
                     default:
                         ret |= SEGCP_RET_ERR_NOCOMMAND;
                         sprintf(trep,"%s", strDEVSTATUS[dev_config->network_info[0].state]);
@@ -1042,6 +1044,14 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                             if(dev_config->serial_info[0].dtr_en == SEGCP_ENABLE) set_flowcontrol_dtr_pin(ON);
                         }
                         break;
+					case SEGCP_OS:
+                        tmp_byte = is_hex(*param);
+                        if(param_len != 1 || tmp_byte > IO_HIGH) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+                        else{
+                                flag_status = tmp_byte;
+                        }
+                        
+						break;
                     case SEGCP_S0:
                     case SEGCP_S1:
                         ret |= SEGCP_RET_ERR_INVALIDPARAM;

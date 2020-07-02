@@ -79,8 +79,14 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
 ## Update History
 
 <p align="center">
-  <img width="100%" src="https://user-images.githubusercontent.com/9648281/70020317-94f94880-15cf-11ea-9dd1-ee18b8221ed0.png" />
+  <img width="100%" src="https://user-images.githubusercontent.com/9648281/70778776-62690000-1dc6-11ea-8cc0-d205659312ba.png" />
 </p>
+
+v1.3.3 Stable
+- Improvements:
+  - Added in order to remove some unused functions
+  - Modified the start ISR address from 0x1fd00 to 0x7d00
+  - Modified flag of socket when socket function use(Non Block)
 
 v1.3.2 Stable
 - Bug fixes:
@@ -115,7 +121,11 @@ v1.3.0 Stable
 
 
 * * *
-
+v1.2.9 Stable
+- Improvements:
+  - Added in order to remove some unused functions
+  - Modified flag of socket when socket function use(Non Block)
+  
 v1.2.8 Stable
 - Bug fixes:
    - Fixed pin mapping : DSR pin of WizZ750SR-100/105/110

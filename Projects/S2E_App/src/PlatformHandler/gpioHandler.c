@@ -413,6 +413,7 @@ void set_connection_status_io(uint16_t pin, uint8_t set)
     #endif
 #endif
 			LED_On(LED2);
+		
 		}
 		else // OFF
 		{

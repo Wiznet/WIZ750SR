@@ -9,7 +9,7 @@
 /* Application Firmware Version */
 #define MAJOR_VER               1
 #define MINOR_VER               3
-#define MAINTENANCE_VER         3
+#define MAINTENANCE_VER         4
 
 //#define STR_VERSION_STATUS      //"Final"//"Develop" // or "Stable"
 #define STR_VERSION_STATUS      "Stable"

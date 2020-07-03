@@ -195,6 +195,8 @@ void set_device_status(teDEVSTATUS status)
 {
 	struct __network_info *net = (struct __network_info *)get_DevConfig_pointer()->network_info;
 	struct __serial_info *serial = (struct __serial_info *)&(get_DevConfig_pointer()->serial_info);
+	struct __options *opt = (struct __options *)&(get_DevConfig_pointer()->options);
+	
 	
 	switch(status)
 	{
@@ -225,7 +227,7 @@ void set_device_status(teDEVSTATUS status)
 		set_connection_status_io(STATUS_TCPCONNECT_PIN, ON); // Status I/O pin to low
 #if (DEVICE_BOARD_NAME == WIZ750SR_1xx)
    #ifdef __USE_TCPCONNECT_STATUS_PIN__
-		if(flag_status == OFF)
+		if( opt->alive_mode == OFF)
 			set_connection_status_io(STATUS_PIN, ON); // Status I/O pin to low
 	#endif
 #endif
@@ -234,7 +236,7 @@ void set_device_status(teDEVSTATUS status)
 		set_connection_status_io(STATUS_TCPCONNECT_PIN, OFF); // Status I/O pin to high
 #if (DEVICE_BOARD_NAME == WIZ750SR_1xx)
     #ifdef __USE_TCPCONNECT_STATUS_PIN__
-		if(flag_status == OFF)
+		if(opt->alive_mode== OFF)
 			set_connection_status_io(STATUS_PIN, OFF); // Status I/O pin to low
 	#endif
 #endif

@@ -1,4 +1,4 @@
-;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Thu Jul 02 16:29:18 2020
+;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Fri Jul 03 12:04:16 2020
 ;VERSION 0.2
 ;FILE configdata.o
 Mac_Conf <= IW 0
@@ -145,6 +145,7 @@ init_connection_status_io <= IW 0
 init_flowcontrol_dsr_pin <= IW 0
 init_flowcontrol_dtr_pin <= IW 0
 init_phylink_status_pin <= IW 0
+init_status_pin <= IW 0
 init_tcpconnection_status_pin <= IW 0
 init_user_io <= IW 0
 read_ADC <= IW 0

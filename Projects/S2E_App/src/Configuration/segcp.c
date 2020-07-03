@@ -53,7 +53,7 @@ volatile uint16_t configtool_keepalive_time = 0;
 uint8_t flag_send_configtool_keepalive = SEGCP_DISABLE;
 
 extern uint8_t tmp_timeflag_for_debug;
-int8_t flag_status = 0;
+int8_t flag_status = 1;
 static uint32_t temp_interrupt;
 static void flash_update_start(void);
 static void flash_update_end(void);
@@ -608,7 +608,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                         break;
                     case SEGCP_BU: ret |= SEGCP_RET_ERR_NOPARAM;
                         break;
-                    case SEGCP_OS: sprintf(trep,"%d", flag_status); // Not used
+                    case SEGCP_OS: sprintf(trep,"%d", dev_config->options.alive_mode); // Not used
                         break;
                     default:
                         ret |= SEGCP_RET_ERR_NOCOMMAND;
@@ -1049,6 +1049,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                         if(param_len != 1 || tmp_byte > IO_HIGH) ret |= SEGCP_RET_ERR_INVALIDPARAM;
                         else{
                                 flag_status = tmp_byte;
+                                dev_config->options.alive_mode = tmp_byte;
                         }
                         
 						break;

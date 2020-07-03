@@ -118,6 +118,7 @@ void set_DevConfig_to_factory_value(void)
 	dev_config.options.serial_trigger[0] = 0x2b;	// Defualt serial command mode trigger code: '+++' (0x2b, 0x2b, 0x2b)
 	dev_config.options.serial_trigger[1] = 0x2b;
 	dev_config.options.serial_trigger[2] = 0x2b;
+	dev_config.options.alive_mode = 1;				//only WIZ750SR-1xx : System alive status
 
 #ifdef __USE_USERS_GPIO__
 	dev_config.user_io_info.user_io_enable = USER_IO_A | USER_IO_B | USER_IO_C | USER_IO_D; // [Enabled] / Disabled	

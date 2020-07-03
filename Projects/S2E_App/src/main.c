@@ -265,7 +265,7 @@ int main(void)
         }
         if(flag_toggle){
             flag_toggle = 0;
-        	LED_Toggle(LED2) ;
+        	LED_Toggle(LED3) ;
         }
         
         if(flag_ringbuf_full) // ## debugging: Ring buffer full
@@ -580,7 +580,7 @@ void display_Dev_Info_main(void)
     printf(" - Hardware information: Status pins\r\n");
         printf("\t- Status 1: [%s] - %s\r\n", "PA_10", dev_config->serial_info[0].dtr_en?"DTR":"PHY link");
         printf("\t- Status 2: [%s] - %s\r\n", "PA_01", dev_config->serial_info[0].dsr_en?"DSR":"TCP connection"); // shared pin; HW_TRIG (input) / TCP connection indicator (output)
-
+        printf("\t- Status 3: [%s] - %s\r\n", "PC_08", (dev_config->options.alive_mode == 1)?"System alive":"TCP connection");
 #ifdef __USE_USERS_GPIO__
     printf(" - Hardware information: User I/O pins\r\n");
         printf("\t- UserIO A: [%s] - %s / %s\r\n", "PC_13", USER_IO_TYPE_STR[get_user_io_type(USER_IO_SEL[0])], USER_IO_DIR_STR[get_user_io_direction(USER_IO_SEL[0])]); 

@@ -76,6 +76,7 @@ struct __options {
 	uint8_t serial_command;			// Serial Command Mode 사용 여부
 	uint8_t serial_command_echo;	// Serial Command 입력 echoback 여부
 	uint8_t serial_trigger[3];		// Serial Command Mode 진입을 위한 Trigger 코드
+	uint8_t alive_mode;
 } __attribute__((packed));
 
 // ## Eric, Field added for expansion I/Os

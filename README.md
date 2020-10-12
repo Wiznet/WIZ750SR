@@ -82,6 +82,17 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
   <img width="100%" src="https://user-images.githubusercontent.com/9648281/70020317-94f94880-15cf-11ea-9dd1-ee18b8221ed0.png" />
 </p>
 
+### Memory area of Boot Project(Boot v1.3)
+<p align="center">
+   <img width="100%" src="https://user-images.githubusercontent.com/9648281/85361501-0e9a5900-b557-11ea-8173-5ae5aadc46c9.png" />
+</p>
+### Memory area of App Project(Boot v1.3)
+<p align="center">
+   <img width="100%" src="https://user-images.githubusercontent.com/9648281/95705625-9be0f500-0c8f-11eb-9ddf-52d06c43fcf0.png" />
+</p>
+
+
+
 v1.3.2 Stable
 - Bug fixes:
    - Fixed pin mapping : DSR pin of WizZ750SR-100/105/110

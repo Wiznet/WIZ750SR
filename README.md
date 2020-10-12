@@ -2,7 +2,7 @@
 
 # WIZ750SR
 WIZnet Serial to Ethernet(S2E) module based on W7500 chip, WIZ107/108SR S2E compatible device
-
+[TOE]
 - 48(W) x 30mm(L) x 18mm(H)
 <!-- WIZ750SR pic -->
 <p align="center">
@@ -84,7 +84,7 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
 
 
 
-**==When you use the Boot v1.3 F/W, you should check the memory area in the project setting(Both Boot and App).==**
+**When you use the Boot v1.3 F/W, you should check the memory area in the project setting(Both Boot and App).**
 
 |Memory area of Boot Project(Boot v1.3)|Memory area of App Project(Boot v1.3)|
 |--|--|
@@ -99,6 +99,7 @@ v1.3.3 Stable
 
 <details markdown="1">   
 <summary>Boot V1.3 history</summary>
+
 v1.3.2 Stable
 - Bug fixes:
    - Fixed pin mapping : DSR pin of WizZ750SR-100/105/110
@@ -139,6 +140,7 @@ v1.2.9 Stable
 - Improvements:
    - Added in order to remove some unused functions
    - Modified flag of socket when socket function use(Non Block)
+
 
 <details markdown="1">   
 **<summary>Boot V1.2 history</summary>**

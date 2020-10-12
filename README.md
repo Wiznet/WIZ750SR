@@ -82,17 +82,22 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
   <img width="100%" src="https://user-images.githubusercontent.com/9648281/70020317-94f94880-15cf-11ea-9dd1-ee18b8221ed0.png" />
 </p>
 
-### Memory area of Boot Project(Boot v1.3)
-<p align="center">
-   <img width="100%" src="https://user-images.githubusercontent.com/9648281/85361501-0e9a5900-b557-11ea-8173-5ae5aadc46c9.png" />
-</p>
-### Memory area of App Project(Boot v1.3)
-<p align="center">
-   <img width="100%" src="https://user-images.githubusercontent.com/9648281/95705625-9be0f500-0c8f-11eb-9ddf-52d06c43fcf0.png" />
-</p>
 
 
+==**When you use the Boot v1.3 F/W, you should check the memory area in the project setting(Both Boot and App).**==
 
+|Memory area of Boot Project(Boot v1.3)|Memory area of App Project(Boot v1.3)|
+|--|--|
+|![boot](http://user-images.githubusercontent.com/9648281/85361501-0e9a5900-b557-11ea-8173-5ae5aadc46c9.png) |![app](https://user-images.githubusercontent.com/9648281/95705625-9be0f500-0c8f-11eb-9ddf-52d06c43fcf0.png) |
+###latest F/W version(Boot v1.3)
+v1.3.3 Stable
+ - Improvements:
+   - Added in order to remove some unused functions
+   - Modified the start ISR address from 0x1fd00 to 0x7d00
+   - Modified flag of socket when socket function use(Non Block)
+
+<details markdown="1">   
+<summary>Boot V1.3 history</summary>
 v1.3.2 Stable
 - Bug fixes:
    - Fixed pin mapping : DSR pin of WizZ750SR-100/105/110
@@ -113,6 +118,7 @@ v1.3.0 Stable
   - Compare DHCP Server IP :  When DHCP OFFER Packet receive from DHCP Server,the DHCP server ip in packet compare with previous DHCP Server IP.
 - Improvements:
   - The ISR address have changed to fixed address. The ISR address of APP did no more have to need copy and use in Boot.
+</details>
 
 ## Caution
 <p align="center">
@@ -126,6 +132,15 @@ v1.3.0 Stable
 
 
 * * *
+
+###latest F/W version(Boot V1.2)
+v1.2.9 Stable
+- Improvements:
+   - Added in order to remove some unused functions
+   - Modified flag of socket when socket function use(Non Block)
+
+<details markdown="1">   
+<summary>**Boot V1.2 history**</summary>
 
 v1.2.8 Stable
 - Bug fixes:
@@ -241,4 +256,5 @@ v1.1.1
 v1.1.0
 - First release : 2016
 
+</detailes>
 

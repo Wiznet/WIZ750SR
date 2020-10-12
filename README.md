@@ -84,12 +84,13 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
 
 
 
-==**When you use the Boot v1.3 F/W, you should check the memory area in the project setting(Both Boot and App).**==
+**==When you use the Boot v1.3 F/W, you should check the memory area in the project setting(Both Boot and App).==**
 
 |Memory area of Boot Project(Boot v1.3)|Memory area of App Project(Boot v1.3)|
 |--|--|
 |![boot](http://user-images.githubusercontent.com/9648281/85361501-0e9a5900-b557-11ea-8173-5ae5aadc46c9.png) |![app](https://user-images.githubusercontent.com/9648281/95705625-9be0f500-0c8f-11eb-9ddf-52d06c43fcf0.png) |
-###latest F/W version(Boot v1.3)
+
+### latest F/W version(Boot v1.3)
 v1.3.3 Stable
  - Improvements:
    - Added in order to remove some unused functions
@@ -133,14 +134,14 @@ v1.3.0 Stable
 
 * * *
 
-###latest F/W version(Boot V1.2)
+### latest F/W version(Boot V1.2)
 v1.2.9 Stable
 - Improvements:
    - Added in order to remove some unused functions
    - Modified flag of socket when socket function use(Non Block)
 
 <details markdown="1">   
-<summary>**Boot V1.2 history**</summary>
+**<summary>Boot V1.2 history</summary>**
 
 v1.2.8 Stable
 - Bug fixes:

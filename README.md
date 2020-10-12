@@ -2,7 +2,8 @@
 
 # WIZ750SR
 WIZnet Serial to Ethernet(S2E) module based on W7500 chip, WIZ107/108SR S2E compatible device
-[TOE]
+[TOC]
+
 - 48(W) x 30mm(L) x 18mm(H)
 <!-- WIZ750SR pic -->
 <p align="center">

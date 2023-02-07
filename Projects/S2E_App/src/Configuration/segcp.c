@@ -1384,7 +1384,13 @@ uint16_t proc_SEGCP_uart(uint8_t * segcp_rep)
                 {
                     printf("%s",segcp_rep);
                 }
-                
+                if(dev_config->serial_info[0].uart_interface == UART_IF_RS422_485)
+								{	
+										uart_rs485_enable(SEG_DATA_UART);
+										uart_puts(SEG_DATA_UART, segcp_rep, strlen(segcp_rep));
+										uart_rs485_disable(SEG_DATA_UART);
+								}
+								else
                 uart_puts(SEG_DATA_UART, segcp_rep, strlen(segcp_rep));
                 
             }

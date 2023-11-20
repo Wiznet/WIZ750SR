@@ -26,7 +26,7 @@
  * Public types/enumerations/variables
  ****************************************************************************/
 //uint8_t BUFPUB[2048];
-uint8_t BUFPUB[256];
+//uint8_t BUFPUB[256];
 
 /*****************************************************************************
  * Private functions
@@ -215,11 +215,11 @@ uint8_t * get_http_param_value(
 /**
  @brief	get next parameter value in the request
  */
-uint8_t * get_http_param_value(char* uri, char* param_name)
+uint8_t * get_http_param_value(char* uri, char* param_name, char* param_buf)
 {
 
 	uint8_t * name = 0;
-	uint8_t * ret = BUFPUB;
+	uint8_t * ret = param_buf;
 	uint8_t * pos2;
 	uint16_t len = 0, content_len = 0;
 	uint8_t tmp_buf[10]={0x00, };

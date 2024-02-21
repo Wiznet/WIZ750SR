@@ -3,6 +3,7 @@
 #include "W7500x_wztoe.h"
 #include "W7500x_gpio.h"
 #include "W7500x_board.h"
+#include "W7500x_wdt.h"
 #include "socket.h"
 #include "seg.h"
 #include "timerHandler.h"
@@ -403,7 +404,11 @@ void proc_SEG_tcp_client(uint8_t sock)
 			break;
 		
 		case SOCK_CLOSE_WAIT:
-			while(getSn_RX_RSR(sock) || e2u_size) ether_to_uart(sock); // receive remaining packets
+			while(getSn_RX_RSR(sock) || e2u_size) 
+			{
+				WDT_SetWDTLoad(0xFF0000);
+				ether_to_uart(sock); // receive remaining packets
+			}
 			disconnect(sock);
 			break;
 		
@@ -561,7 +566,11 @@ void proc_SEG_tcp_server(uint8_t sock)
 			break;
 		
 		case SOCK_CLOSE_WAIT:
-			while(getSn_RX_RSR(sock) || e2u_size) ether_to_uart(sock); // receive remaining packets
+			while(getSn_RX_RSR(sock) || e2u_size) 
+			{
+				WDT_SetWDTLoad(0xFF0000);
+				ether_to_uart(sock); // receive remaining packets
+			}
 			disconnect(sock);
 			break;
 		
@@ -781,7 +790,11 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 			break;
 		
 		case SOCK_CLOSE_WAIT:
-			while(getSn_RX_RSR(sock) || e2u_size) ether_to_uart(sock); // receive remaining packets
+			while(getSn_RX_RSR(sock) || e2u_size) 
+			{
+				WDT_SetWDTLoad(0xFF0000);
+				ether_to_uart(sock); // receive remaining packets
+			}
 			disconnect(sock);
 			break;
 		
@@ -1072,7 +1085,7 @@ void ether_to_uart(uint8_t sock)
 	{
 		if(serial->dsr_en == SEG_ENABLE) // DTR / DSR handshake (flowcontrol)
 		{
-			if(get_flowcontrol_dsr_pin() == 0) return;
+			if(get_flowcontrol_dsr_pin() == 1) return;
 		}
 //////////////////////////////////////////////////////////////////////
 		if(serial->uart_interface == UART_IF_RS422_485)

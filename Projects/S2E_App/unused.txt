@@ -1,4 +1,4 @@
-;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Fri Dec 13 15:53:45 2019
+;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Wed Feb 21 14:41:07 2024
 ;VERSION 0.2
 ;FILE configdata.o
 Mac_Conf <= IW 0
@@ -914,9 +914,7 @@ WDT_GetWDTRIS <= USED 0
 WDT_GetWDTRIS <= IW 0
 WDT_GetWDTValue <= USED 0
 WDT_GetWDTValue <= IW 0
-WDT_Init <= USED 0
 WDT_Init <= IW 0
-WDT_IntClear <= USED 0
 WDT_IntClear <= IW 0
 WDT_Lock <= USED 0
 WDT_Lock <= IW 0
@@ -924,11 +922,8 @@ WDT_Set <= USED 0
 WDT_Set <= IW 0
 WDT_SetWDTControl <= USED 0
 WDT_SetWDTControl <= IW 0
-WDT_SetWDTLoad <= USED 0
 WDT_SetWDTLoad <= IW 0
-WDT_Start <= USED 0
 WDT_Start <= IW 0
-WDT_Stop <= USED 0
 WDT_Stop <= IW 0
 WDT_Unlock <= USED 0
 WDT_Unlock <= IW 0

@@ -3,6 +3,7 @@
 #include "W7500x_gpio.h"
 #include "common.h"
 #include "W7500x_board.h"
+#include "W7500x_wdt.h"
 #include "configdata.h"
 #include "uartHandler.h"
 #include "seg.h"
@@ -370,7 +371,10 @@ int32_t uart_getc(uint8_t uartNum)
 
 	if(uartNum == SEG_DATA_UART)
 	{
-		while(IS_BUFFER_EMPTY(data_rx));
+		while(IS_BUFFER_EMPTY(data_rx))
+		{
+			WDT_SetWDTLoad(0xFF0000);
+		}
 		ch = (int32_t)BUFFER_OUT(data_rx);
 		BUFFER_OUT_MOVE(data_rx, 1);
 	}

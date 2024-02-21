@@ -1,4 +1,4 @@
-;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Fri Dec 13 15:33:54 2019
+;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Wed Feb 21 14:41:03 2024
 ;VERSION 0.2
 ;FILE configdata.o
 Mac_Conf <= USED 0
@@ -566,6 +566,42 @@ __asm___13_W7500x_uart_c_61efec2c____REV16 <= USED 0
 __asm___13_W7500x_uart_c_61efec2c____REV16 <= IW 0
 __asm___13_W7500x_uart_c_61efec2c____REVSH <= USED 0
 __asm___13_W7500x_uart_c_61efec2c____REVSH <= IW 0
+;FILE w7500x_wdt.o
+WDT_DeInit <= USED 0
+WDT_DeInit <= IW 0
+WDT_GetIntStatus <= USED 0
+WDT_GetIntStatus <= IW 0
+WDT_GetWDTControl <= USED 0
+WDT_GetWDTControl <= IW 0
+WDT_GetWDTLoad <= USED 0
+WDT_GetWDTLoad <= IW 0
+WDT_GetWDTMIS <= USED 0
+WDT_GetWDTMIS <= IW 0
+WDT_GetWDTRIS <= USED 0
+WDT_GetWDTRIS <= IW 0
+WDT_GetWDTValue <= USED 0
+WDT_GetWDTValue <= IW 0
+WDT_Init <= USED 0
+WDT_Init <= IW 0
+WDT_IntClear <= IW 0
+WDT_Lock <= USED 0
+WDT_Lock <= IW 0
+WDT_Set <= USED 0
+WDT_Set <= IW 0
+WDT_SetWDTControl <= USED 0
+WDT_SetWDTControl <= IW 0
+WDT_SetWDTLoad <= USED 0
+WDT_SetWDTLoad <= IW 0
+WDT_Start <= USED 0
+WDT_Start <= IW 0
+WDT_Stop <= USED 0
+WDT_Stop <= IW 0
+WDT_Unlock <= USED 0
+WDT_Unlock <= IW 0
+__asm___12_W7500x_wdt_c_bdd4e73f____REV16 <= USED 0
+__asm___12_W7500x_wdt_c_bdd4e73f____REV16 <= IW 0
+__asm___12_W7500x_wdt_c_bdd4e73f____REVSH <= USED 0
+__asm___12_W7500x_wdt_c_bdd4e73f____REVSH <= IW 0
 ;FILE w7500x_wztoe.o
 WIZCHIP_READ <= IW 0
 WIZCHIP_READ_BUF <= IW 0

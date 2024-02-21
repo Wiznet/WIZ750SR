@@ -1085,7 +1085,7 @@ void ether_to_uart(uint8_t sock)
 	{
 		if(serial->dsr_en == SEG_ENABLE) // DTR / DSR handshake (flowcontrol)
 		{
-			if(get_flowcontrol_dsr_pin() == 0) return;
+			if(get_flowcontrol_dsr_pin() == 1) return;
 		}
 //////////////////////////////////////////////////////////////////////
 		if(serial->uart_interface == UART_IF_RS422_485)

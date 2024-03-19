@@ -10,14 +10,14 @@
       <TargetName>W7500x_S2E_App</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060750::V5.06 update 6 (build 750)::.\ARMCC</pCCUsed>
+      <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
           <Device>ARMCM0</Device>
           <Vendor>ARM</Vendor>
-          <PackID>ARM.Cortex_DFP.1.0.0</PackID>
-          <PackURL>https://www.keil.com/pack/</PackURL>
+          <PackID>ARM.CMSIS.5.9.0</PackID>
+          <PackURL>http://www.keil.com/pack/</PackURL>
           <Cpu>IRAM(0x20000000,0x00020000) IROM(0x00000000,0x00040000) CPUTYPE("Cortex-M0") CLOCK(12000000) ESEL ELITTLE</Cpu>
           <FlashUtilSpec></FlashUtilSpec>
           <StartupFile></StartupFile>
@@ -137,7 +137,7 @@
             <DriverSelection>4099</DriverSelection>
           </Flash1>
           <bUseTDR>1</bUseTDR>
-          <Flash2>BIN\CMSIS_AGDI.dll</Flash2>
+          <Flash2>BIN\UL2CM3.DLL</Flash2>
           <Flash3>"" ()</Flash3>
           <Flash4></Flash4>
           <pFcarmOut></pFcarmOut>
@@ -339,7 +339,7 @@
               <MiscControls>--feedback=unused.txt</MiscControls>
               <Define>CORTEX_M0 USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\Libraries\CMSIS\Device\WIZnet\W7500\Include;..\..\Libraries\W7500x_stdPeriph_Driver\inc;..\..\Libraries\CMSIS\Include;..\..\Libraries\CMSIS\Device\WIZnet\W7500\Source\ARM;.\src;..\..\ioLibrary\Ethernet;..\..\ioLibrary\Internet\DHCP;..\..\ioLibrary\Internet\DNS;..\..\ioLibrary\MDIO;..\..\ioLibrary\Application\loopback;.\src\Configuration;.\src\PlatformHandler;.\src\Serial_to_Ethernet;.\src\Callback</IncludePath>
+              <IncludePath>..\..\Libraries\CMSIS\Device\WIZnet\W7500\Include;..\..\Libraries\W7500x_stdPeriph_Driver\inc;..\..\Libraries\CMSIS\Include;..\..\Libraries\CMSIS\Device\WIZnet\W7500\Source\ARM;.\src;..\..\ioLibrary\Ethernet;..\..\ioLibrary\Internet\DHCP;..\..\ioLibrary\Internet\DNS;..\..\ioLibrary\Internet\httpServer;..\..\ioLibrary\MDIO;..\..\ioLibrary\Application\loopback;.\src\Configuration;.\src\PlatformHandler;.\src\Serial_to_Ethernet;.\src\Callback</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -499,6 +499,21 @@
               <FileType>1</FileType>
               <FilePath>..\..\ioLibrary\Application\loopback\loopback.c</FilePath>
             </File>
+            <File>
+              <FileName>httpParser.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\ioLibrary\Internet\httpServer\httpParser.c</FilePath>
+            </File>
+            <File>
+              <FileName>httpServer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\ioLibrary\Internet\httpServer\httpServer.c</FilePath>
+            </File>
+            <File>
+              <FileName>httpUtil.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\ioLibrary\Internet\httpServer\httpUtil.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -614,6 +629,11 @@
               <FileType>1</FileType>
               <FilePath>.\src\PlatformHandler\isr_vector.c</FilePath>
             </File>
+            <File>
+              <FileName>httpHandler.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\PlatformHandler\httpHandler.c</FilePath>
+            </File>
           </Files>
         </Group>
       </Groups>
@@ -630,11 +650,6 @@
     <Layers>
       <Layer>
         <LayName>&lt;Project Info&gt;</LayName>
-        <LayDesc></LayDesc>
-        <LayUrl></LayUrl>
-        <LayKeys></LayKeys>
-        <LayCat></LayCat>
-        <LayLic></LayLic>
         <LayTarg>0</LayTarg>
         <LayPrjMark>1</LayPrjMark>
       </Layer>

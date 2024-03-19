@@ -1,4 +1,4 @@
-;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Wed Feb 21 15:22:12 2024
+;#<FEEDBACK># ARM Linker, 5060960: Last Updated: Tue Mar 19 08:55:49 2024
 ;VERSION 0.2
 ;FILE configdata.o
 Mac_Conf <= IW 0
@@ -124,6 +124,8 @@ __asm___14_flashHandler_c_347690df____REVSH <= USED 0
 __asm___14_flashHandler_c_347690df____REVSH <= IW 0
 erase_flash_block <= IW 0
 erase_flash_sector <= IW 0
+flash_update_end <= IW 0
+flash_update_start <= IW 0
 read_flash <= IW 0
 write_flash <= IW 0
 ;FILE gpiohandler.o
@@ -155,6 +157,60 @@ set_user_io_enable <= USED 0
 set_user_io_enable <= IW 0
 set_user_io_type <= IW 0
 set_user_io_val <= IW 0
+;FILE httphandler.o
+__asm___13_httpHandler_c_a3a2a0ab____REV16 <= USED 0
+__asm___13_httpHandler_c_a3a2a0ab____REV16 <= IW 0
+__asm___13_httpHandler_c_a3a2a0ab____REVSH <= USED 0
+__asm___13_httpHandler_c_a3a2a0ab____REVSH <= IW 0
+make_json_devinfo <= IW 0
+set_devfacreset <= IW 0
+set_devinfo <= IW 0
+set_devreset <= IW 0
+;FILE httpparser.o
+ATOI <= IW 0
+__asm___12_httpParser_c_29592369____REV16 <= USED 0
+__asm___12_httpParser_c_29592369____REV16 <= IW 0
+__asm___12_httpParser_c_29592369____REVSH <= USED 0
+__asm___12_httpParser_c_29592369____REVSH <= IW 0
+find_http_uri_type <= IW 0
+get_http_param_value <= IW 0
+get_http_uri_name <= IW 0
+inet_addr_ <= IW 0
+make_http_response_head <= IW 0
+mid <= IW 0
+parse_http_request <= IW 0
+unescape_http_url <= IW 0
+;FILE httpserver.o
+__asm___12_httpServer_c_132339ce____REV16 <= USED 0
+__asm___12_httpServer_c_132339ce____REV16 <= IW 0
+__asm___12_httpServer_c_132339ce____REVSH <= USED 0
+__asm___12_httpServer_c_132339ce____REVSH <= IW 0
+default_mcu_reset <= IW 0
+default_wdt_reset <= IW 0
+display_reg_webContent_list <= USED 0
+display_reg_webContent_list <= IW 0
+find_userReg_webContent <= IW 0
+get_httpServer_timecount <= USED 0
+get_httpServer_timecount <= IW 0
+httpServer_Sockinit <= IW 0
+httpServer_init <= IW 0
+httpServer_run <= IW 0
+httpServer_time_handler <= USED 0
+httpServer_time_handler <= IW 0
+read_userReg_webContent <= IW 0
+reg_httpServer_cbfunc <= IW 0
+reg_httpServer_webContent <= IW 0
+;FILE httputil.o
+__asm___10_httpUtil_c_a1b8b851____REV16 <= USED 0
+__asm___10_httpUtil_c_a1b8b851____REV16 <= IW 0
+__asm___10_httpUtil_c_a1b8b851____REVSH <= USED 0
+__asm___10_httpUtil_c_a1b8b851____REVSH <= IW 0
+http_get_cgi_handler <= IW 0
+http_post_cgi_handler <= IW 0
+predefined_get_cgi_processor <= IW 0
+predefined_set_cgi_processor <= IW 0
+set_LED <= USED 0
+set_LED <= IW 0
 ;FILE i2chandler.o
 I2C_Ack <= USED 0
 I2C_Ack <= IW 0
@@ -237,10 +293,10 @@ loopback_udps <= IW 0
 ;FILE main.o
 Dev_Mode_Check <= IW 0
 TimingDelay_Decrement <= IW 0
-__asm___6_main_c_main____REV16 <= USED 0
-__asm___6_main_c_main____REV16 <= IW 0
-__asm___6_main_c_main____REVSH <= USED 0
-__asm___6_main_c_main____REVSH <= IW 0
+__asm___6_main_c_408ce45d____REV16 <= USED 0
+__asm___6_main_c_408ce45d____REV16 <= IW 0
+__asm___6_main_c_408ce45d____REVSH <= USED 0
+__asm___6_main_c_408ce45d____REVSH <= IW 0
 delay <= IW 0
 display_Dev_Info_dhcp <= IW 0
 display_Dev_Info_dns <= IW 0

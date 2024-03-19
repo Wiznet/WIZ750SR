@@ -38,5 +38,7 @@ uint32_t read_flash(uint32_t addr, uint8_t *data, uint32_t data_len);
 void Copy_Interrupt_VectorTable(uint32_t start_addr, uint8_t * vectortable);
 
 void DO_IAP( uint32_t id, uint32_t dst_addr, uint8_t* src_addr, uint32_t size);
+void flash_update_start(void);
+void flash_update_end(void);
 
 #endif

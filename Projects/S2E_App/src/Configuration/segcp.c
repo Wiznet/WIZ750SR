@@ -28,8 +28,8 @@ BUFFER_DECLARATION(data_rx);
 uint16_t uart_get_commandline(uint8_t uartNum, uint8_t* buf, uint16_t maxSize);
 
 /* Private variables ---------------------------------------------------------*/
-static uint8_t gSEGCPREQ[CONFIG_BUF_SIZE];
-static uint8_t gSEGCPREP[CONFIG_BUF_SIZE];
+uint8_t gSEGCPREQ[CONFIG_BUF_SIZE];
+uint8_t gSEGCPREP[CONFIG_BUF_SIZE];
 
 uint8_t * strDEVSTATUS[]  = {"BOOT", "OPEN", "CONNECT", "UPGRADE", "ATMODE", "UDP", 0};
 
@@ -53,10 +53,6 @@ volatile uint16_t configtool_keepalive_time = 0;
 uint8_t flag_send_configtool_keepalive = SEGCP_DISABLE;
 
 extern uint8_t tmp_timeflag_for_debug;
-
-static uint32_t temp_interrupt;
-static void flash_update_start(void);
-static void flash_update_end(void);
 
 void do_segcp(void)
 {
@@ -1450,35 +1446,4 @@ void segcp_timer_msec(void)
 }
 
 
-/* System Core Clock Update for improved stability */
-static void flash_update_start(void)
-{
-    /* System Core Clock Update */
-    SystemCoreClockUpdate_User(CLOCK_SOURCE_INTERNAL, PLL_SOURCE_8MHz, SYSTEM_CLOCK_8MHz);
-    
-    /* SysTick_Config */
-    SysTick_Config((GetSystemClock()/1000));
-    
-    /* Simple UART re-init by MCU clock update */
-    UART2_Configuration();
-    
-    // Backup Interrupt Set Pending Register
-    temp_interrupt = (NVIC->ISPR[0]);
-    (NVIC->ISPR[0]) = (uint32_t)0xFFFFFFFF;
-}
 
-/* System Core Clock Update - Restore */
-static void flash_update_end(void)
-{
-    /* System Core Clock Update */
-    SystemCoreClockUpdate_User(DEVICE_CLOCK_SELECT, DEVICE_PLL_SOURCE_CLOCK, DEVICE_TARGET_SYSTEM_CLOCK);
-    
-    /* SysTick_Config */
-    SysTick_Config((GetSystemClock()/1000));
-    
-    /* Simple UART re-init by MCU clock update */
-    UART2_Configuration();
-    
-    // Restore Interrupt Set Pending Register
-    (NVIC->ISPR[0]) = temp_interrupt;
-}

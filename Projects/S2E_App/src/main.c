@@ -65,6 +65,7 @@
 #include "flashHandler.h"
 #include "gpioHandler.h"
 
+#include "index.h"
 // ## for debugging
 //#include "loopback.h"
 
@@ -103,6 +104,7 @@ void display_Dev_Info_dns(void);
 void delay(__IO uint32_t milliseconds); //Notice: used ioLibray
 void TimingDelay_Decrement(void);
 
+uint8_t socknumlist[] = {SOCK_HTTPSERVER_1, SOCK_HTTPSERVER_2, SOCK_HTTPSERVER_3};
 /* Private variables ---------------------------------------------------------*/
 static WDT_InitTypeDef WDT_InitStructure;
 static __IO uint32_t TimingDelay;
@@ -121,6 +123,8 @@ uint8_t prev_triggercode_idx = 0;
 uint8_t g_send_buf[DATA_BUF_SIZE];
 uint8_t g_recv_buf[DATA_BUF_SIZE];
 
+extern uint8_t gSEGCPREQ[CONFIG_BUF_SIZE];
+extern uint8_t gSEGCPREP[CONFIG_BUF_SIZE];
 /**
   * @brief  Main program
   * @param  None
@@ -133,6 +137,7 @@ int main(void)
 		int rst_info = 0;
 		uint32_t cnt = 0;
 		uint32_t stat_;
+	  int i;
 	
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // W7500x Hardware Initialize
@@ -260,6 +265,14 @@ int main(void)
 		
 		WDT_Start();
 
+
+    if (dev_config->options.pw_search[0] == 0) {  //search ID Disabled
+      httpServer_init(gSEGCPREQ, gSEGCPREP, MAX_HTTPSOCK, socknumlist);
+      reg_httpServer_cbfunc(NVIC_SystemReset, NULL);
+      reg_httpServer_webContent("index.html", _acindex);
+    }
+    
+
     while(1) // main loop
     {
 				WDT_SetWDTLoad(0xFF0000);
@@ -285,6 +298,9 @@ int main(void)
 #endif        
         if(dev_config->options.dhcp_use) DHCP_run(); // DHCP client handler for IP renewal
         
+        if (dev_config->options.pw_search[0] == 0) { //search ID Disabled
+          for(i = 0; i < MAX_HTTPSOCK; i++)	httpServer_run(i);
+        }
         // ## debugging: Data echoback
         //loopback_tcps(6, g_recv_buf, 5001); // Loopback
         //loopback_iperf(6, g_recv_buf, 5001); // iperf: Ethernet performance test

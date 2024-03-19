@@ -133,17 +133,18 @@ uint8_t predefined_set_cgi_processor(uint8_t * uri_name, uint8_t * uri, uint8_t 
 
 int8_t set_LED(uint8_t * uri)
 {
+	uint8_t buf[4];
 	uint8_t * param;
 	uint8_t pin = 0, val = 0;
 
 		
-	if((param = get_http_param_value((char *)uri, "pin"))) // GPIO; D0 ~ D15
+	if((param = get_http_param_value((char *)uri, "pin", (char*)buf))) // GPIO; D0 ~ D15
 	{
 		pin = (uint8_t)ATOI(param, 10);
 		
 		if(pin > 15) return -1;
 
-		if((param = get_http_param_value((char *)uri, "val")))  // State; high(off)/low(on)
+		if((param = get_http_param_value((char *)uri, "val", (char*)buf)))  // State; high(off)/low(on)
 		{
 			val = (uint8_t)ATOI(param, 10);
 			

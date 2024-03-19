@@ -28,8 +28,8 @@ BUFFER_DECLARATION(data_rx);
 uint16_t uart_get_commandline(uint8_t uartNum, uint8_t* buf, uint16_t maxSize);
 
 /* Private variables ---------------------------------------------------------*/
-static uint8_t gSEGCPREQ[CONFIG_BUF_SIZE];
-static uint8_t gSEGCPREP[CONFIG_BUF_SIZE];
+uint8_t gSEGCPREQ[CONFIG_BUF_SIZE];
+uint8_t gSEGCPREP[CONFIG_BUF_SIZE];
 
 uint8_t * strDEVSTATUS[]  = {"BOOT", "OPEN", "CONNECT", "UPGRADE", "ATMODE", "UDP", 0};
 

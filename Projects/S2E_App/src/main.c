@@ -123,6 +123,8 @@ uint8_t prev_triggercode_idx = 0;
 uint8_t g_send_buf[DATA_BUF_SIZE];
 uint8_t g_recv_buf[DATA_BUF_SIZE];
 
+extern uint8_t gSEGCPREQ[CONFIG_BUF_SIZE];
+extern uint8_t gSEGCPREP[CONFIG_BUF_SIZE];
 /**
   * @brief  Main program
   * @param  None
@@ -265,7 +267,7 @@ int main(void)
 
 
     if (dev_config->options.pw_search[0] == 0) {  //search ID Disabled
-      httpServer_init(g_send_buf, g_recv_buf, MAX_HTTPSOCK, socknumlist);
+      httpServer_init(gSEGCPREQ, gSEGCPREP, MAX_HTTPSOCK, socknumlist);
       reg_httpServer_cbfunc(NVIC_SystemReset, NULL);
       reg_httpServer_webContent("index.html", _acindex);
     }

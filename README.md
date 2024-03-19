@@ -88,12 +88,19 @@ These are Firmware projects (source code) based on Keil IDE for ARM (version 5)
 
 
 
-**When you use the Boot v1.3 F/W, you should check the memory area in the project setting(Both Boot and App).**
+**When you are using F/W after Boot 1.3 Version, you should check the memory area in the project setting(Both Boot and App).**
 
-| Memory area of Boot Project(Boot v1.3)                                                                      | Memory area of App Project(Boot v1.3)                                                                       |
+| Memory area of Boot Project(Boot after v1.3)                                                                      | Memory area of App Project(Boot after v1.3)                                                                       |
 | ----------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
 | ![boot](http://user-images.githubusercontent.com/9648281/85361501-0e9a5900-b557-11ea-8173-5ae5aadc46c9.png) | ![app](https://user-images.githubusercontent.com/9648281/95705625-9be0f500-0c8f-11eb-9ddf-52d06c43fcf0.png) |
 
+### latest F/W version(Boot v1.4)
+v1.4.0 Stable
+ - Improvements:
+   - Add Config WebServer
+   - Include http parser issue fix in ioLibrary
+
+  
 ### latest F/W version(Boot v1.3)
 v1.3.3 Stable
  - Improvements:

@@ -153,22 +153,22 @@ uint8_t set_devinfo(uint8_t * uri)
 	}
 	if((param = get_http_param_value((char *)uri, "databit")))
 	{
-    dev_config->serial_info[uart_sel].data_bits = ATOI(param, 10);;
+    dev_config->serial_info[uart_sel].data_bits = ATOI(param, 10);
 		ret = 1;
 	}
 	if((param = get_http_param_value((char *)uri, "parity")))
 	{
-    dev_config->serial_info[uart_sel].parity = ATOI(param, 10);;
+    dev_config->serial_info[uart_sel].parity = ATOI(param, 10);
 		ret = 1;
 	}
 	if((param = get_http_param_value((char *)uri, "stopbit")))
 	{
-    dev_config->serial_info[uart_sel].stop_bits = ATOI(param, 10);;
+    dev_config->serial_info[uart_sel].stop_bits = ATOI(param, 10);
 		ret = 1;
 	}
 	if((param = get_http_param_value((char *)uri, "flow")))
 	{
-		dev_config->serial_info[uart_sel].flow_control = ATOI(param, 10);;
+    dev_config->serial_info[uart_sel].flow_control = ATOI(param, 10);
 		ret = 1;
 	}
 

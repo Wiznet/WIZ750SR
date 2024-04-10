@@ -115,7 +115,7 @@ void delay(__IO uint32_t milliseconds); //Notice: used ioLibray
 
 /* Private variables ---------------------------------------------------------*/
 static __IO uint32_t TimingDelay;
-static WDT_InitTypeDef WDT_InitStructure;
+//static WDT_InitTypeDef WDT_InitStructure;
 
 /* Public variables ---------------------------------------------------------*/
 // Shared buffer declaration
@@ -293,6 +293,7 @@ int main(void)
 	
 	flag_s2e_application_running = ON;
 	LED_On(LED1);
+	(void)ret;
 
 	while(1) // main loop
 	{
@@ -376,7 +377,9 @@ static void W7500x_WZTOE_Init(void)
 	//uint8_t rx_size[8] = { 2, 2, 2, 2, 2, 2, 2, 2 };
 	
 	/* Structure for timeout control: RTR, RCR */
+#ifdef _MAIN_DEBUG_
 	wiz_NetTimeout net_timeout;
+#endif
 	
 	/* Software reset the WZTOE(Hardwired TCP/IP core) */
 	wizchip_sw_reset();

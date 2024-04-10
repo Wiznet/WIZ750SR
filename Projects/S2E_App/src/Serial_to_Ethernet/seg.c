@@ -1,4 +1,5 @@
 #include <string.h>
+#include <stdlib.h>
 #include "common.h"
 #include "W7500x_wztoe.h"
 #include "W7500x_gpio.h"
@@ -859,7 +860,6 @@ void uart_to_ether(uint8_t sock)
 	struct __serial_info *serial = (struct __serial_info *)get_DevConfig_pointer()->serial_info;
 	uint16_t len;
 	int16_t sent_len;
-	uint16_t i; // ## for debugging
 	
 #if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == WIZ750SR_1xx))
 	if(get_phylink_in_pin() != 0) return; // PHY link down

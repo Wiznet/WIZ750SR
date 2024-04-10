@@ -6,6 +6,7 @@
 #include "W7500x_board.h"
 #include "ConfigData.h"
 #include "storageHandler.h"
+#include "flashHandler.h"
 #include "deviceHandler.h"
 #include "segcp.h"
 #include "uartHandler.h"
@@ -79,7 +80,8 @@ uint8_t set_devinfo(uint8_t * uri)
 	DevConfig *dev_config = get_DevConfig_pointer();
   uint8_t uart_sel = 0;
   
-	if((param = get_http_param_value((char *)uri, "devname", (char*)buf)))
+	param = get_http_param_value((char *)uri, "devname", (char*)buf);
+	if(param)
 	{
 		memset(dev_config->module_name, 0x00, 15);
 		if((str_size = strlen((char*)param)) > 14) str_size = 14; // exception handling
@@ -87,8 +89,8 @@ uint8_t set_devinfo(uint8_t * uri)
 
 		ret = 1;
 	}
-
-	if((param = get_http_param_value((char *)uri, "dhcp", (char*)buf)))
+	param = get_http_param_value((char *)uri, "dhcp", (char*)buf);
+	if(param)
 	{
 		if(strstr((char const*)param, "1") != NULL) dev_config->options.dhcp_use = 1; // DHCP mode
 		else dev_config->options.dhcp_use = 0; // Static mode
@@ -97,34 +99,39 @@ uint8_t set_devinfo(uint8_t * uri)
 
 	if(dev_config->options.dhcp_use == 0) // Static mode
 	{
-		if((param = get_http_param_value((char *)uri, "ip", (char*)buf)))
+		param = get_http_param_value((char *)uri, "ip", (char*)buf);
+		if(param)
 		{
 			inet_addr_((unsigned char*)param, dev_config->network_info_common.local_ip);
 			ret = 1;
 		}
-		if((param = get_http_param_value((char *)uri, "gw", (char*)buf)))
+		param = get_http_param_value((char *)uri, "gw", (char*)buf);
+		if(param)
 		{
 			inet_addr_((unsigned char*)param, dev_config->network_info_common.gateway);
 			ret = 1;
 		}
-		if((param = get_http_param_value((char *)uri, "sub", (char*)buf)))
+		param = get_http_param_value((char *)uri, "sub", (char*)buf);
+		if(param)
 		{
 			inet_addr_((unsigned char*)param, dev_config->network_info_common.subnet);
 			ret = 1;
 		}
-		if((param = get_http_param_value((char *)uri, "dns", (char*)buf)))
+		param = get_http_param_value((char *)uri, "dns", (char*)buf);
+		if(param)
 		{
 			inet_addr_((unsigned char*)param, dev_config->options.dns_server_ip);
 			ret = 1;
 		}
 	}
 
-	if((param = get_http_param_value((char *)uri, "opmode", (char*)buf)))
+	param = get_http_param_value((char *)uri, "opmode", (char*)buf);
+	if(param)
 	{
 	  dev_config->network_info[0].working_mode = ATOI(param, 10);
 	}
-
-  if((param = get_http_param_value((char *)uri, "lport", (char*)buf)))
+	param = get_http_param_value((char *)uri, "lport", (char*)buf);
+  if(param)
   {
     dev_config->network_info[0].local_port = ATOI(param, 10);
     ret = 1;
@@ -132,42 +139,47 @@ uint8_t set_devinfo(uint8_t * uri)
   
   if(dev_config->network_info[0].working_mode != TCP_SERVER_MODE)
   {
-    if((param = get_http_param_value((char *)uri, "rip", (char*)buf)))
+    param = get_http_param_value((char *)uri, "rip", (char*)buf);
+		if(param)
 		{
       inet_addr_((unsigned char*)param, dev_config->network_info[0].remote_ip);
 			ret = 1;
 		}
-
-    if((param = get_http_param_value((char *)uri, "rport", (char*)buf)))
+		param = get_http_param_value((char *)uri, "rport", (char*)buf);
+    if(param)
     {
 		  dev_config->network_info[0].remote_port = ATOI(param, 10);
 			ret = 1;
     }
   }
-
-	if((param = get_http_param_value((char *)uri, "baud", (char*)buf)))
+	param = get_http_param_value((char *)uri, "baud", (char*)buf);
+	if(param)
 	{
 		uint8_t baudrate_idx = ATOI(param, 10);
 		if(baudrate_idx > baud_230400) baudrate_idx = baud_115200; // 115200
 		dev_config->serial_info[uart_sel].baud_rate = baudrate_idx;
 		ret = 1;
 	}
-	if((param = get_http_param_value((char *)uri, "databit", (char*)buf)))
+	param = get_http_param_value((char *)uri, "databit", (char*)buf);
+	if(param)
 	{
     dev_config->serial_info[uart_sel].data_bits = ATOI(param, 10);
 		ret = 1;
 	}
-	if((param = get_http_param_value((char *)uri, "parity", (char*)buf)))
+	param = get_http_param_value((char *)uri, "parity", (char*)buf);
+	if(param)
 	{
     dev_config->serial_info[uart_sel].parity = ATOI(param, 10);
 		ret = 1;
 	}
-	if((param = get_http_param_value((char *)uri, "stopbit", (char*)buf)))
+	param = get_http_param_value((char *)uri, "stopbit", (char*)buf);
+	if(param)
 	{
     dev_config->serial_info[uart_sel].stop_bits = ATOI(param, 10);
 		ret = 1;
 	}
-	if((param = get_http_param_value((char *)uri, "flow", (char*)buf)))
+	param = get_http_param_value((char *)uri, "flow", (char*)buf);
+	if(param)
 	{
     dev_config->serial_info[uart_sel].flow_control = ATOI(param, 10);
 		ret = 1;
@@ -193,7 +205,6 @@ uint8_t set_devreset(uint8_t * uri)
 uint8_t set_devfacreset(uint8_t * uri)
 {
 	uint8_t ret = 0;
-	uint8_t * param;
 
   flash_update_start();
   device_set_factory_default();

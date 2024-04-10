@@ -12,6 +12,7 @@
 #include "ConfigData.h"
 #include "storageHandler.h"
 #include "deviceHandler.h"
+#include "flashHandler.h"
 
 #include "seg.h"
 #include "segcp.h"
@@ -211,7 +212,7 @@ uint8_t parse_SEGCP(uint8_t * pmsg, uint8_t * param)
 
     for(pcmd = tbSEGCPCMD; *pcmd != 0; pcmd++)
     {
-        if(!strncmp((char *)pmsg, *pcmd, strlen(*pcmd))) break;
+        if(!strncmp((char *)pmsg, (char *)*pcmd, strlen((char *)*pcmd))) break;
     }
 
     if(*pcmd == 0) 
@@ -253,7 +254,7 @@ uint8_t parse_SEGCP(uint8_t * pmsg, uint8_t * param)
     }
     else
     {
-        strcpy(param, (uint8_t*)&pmsg[2]);
+        strcpy((char *)param, (char *)&pmsg[2]);
     }
 
 #ifdef _SEGCP_DEBUG_
@@ -281,7 +282,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
     uint8_t  cmdnum = 0;
     uint8_t* treq;
     
-    char * trep = segcp_rep;
+    char * trep = (char*)segcp_rep;
     uint16_t param_len = 0;
     
     uint8_t  io_num = 0;
@@ -299,8 +300,8 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
 #ifdef _SEGCP_DEBUG_
     printf("SEGCP_REQ : %s\r\n",segcp_req);
 #endif
-    memset(trep, 0, sizeof(trep));
-    treq = strtok(segcp_req, SEGCP_DELIMETER);
+    memset(trep, 0, sizeof((char*)trep));
+    treq = (uint8_t*)strtok((char*)segcp_req, SEGCP_DELIMETER);
     
     while(treq)
     {
@@ -618,7 +619,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                 else
                 {
                     strcat(trep, SEGCP_DELIMETER);
-                    trep += strlen(trep);
+                    trep += strlen((char *)trep);
                 }
             }
             else if(gSEGCPPRIVILEGE & (SEGCP_PRIVILEGE_SET|SEGCP_PRIVILEGE_WRITE))
@@ -678,17 +679,17 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                         else dev_config->network_info[0].keepalive_en = tmp_byte;
                         break;
                     case SEGCP_KI:
-                        tmp_long = atol(param);
+                        tmp_long = atol((char*)param);
                         if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
                         else dev_config->network_info[0].keepalive_wait_time = (uint16_t) tmp_long;
                         break;
                     case SEGCP_KE:
-                        tmp_long = atol(param);
+                        tmp_long = atol((char*)param);
                         if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
                         else dev_config->network_info[0].keepalive_retry_time = (uint16_t) tmp_long;
                         break;
                     case SEGCP_RI:
-                        tmp_long = atol(param);
+                        tmp_long = atol((char*)param);
                         if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
                         else dev_config->network_info[0].reconnection = (uint16_t) tmp_long;
                         break;
@@ -791,17 +792,17 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                             }
                             else
                             {
-                                sprintf(dev_config->module_name, "%s", param);
+                                sprintf((char*)dev_config->module_name, "%s", param);
                             }
                         }
                         break;
                     case SEGCP_LP:
-                        tmp_long = atol(param);
+                        tmp_long = atol((char*)param);
                         if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
                         else dev_config->network_info[0].local_port = (uint16_t)tmp_long;
                         break;
                     case SEGCP_RP:
-                        tmp_long = atol(param);
+                        tmp_long = atol((char*)param);
                         if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
                         else dev_config->network_info[0].remote_port = (uint16_t)tmp_long;
                         break;
@@ -818,12 +819,12 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                         {
                             dev_config->options.dns_use = SEGCP_ENABLE;
                             if(param[0] == SEGCP_NULL) dev_config->options.dns_domain_name[0] = 0;
-                            else strcpy(dev_config->options.dns_domain_name, param);
+                            else strcpy(dev_config->options.dns_domain_name, (char*)param);
                         }
                         
                         break;
                     case SEGCP_BR:
-                        tmp_int = atoi(param);
+                        tmp_int = atoi((char*)param);
                         if(param_len > 2 || tmp_int > baud_460800) ret |= SEGCP_RET_ERR_INVALIDPARAM; // ## 20180208 Added by Eric, Supports baudrate up to 460.8kbps 
                         else dev_config->serial_info[0].baud_rate = (uint8_t)tmp_int;
                         break;
@@ -868,17 +869,17 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                         }
                         break;
                     case SEGCP_IT:
-                        tmp_long = atol(param);
+                        tmp_long = atol((char*)param);
                         if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
                         else dev_config->network_info[0].inactivity = (uint16_t)tmp_long;
                         break;
                     case SEGCP_PT:
-                        tmp_long = atol(param);
+                        tmp_long = atol((char*)param);
                         if(tmp_long > 0xFFFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
                         else dev_config->network_info[0].packing_time = (uint16_t)tmp_long;
                         break;
                     case SEGCP_PS:
-                        tmp_int = atoi(param);
+                        tmp_int = atoi((char*)param);
                         if(param_len > 3 || tmp_int > 0xFF) ret |= SEGCP_RET_ERR_INVALIDPARAM;
                         else dev_config->network_info[0].packing_size = (uint8_t)tmp_int;
                         break;
@@ -933,7 +934,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                         }
                         break;
                     case SEGCP_FW:
-                        tmp_long = atol(param);
+                        tmp_long = atol((char*)param);
 #ifdef __USE_APPBACKUP_AREA__
                         if(tmp_long > (((uint32_t)DEVICE_FWUP_SIZE) & 0x0FFFF)) // 64KByte
 #else
@@ -988,7 +989,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                     case SEGCP_CC:
                     case SEGCP_CD:
                         io_num = (teSEGCPCMDNUM)cmdnum - SEGCP_CA;
-                        tmp_int = atoi(param);
+                        tmp_int = atoi((char*)param);
                         
                         io_type = (uint8_t)(tmp_int >> 1);
                         io_dir = (uint8_t)(tmp_int & 0x01);
@@ -1060,7 +1061,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                         break;
                     
                     case SEGCP_FP: // Firmware update HTTP Server Port
-                        tmp_int = atoi(param);
+                        tmp_int = atoi((char*)param);
                         if(tmp_int > 0xffff) ret |= SEGCP_RET_ERR_INVALIDPARAM;
                         else dev_config->firmware_update_extend.fwup_server_port = tmp_int;
                         break;
@@ -1091,13 +1092,13 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                         break;
                     
                     case SEGCP_TR: // TCP Retransmission retry count
-                        tmp_int = atoi(param);
+                        tmp_int = atoi((char*)param);
                         if((param_len > 3) || (tmp_int < 1) || (tmp_int > 0xFF)) ret |= SEGCP_RET_ERR_INVALIDPARAM;
                         else dev_config->options.tcp_rcr_val = (uint8_t)tmp_int;
                         break;
                     
                     case SEGCP_BU:
-                        tmp_long = atol(param);
+                        tmp_long = atol((char*)param);
                         if(tmp_long > DEVICE_BOOT_SIZE) // AppBoot Size, 28KByte
                         {
                             dev_config->firmware_update.fwup_size = 0;
@@ -1164,7 +1165,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                 return ret;
             }
         }
-        treq = strtok(NULL, SEGCP_DELIMETER);
+        treq = (uint8_t*)strtok(NULL, SEGCP_DELIMETER);
 #ifdef _SEGCP_DEBUG_
         //printf(">> strtok: %s\r\n", treq);
 #endif
@@ -1209,7 +1210,7 @@ uint16_t proc_SEGCP_udp(uint8_t* segcp_req, uint8_t* segcp_rep)
                     
                     if(gSEGCPPRIVILEGE & SEGCP_PRIVILEGE_SET)
                     {
-                        sprintf(trep,"%s%c%c%c%c%c%c\r\n",tbSEGCPCMD[SEGCP_MA],
+                        sprintf((char*)trep,"%s%c%c%c%c%c%c\r\n",tbSEGCPCMD[SEGCP_MA],
                             dev_config->network_info_common.mac[0], dev_config->network_info_common.mac[1], dev_config->network_info_common.mac[2],
                             dev_config->network_info_common.mac[3], dev_config->network_info_common.mac[4], dev_config->network_info_common.mac[5]);
                         
@@ -1218,14 +1219,14 @@ uint16_t proc_SEGCP_udp(uint8_t* segcp_req, uint8_t* segcp_rep)
                         
                         if(SEGCP_PW == parse_SEGCP(treq, tpar))
                         {
-                            if((tpar[0] == SEGCP_NULL && dev_config->options.pw_search[0] == 0) || !strcmp(tpar, dev_config->options.pw_search))
+                            if((tpar[0] == SEGCP_NULL && dev_config->options.pw_search[0] == 0) || !strcmp((char*)tpar, dev_config->options.pw_search))
                             {
-                                memcpy(trep,treq, strlen(tpar)+4);  // "PWxxxx\r\n"
-                                treq += (strlen(tpar) + 4);
-                                trep += (strlen(tpar) + 4);
+                                memcpy(trep,treq, strlen((char *)tpar)+4);  // "PWxxxx\r\n"
+                                treq += (strlen((char *)tpar) + 4);
+                                trep += (strlen((char *)tpar) + 4);
                                 ret = proc_SEGCP(treq,trep);
                                 
-                                sendto(SEGCP_UDP_SOCK, segcp_rep, 14+strlen(tpar)+strlen(trep), "\xFF\xFF\xFF\xFF", destport);
+                                sendto(SEGCP_UDP_SOCK, segcp_rep, 14+strlen((char *)tpar)+strlen((char *)trep), "\xFF\xFF\xFF\xFF", destport);
                             }
                         }
                     }
@@ -1305,7 +1306,7 @@ uint16_t proc_SEGCP_tcp(uint8_t* segcp_req, uint8_t* segcp_rep)
                     
                     if(gSEGCPPRIVILEGE & SEGCP_PRIVILEGE_SET)
                     {
-                        sprintf(trep,"%s%c%c%c%c%c%c\r\n",tbSEGCPCMD[SEGCP_MA],
+                        sprintf((char*)trep,"%s%c%c%c%c%c%c\r\n",tbSEGCPCMD[SEGCP_MA],
                             dev_config->network_info_common.mac[0], dev_config->network_info_common.mac[1], dev_config->network_info_common.mac[2],
                             dev_config->network_info_common.mac[3], dev_config->network_info_common.mac[4], dev_config->network_info_common.mac[5]);
                         
@@ -1314,13 +1315,13 @@ uint16_t proc_SEGCP_tcp(uint8_t* segcp_req, uint8_t* segcp_rep)
                         
                         if(SEGCP_PW == parse_SEGCP(treq,tpar))
                         {
-                            if((tpar[0] == SEGCP_NULL && dev_config->options.pw_search[0] == 0) || !strcmp(tpar, dev_config->options.pw_search))
+                            if((tpar[0] == SEGCP_NULL && dev_config->options.pw_search[0] == 0) || !strcmp((char*)tpar, dev_config->options.pw_search))
                             {
-                                memcpy(trep,treq, strlen(tpar)+4);  // "PWxxxx\r\n"
-                                treq += (strlen(tpar) + 4);
-                                trep += (strlen(tpar) + 4);
+                                memcpy(trep,treq, strlen((char *)tpar)+4);  // "PWxxxx\r\n"
+                                treq += (strlen((char *)tpar) + 4);
+                                trep += (strlen((char *)tpar) + 4);
                                 ret = proc_SEGCP(treq,trep);
-                                send(SEGCP_TCP_SOCK, segcp_rep, 14+strlen(tpar)+strlen(trep));
+                                send(SEGCP_TCP_SOCK, segcp_rep, 14+strlen((char *)tpar)+strlen((char *)trep));
                             }
                         }
                     }
@@ -1381,7 +1382,7 @@ uint16_t proc_SEGCP_uart(uint8_t * segcp_rep)
                     printf("%s",segcp_rep);
                 }
                 
-                uart_puts(SEG_DATA_UART, segcp_rep, strlen(segcp_rep));
+                uart_puts(SEG_DATA_UART, segcp_rep, strlen((char *)segcp_rep));
                 
             }
         }
@@ -1418,7 +1419,7 @@ uint16_t uart_get_commandline(uint8_t uartNum, uint8_t* buf, uint16_t maxSize)
         return 0;
     }
     
-    return strlen(buf);
+    return strlen((char *)buf);
 }
 
 void send_keepalive_packet_configtool(uint8_t sock)

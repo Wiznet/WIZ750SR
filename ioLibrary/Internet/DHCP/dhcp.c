@@ -262,6 +262,16 @@ void     reset_DHCP_timeout(void);
 /* Parse message as OFFER and ACK and NACK from DHCP server.*/
 int8_t   parseDHCPCMSG(void);
 
+uint8_t  nibble2hexstr(uint8_t nibble)
+{
+	nibble &= 0x0f;
+
+	if (nibble <= 9)
+		return nibble + '0';
+	else
+		return nibble + ('A' - 0x0A);
+}
+
 /* The default handler of ip assign first */
 void default_ip_assign(void)
 {
@@ -403,11 +413,20 @@ void send_DHCP_DISCOVER(void)
 	pDHCPMSG->OPT[k++] = 0;          // fill zero length of hostname 
 	for(i = 0 ; HOST_NAME[i] != 0; i++)
    	pDHCPMSG->OPT[k++] = HOST_NAME[i];
+#if 1
+	pDHCPMSG->OPT[k++] = nibble2hexstr(DHCP_CHADDR[3] >> 4);
+	pDHCPMSG->OPT[k++] = nibble2hexstr(DHCP_CHADDR[3] >> 0);
+	pDHCPMSG->OPT[k++] = nibble2hexstr(DHCP_CHADDR[4] >> 4);
+	pDHCPMSG->OPT[k++] = nibble2hexstr(DHCP_CHADDR[4] >> 0);
+	pDHCPMSG->OPT[k++] = nibble2hexstr(DHCP_CHADDR[5] >> 4);
+	pDHCPMSG->OPT[k++] = nibble2hexstr(DHCP_CHADDR[5] >> 0);
+	pDHCPMSG->OPT[k - (i + 6 + 1)] = i + 6; // length of hostname
+#else
 	pDHCPMSG->OPT[k++] = DHCP_CHADDR[3];
 	pDHCPMSG->OPT[k++] = DHCP_CHADDR[4];
 	pDHCPMSG->OPT[k++] = DHCP_CHADDR[5];
 	pDHCPMSG->OPT[k - (i+3+1)] = i+3; // length of hostname
-
+#endif
 	pDHCPMSG->OPT[k++] = dhcpParamRequest;
 	pDHCPMSG->OPT[k++] = 0x06;	// length of request
 	pDHCPMSG->OPT[k++] = subnetMask;
@@ -508,11 +527,20 @@ void send_DHCP_REQUEST(void)
 	pDHCPMSG->OPT[k++] = 0; // length of hostname
 	for(i = 0 ; HOST_NAME[i] != 0; i++)
    	pDHCPMSG->OPT[k++] = HOST_NAME[i];
+#if 1
+	pDHCPMSG->OPT[k++] = nibble2hexstr(DHCP_CHADDR[3] >> 4);
+	pDHCPMSG->OPT[k++] = nibble2hexstr(DHCP_CHADDR[3] >> 0);
+	pDHCPMSG->OPT[k++] = nibble2hexstr(DHCP_CHADDR[4] >> 4);
+	pDHCPMSG->OPT[k++] = nibble2hexstr(DHCP_CHADDR[4] >> 0);
+	pDHCPMSG->OPT[k++] = nibble2hexstr(DHCP_CHADDR[5] >> 4);
+	pDHCPMSG->OPT[k++] = nibble2hexstr(DHCP_CHADDR[5] >> 0);
+	pDHCPMSG->OPT[k - (i + 6 + 1)] = i + 6; // length of hostname
+#else
 	pDHCPMSG->OPT[k++] = DHCP_CHADDR[3];
 	pDHCPMSG->OPT[k++] = DHCP_CHADDR[4];
 	pDHCPMSG->OPT[k++] = DHCP_CHADDR[5];
 	pDHCPMSG->OPT[k - (i+3+1)] = i+3; // length of hostname
-	
+#endif
 	pDHCPMSG->OPT[k++] = dhcpParamRequest;
 	pDHCPMSG->OPT[k++] = 0x08;
 	pDHCPMSG->OPT[k++] = subnetMask;

@@ -647,4 +647,5 @@ void check_n_clear_uart_recv_status(uint8_t channel)
 		
 		UARTx->STATUS.ECR = ~UARTx->STATUS.RSR;
 	}
+	(void)dummy;
 }

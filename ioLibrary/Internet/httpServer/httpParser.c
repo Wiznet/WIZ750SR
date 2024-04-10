@@ -219,7 +219,7 @@ uint8_t * get_http_param_value(char* uri, char* param_name, char* param_buf)
 {
 
 	uint8_t * name = 0;
-	uint8_t * ret = param_buf;
+	uint8_t * ret = (uint8_t *)param_buf;
 	uint8_t * pos2;
 	uint16_t len = 0, content_len = 0;
 	uint8_t tmp_buf[10]={0x00, };
@@ -234,7 +234,8 @@ uint8_t * get_http_param_value(char* uri, char* param_name, char* param_buf)
 	uri[content_len] = 0;
 	/***************/
 
-	if((name = (uint8_t *)strstr(uri, param_name)))
+	name = (uint8_t *)strstr(uri, param_name);
+	if(name)
 	{
 		name += strlen(param_name) + 1;
 		pos2 = (uint8_t*)strstr((char*)name, "&");

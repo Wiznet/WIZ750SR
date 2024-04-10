@@ -1,4 +1,4 @@
-;#<FEEDBACK># ARM Linker, 5060750: Last Updated: Tue Mar 19 14:05:15 2024
+;#<FEEDBACK># ARM Linker, 5060960: Last Updated: Wed Apr 10 10:26:26 2024
 ;VERSION 0.2
 ;FILE configdata.o
 Mac_Conf <= USED 0
@@ -69,6 +69,8 @@ getSNfromDHCP <= USED 0
 getSNfromDHCP <= IW 0
 makeDHCPMSG <= USED 0
 makeDHCPMSG <= IW 0
+nibble2hexstr <= USED 0
+nibble2hexstr <= IW 0
 parseDHCPMSG <= USED 0
 parseDHCPMSG <= IW 0
 reg_dhcp_cbfunc <= USED 0

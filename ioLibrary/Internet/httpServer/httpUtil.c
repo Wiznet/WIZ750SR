@@ -27,6 +27,7 @@
 #include <stdlib.h>
 #include "W7500x_gpio.h"
 #include "httpServer.h"
+#include "httpHandler.h"
 #include "httpParser.h"
 #include "httpUtil.h"
 #include "wizchip_conf.h"
@@ -54,8 +55,6 @@ uint8_t http_post_cgi_handler(uint8_t * uri_name, st_http_request * p_http_reque
 {
 	uint8_t ret = HTTP_OK;
 	uint16_t len = 0;
-	uint8_t * device_ip;
-	uint8_t val;
 
 	if(predefined_set_cgi_processor(uri_name, p_http_request->URI, buf, &len))
 	{
@@ -75,11 +74,10 @@ uint8_t http_post_cgi_handler(uint8_t * uri_name, st_http_request * p_http_reque
 uint8_t predefined_get_cgi_processor(uint8_t * uri_name, uint8_t * buf, uint16_t * len)
 {
 	uint8_t ret = 1;	// ret = 1 means 'uri_name' matched
-	uint8_t cgibuf[14] = {0, };
-	int8_t cgi_dio = -1;
-	int8_t cgi_ain = -1;
-
-	uint8_t i;
+	//uint8_t cgibuf[14] = {0, };
+	//int8_t cgi_dio = -1;
+	//int8_t cgi_ain = -1;
+	//uint8_t i;
   
 	if(strcmp((const char *)uri_name, "get_devinfo.cgi") == 0)
 	{
@@ -137,14 +135,14 @@ int8_t set_LED(uint8_t * uri)
 	uint8_t * param;
 	uint8_t pin = 0, val = 0;
 
-		
-	if((param = get_http_param_value((char *)uri, "pin", (char*)buf))) // GPIO; D0 ~ D15
+	param = get_http_param_value((char *)uri, "pin", (char*)buf); // GPIO; D0 ~ D15
+	if(param)
 	{
 		pin = (uint8_t)ATOI(param, 10);
 		
 		if(pin > 15) return -1;
-
-		if((param = get_http_param_value((char *)uri, "val", (char*)buf)))  // State; high(off)/low(on)
+		param = get_http_param_value((char *)uri, "val", (char*)buf);  // State; high(off)/low(on)
+		if(param)
 		{
 			val = (uint8_t)ATOI(param, 10);
 			

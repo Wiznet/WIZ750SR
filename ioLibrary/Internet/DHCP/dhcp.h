@@ -67,7 +67,8 @@
 
 #define MAGIC_COOKIE             0x63825363  ///< Any number. You can be modifyed it any number
 
-#define DCHP_HOST_NAME           "WIZnet\0"
+// #define DCHP_HOST_NAME           "WIZnet\0"
+#define DCHP_HOST_NAME "WIZ750SR-\0"
 
 
 /* 

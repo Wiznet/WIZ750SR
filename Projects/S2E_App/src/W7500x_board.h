@@ -58,7 +58,7 @@
 		//#define __USE_APPBACKUP_AREA__		// If this option activated, Application firmware area is consists of App (50kB) and App backup (50kB). If not, user's application can be 100kB size. (Does not use the backup area)
 		#define __USE_GPIO_HARDWARE_FLOWCONTROL__
 		#define __USE_USERS_GPIO__
-		#define __USE_DSR_DTR_DEFAULT__
+		//#define __USE_DSR_DTR_DEFAULT__
         #define __USE_SAFE_SAVE__             // DevConfig Save verify function added
         #define __USE_APPBOOT_TCP_SEARCH__
         #define __USE_TCPCONNECT_STATUS_PIN__ // When this option is enabled, the STATUS pin acts as a pin to indicate the TCP connection status of socket. (WIZ750SR-1xx series only)

@@ -156,7 +156,6 @@ void UART2_Configuration(void)
 void serial_info_init(UART_TypeDef *pUART, struct __serial_info *serial)
 {
 	UART_InitTypeDef UART_InitStructure;
-	GPIO_InitTypeDef GPIO_InitStructure; //1.4.1
 	uint32_t valid_arg = 0;
     uint32_t baud_table[] = {300, 600, 1200, 1800, 2400, 4800, 9600, 14400, 19200, 28800, 38400, 57600, 115200, 230400, 460800};
 
@@ -450,8 +449,8 @@ uint8_t get_uart_rs485_sel(uint8_t uartNum)
 	if(uartNum == 0) // UART0 
 	{
 		GPIO_Configuration(UART0_RTS_PORT, UART0_RTS_PIN, GPIO_Mode_IN, UART0_RTS_PAD_AF); // UART0 RTS pin: GPIO / Input
-		GPIO_SetBits(UART0_RTS_PORT, UART0_RTS_PIN); //check 
-		
+		GPIO_SetBits(UART0_RTS_PORT, UART0_RTS_PIN); 
+
 		if(GPIO_ReadInputDataBit(UART0_RTS_PORT, UART0_RTS_PIN) == UART_IF_RS422)
 		{
 			uart_if_mode = UART_IF_RS422;

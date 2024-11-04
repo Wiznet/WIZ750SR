@@ -59,7 +59,7 @@ static uint8_t xonoff_status = UART_XON;
 
 // UART Interface selecter; RS-422 or RS-485 use only
 static uint8_t uart_if_mode = UART_IF_RS422;
-static uint32_t rs485_422_disable_delay;  //1.4.1
+//static uint32_t rs485_422_disable_delay;  //1.4.1
 /* Public functions ----------------------------------------------------------*/
 
 ////////////////////////////////////////////////////////////////////////////////
@@ -272,18 +272,9 @@ void serial_info_init(UART_TypeDef *pUART, struct __serial_info *serial)
 			}
 		}
 		uart_rs485_rs422_init(SEG_DATA_UART);
-		rs485_422_disable_delay = (400000 / baud_table[serial->baud_rate]) + 1;
+		//rs485_422_disable_delay = (400000 / baud_table[serial->baud_rate]) + 1;
 	}
-#if 1	//1.4.1
-	GPIO_StructInit(&GPIO_InitStructure);
-	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_14;
-	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-	GPIO_InitStructure.GPIO_Pad = GPIO_PuPd_UP;
-	GPIO_Init(GPIOA, &GPIO_InitStructure);
-	PAD_AFConfig(PAD_PC,GPIO_Pin_14, PAD_AF1);
-#else
 	GPIO_Configuration(GPIOC, GPIO_Pin_14, GPIO_Mode_IN, PAD_AF1);
-#endif 
 
 	/* Configure the UARTx */
 	UART_InitStructure.UART_Mode = UART_Mode_Rx | UART_Mode_Tx;
@@ -340,6 +331,9 @@ int32_t uart_putc(uint8_t uartNum, uint8_t ch)
 {
 	DevConfig *value = get_DevConfig_pointer();
 	
+	//1.4.1
+	// When the baudrate is low and long data is sent, the WDT is triggered.
+	WDT_SetWDTLoad(0xFF0000); 
 	if(uartNum == SEG_DATA_UART)
 	{
 		UartPutc(UART_data, ch); 
@@ -455,17 +449,8 @@ uint8_t get_uart_rs485_sel(uint8_t uartNum)
 {
 	if(uartNum == 0) // UART0 
 	{
-		//1.4.1 
-		GPIO_InitTypeDef GPIO_InitStructure;
-		GPIO_StructInit(&GPIO_InitStructure);
-		GPIO_InitStructure.GPIO_Pin = UART0_RTS_PIN; 
-		GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-		GPIO_InitStructure.GPIO_Pad = GPIO_SUMMIT|GPIO_IE|GPIO_PuPd_UP;
-		GPIO_Init(UART0_RTS_PORT, &GPIO_InitStructure);
-		PAD_AFConfig(0, UART0_RTS_PIN, UART0_RTS_PAD_AF);
-
+		GPIO_Configuration(UART0_RTS_PORT, UART0_RTS_PIN, GPIO_Mode_IN, UART0_RTS_PAD_AF); // UART0 RTS pin: GPIO / Input
 		GPIO_SetBits(UART0_RTS_PORT, UART0_RTS_PIN); //check 
-		// GPIO_Configuration(UART0_RTS_PORT, UART0_RTS_PIN, GPIO_Mode_IN, UART0_RTS_PAD_AF); // UART0 RTS pin: GPIO / Input
 		
 		if(GPIO_ReadInputDataBit(UART0_RTS_PORT, UART0_RTS_PIN) == UART_IF_RS422)
 		{
@@ -499,15 +484,6 @@ void uart_rs485_rs422_init(uint8_t uartNum)
 {
 	if(uartNum == 0) // UART0
 	{
-		//1.4.1
-		// GPIO_InitTypeDef GPIO_InitStructure;
-		// GPIO_StructInit(&GPIO_InitStructure);
-		// GPIO_InitStructure.GPIO_Pin = UART0_RTS_PIN;
-		// GPIO_InitStructure.GPIO_Mode = GPIO_Mode_IN;
-		// GPIO_InitStructure.GPIO_Pad = GPIO_SUMMIT|GPIO_IE|GPIO_PuPd_UP;
-		// GPIO_Init(UART0_RTS_PORT, &GPIO_InitStructure);
-		// PAD_AFConfig(0, UART0_RTS_PIN, UART0_RTS_PAD_AF);
-		
 		GPIO_Configuration(UART0_RTS_PORT, UART0_RTS_PIN, GPIO_Mode_OUT, UART0_RTS_PAD_AF); // UART0 RTS pin: GPIO / Output
 
 		if(uart_if_mode == UART_IF_RS485)
@@ -573,7 +549,10 @@ void uart_rs485_disable(uint8_t uartNum)
 	if(uart_if_mode == UART_IF_RS485)
 	{
 		//1.4.1
-		delay(rs485_422_disable_delay); 
+		// WDT_Stop();
+		// delay(rs485_422_disable_delay); // if you want add a delay, you must use WDT control.
+		// WDT_Start();
+
 		// RTS pin -> Low
 		if(uartNum == 0) // UART0
 		{
@@ -588,7 +567,10 @@ void uart_rs485_disable(uint8_t uartNum)
 	else if(uart_if_mode == UART_IF_RS485_REVERSE)
 	{
 		//1.4.1
-		delay(rs485_422_disable_delay); 
+		// WDT_Stop();
+		// delay(rs485_422_disable_delay);  // if you want add a delay, you must use WDT control.
+		// WDT_Start();
+
 		// RTS pin -> High
 		if(uartNum == 0) // UART0
 		{

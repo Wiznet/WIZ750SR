@@ -273,7 +273,8 @@ void serial_info_init(UART_TypeDef *pUART, struct __serial_info *serial)
 		uart_rs485_rs422_init(SEG_DATA_UART);
 		//rs485_422_disable_delay = (400000 / baud_table[serial->baud_rate]) + 1;
 	}
-	GPIO_Configuration(GPIOC, GPIO_Pin_14, GPIO_Mode_IN, PAD_AF1);
+	//ver1.4.1
+	GPIO_Configuration(GPIOA, GPIO_Pin_14, GPIO_Mode_IN, PAD_AF0);
 
 	/* Configure the UARTx */
 	UART_InitStructure.UART_Mode = UART_Mode_Rx | UART_Mode_Tx;
@@ -561,7 +562,7 @@ void uart_rs485_disable(uint8_t uartNum)
 		{
 			GPIO_ResetBits(UART1_RTS_PORT, UART1_RTS_PIN);
 		}
-		delay(1);
+		//delay(1);	//1.4.1
 	}
 	else if(uart_if_mode == UART_IF_RS485_REVERSE)
 	{
@@ -579,7 +580,7 @@ void uart_rs485_disable(uint8_t uartNum)
 		{
 			GPIO_SetBits(UART1_RTS_PORT, UART1_RTS_PIN);
 		}
-		delay(1);
+		//delay(1);	//1.4.1
 	}
 	
 	//UART_IF_RS422: None

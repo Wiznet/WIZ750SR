@@ -272,8 +272,8 @@ void serial_info_init(UART_TypeDef *pUART, struct __serial_info *serial)
 		}
 		uart_rs485_rs422_init(SEG_DATA_UART);
 	}
-	
-	GPIO_Configuration(GPIOC, GPIO_Pin_14, GPIO_Mode_IN, PAD_AF1);
+	//1.4.1
+	GPIO_Configuration(GPIOA, GPIO_Pin_14, GPIO_Mode_IN, PAD_AF0);
 
 	/* Configure the UARTx */
 	UART_InitStructure.UART_Mode = UART_Mode_Rx | UART_Mode_Tx;
@@ -330,6 +330,9 @@ int32_t uart_putc(uint8_t uartNum, uint8_t ch)
 {
 	DevConfig *value = get_DevConfig_pointer();
 	
+	//1.4.1
+	// When the baudrate is low and long data is sent, the WDT is triggered.
+	WDT_SetWDTLoad(0xFF0000); 
 	if(uartNum == SEG_DATA_UART)
 	{
 		UartPutc(UART_data, ch); 
@@ -443,11 +446,11 @@ void uart_rx_flush(uint8_t uartNum)
 
 uint8_t get_uart_rs485_sel(uint8_t uartNum)
 {
-	if(uartNum == 0) // UART0
+	if(uartNum == 0) // UART0 
 	{
 		GPIO_Configuration(UART0_RTS_PORT, UART0_RTS_PIN, GPIO_Mode_IN, UART0_RTS_PAD_AF); // UART0 RTS pin: GPIO / Input
 		GPIO_SetBits(UART0_RTS_PORT, UART0_RTS_PIN); 
-		
+
 		if(GPIO_ReadInputDataBit(UART0_RTS_PORT, UART0_RTS_PIN) == UART_IF_RS422)
 		{
 			uart_if_mode = UART_IF_RS422;
@@ -553,10 +556,11 @@ void uart_rs485_disable(uint8_t uartNum)
 		{
 			GPIO_ResetBits(UART1_RTS_PORT, UART1_RTS_PIN);
 		}
-		delay(1);
+		//delay(1);	//1.4.1
 	}
 	else if(uart_if_mode == UART_IF_RS485_REVERSE)
 	{
+
 		// RTS pin -> High
 		if(uartNum == 0) // UART0
 		{
@@ -566,7 +570,7 @@ void uart_rs485_disable(uint8_t uartNum)
 		{
 			GPIO_SetBits(UART1_RTS_PORT, UART1_RTS_PIN);
 		}
-		delay(1);
+		//delay(1);	//1.4.1
 	}
 	
 	//UART_IF_RS422: None

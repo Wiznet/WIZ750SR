@@ -1221,7 +1221,16 @@ void init_trigger_modeswitch(uint8_t mode)
 		if(serial->serial_debug_en)
 		{
 			printf(" > SEG:AT Mode\r\n");
-			uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:AT Mode\r\n", sizeof("SEG:AT Mode\r\n"));
+			if(serial->uart_interface == UART_IF_RS422_485)
+			{
+				uart_rs485_enable(SEG_DATA_UART); 	
+				uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:AT Mode\r\n", sizeof("SEG:AT Mode\r\n"));
+				uart_rs485_disable(SEG_DATA_UART);
+			}
+			else
+			{
+				uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:AT Mode\r\n", sizeof("SEG:AT Mode\r\n"));	
+			}
 		}
 	}
 	else // DEVICE_GW_MODE
@@ -1233,7 +1242,16 @@ void init_trigger_modeswitch(uint8_t mode)
 		if(serial->serial_debug_en)
 		{
 			printf(" > SEG:GW Mode\r\n");
-			uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:GW Mode\r\n", sizeof("SEG:GW Mode\r\n"));
+			if(serial->uart_interface == UART_IF_RS422_485)
+			{
+				uart_rs485_enable(SEG_DATA_UART); 	
+				uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:GW Mode\r\n", sizeof("SEG:GW Mode\r\n"));
+				uart_rs485_disable(SEG_DATA_UART);
+			}
+			else
+			{
+				uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:GW Mode\r\n", sizeof("SEG:GW Mode\r\n"));	
+			}
 		}
 		
 	}
@@ -1569,7 +1587,11 @@ uint16_t debugSerial_dataTransfer(uint8_t * buf, uint16_t size, teDEBUGTYPE type
     if((type == SEG_DEBUG_S2E) || (type == SEG_DEBUG_E2S))
     {
         printf("[%s][%04d] ", (type == SEG_DEBUG_S2E)?"S2E":"E2S", size);
-        for(bytecnt = 0; bytecnt < size; bytecnt++) printf("%02X ", buf[bytecnt]);
+		//1.4.1
+        for(bytecnt = 0; bytecnt < size; bytecnt++){
+			WDT_SetWDTLoad(0xFF0000); 
+			printf("%02X ", buf[bytecnt]);
+		}
         printf("\r\n");
     }
     

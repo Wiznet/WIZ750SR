@@ -56,6 +56,7 @@ extern uint8_t tmp_timeflag_for_debug;
 
 void do_segcp(void)
 {
+    struct __serial_info *serial = (struct __serial_info *)get_DevConfig_pointer()->serial_info;
     DevConfig *dev_config = get_DevConfig_pointer();
 
     uint8_t ret = 0;
@@ -192,7 +193,19 @@ void do_segcp(void)
         {
             if(opmode == DEVICE_AT_MODE) 
             {
-                if(dev_config->serial_info[0].serial_debug_en) uart_puts(SEG_DATA_UART, "REBOOT\r\n", 8);
+                //1.4.1
+                if(dev_config->serial_info[0].serial_debug_en){
+                    if(serial->uart_interface == UART_IF_RS422_485)
+                    {
+                        uart_rs485_enable(SEG_DATA_UART); 	
+                        uart_puts(SEG_DATA_UART, "REBOOT\r\n", 8);
+                        uart_rs485_disable(SEG_DATA_UART);
+                    }
+                    else
+                    {
+                        uart_puts(SEG_DATA_UART, "REBOOT\r\n", 8);
+                    }
+                }
             }
             
             device_reboot();
@@ -1360,6 +1373,8 @@ uint16_t proc_SEGCP_tcp(uint8_t* segcp_req, uint8_t* segcp_rep)
 
 uint16_t proc_SEGCP_uart(uint8_t * segcp_rep)
 {
+    //1.4.1
+    struct __serial_info *serial = (struct __serial_info *)get_DevConfig_pointer()->serial_info;
     DevConfig *dev_config = get_DevConfig_pointer();
     
     uint16_t len = 0;
@@ -1367,9 +1382,8 @@ uint16_t proc_SEGCP_uart(uint8_t * segcp_rep)
     uint8_t segcp_req[SEGCP_PARAM_MAX*2];
     
     if(BUFFER_USED_SIZE(data_rx))
-    {
+    { 
         len = uart_get_commandline(SEG_DATA_UART, segcp_req, (sizeof(segcp_req) - 1));
-        
         if(len != 0)
         {
             gSEGCPPRIVILEGE = SEGCP_PRIVILEGE_SET | SEGCP_PRIVILEGE_WRITE;
@@ -1380,9 +1394,18 @@ uint16_t proc_SEGCP_uart(uint8_t * segcp_rep)
                 {
                     printf("%s",segcp_rep);
                 }
-                
-                uart_puts(SEG_DATA_UART, segcp_rep, strlen(segcp_rep));
-                
+                //1.4.1
+                if(serial->uart_interface == UART_IF_RS422_485  )
+                {
+                    uart_rs485_enable(SEG_DATA_UART); 
+                    uart_puts(SEG_DATA_UART, segcp_rep, strlen(segcp_rep));
+                    uart_rs485_disable(SEG_DATA_UART);
+                }
+                else
+                {
+                    uart_puts(SEG_DATA_UART, segcp_rep, strlen(segcp_rep));
+                }
+               // BUFFER_CLEAR(data_rx);
             }
         }
     }
@@ -1391,6 +1414,8 @@ uint16_t proc_SEGCP_uart(uint8_t * segcp_rep)
 
 uint16_t uart_get_commandline(uint8_t uartNum, uint8_t* buf, uint16_t maxSize)
 {
+    //1.4.1
+    struct __serial_info *serial = (struct __serial_info *)get_DevConfig_pointer()->serial_info;
     DevConfig *dev_config = get_DevConfig_pointer();
     
     uint16_t i;
@@ -1410,7 +1435,17 @@ uint16_t uart_get_commandline(uint8_t uartNum, uint8_t* buf, uint16_t maxSize)
         if(dev_config->options.serial_command_echo == SEGCP_ENABLE)
         {
             //for(j = 0; j < i; j++) uart_putc(uartNum, buf[j]);
-            uart_puts(uartNum, buf, i);
+            //1.4.1
+            if(serial->uart_interface == UART_IF_RS422_485)
+            {
+                uart_rs485_enable(SEG_DATA_UART); 
+                uart_puts(uartNum, buf, i);
+                uart_rs485_disable(SEG_DATA_UART);
+            }
+            else
+            {
+                uart_puts(uartNum, buf, i);    
+            }
         }
     }
     else

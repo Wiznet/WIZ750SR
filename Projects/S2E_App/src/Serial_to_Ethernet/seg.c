@@ -1587,7 +1587,11 @@ uint16_t debugSerial_dataTransfer(uint8_t * buf, uint16_t size, teDEBUGTYPE type
     if((type == SEG_DEBUG_S2E) || (type == SEG_DEBUG_E2S))
     {
         printf("[%s][%04d] ", (type == SEG_DEBUG_S2E)?"S2E":"E2S", size);
-        for(bytecnt = 0; bytecnt < size; bytecnt++) printf("%02X ", buf[bytecnt]);
+		//1.4.1
+        for(bytecnt = 0; bytecnt < size; bytecnt++){
+			WDT_SetWDTLoad(0xFF0000); 
+			printf("%02X ", buf[bytecnt]);
+		}
         printf("\r\n");
     }
     

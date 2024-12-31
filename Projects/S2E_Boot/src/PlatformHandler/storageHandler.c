@@ -73,8 +73,8 @@ uint32_t write_storage(teDATASTORAGE stype, uint32_t addr, void *data, uint16_t 
 			ret_len = write_eeprom(convert_eeprom_addr(DEVICE_MAC_ADDR), data, 6); // external eeprom for configuration data
 			
 			// MAC address write both EEPROM and Internal DAT flash for device stability
-			erase_storage(STORAGE_MAC);
-			ret_len = write_flash(DEVICE_MAC_ADDR, data, 6); // internal data flash for configuration data (DAT0/1)
+			//erase_storage(STORAGE_MAC);
+			//ret_len = write_flash(DEVICE_MAC_ADDR, data, 6); // internal data flash for configuration data (DAT0/1)
 		
 	#ifdef _EEPROM_DEBUG_
 			dump_eeprom_block(convert_eeprom_addr(DEVICE_MAC_ADDR));

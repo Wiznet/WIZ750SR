@@ -3,6 +3,7 @@
 #include "W7500x_wztoe.h"
 #include "W7500x_gpio.h"
 #include "W7500x_board.h"
+#include "W7500x_wdt.h"
 #include "socket.h"
 #include "seg.h"
 #include "timerHandler.h"
@@ -403,7 +404,11 @@ void proc_SEG_tcp_client(uint8_t sock)
 			break;
 		
 		case SOCK_CLOSE_WAIT:
-			while(getSn_RX_RSR(sock) || e2u_size) ether_to_uart(sock); // receive remaining packets
+			while(getSn_RX_RSR(sock) || e2u_size) 
+			{
+				WDT_SetWDTLoad(0xFF0000);
+				ether_to_uart(sock); // receive remaining packets
+			}
 			disconnect(sock);
 			break;
 		
@@ -561,7 +566,11 @@ void proc_SEG_tcp_server(uint8_t sock)
 			break;
 		
 		case SOCK_CLOSE_WAIT:
-			while(getSn_RX_RSR(sock) || e2u_size) ether_to_uart(sock); // receive remaining packets
+			while(getSn_RX_RSR(sock) || e2u_size) 
+			{
+				WDT_SetWDTLoad(0xFF0000);
+				ether_to_uart(sock); // receive remaining packets
+			}
 			disconnect(sock);
 			break;
 		
@@ -781,7 +790,11 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 			break;
 		
 		case SOCK_CLOSE_WAIT:
-			while(getSn_RX_RSR(sock) || e2u_size) ether_to_uart(sock); // receive remaining packets
+			while(getSn_RX_RSR(sock) || e2u_size) 
+			{
+				WDT_SetWDTLoad(0xFF0000);
+				ether_to_uart(sock); // receive remaining packets
+			}
 			disconnect(sock);
 			break;
 		
@@ -1072,7 +1085,7 @@ void ether_to_uart(uint8_t sock)
 	{
 		if(serial->dsr_en == SEG_ENABLE) // DTR / DSR handshake (flowcontrol)
 		{
-			if(get_flowcontrol_dsr_pin() == 0) return;
+			if(get_flowcontrol_dsr_pin() == 1) return;
 		}
 //////////////////////////////////////////////////////////////////////
 		if(serial->uart_interface == UART_IF_RS422_485)
@@ -1208,7 +1221,16 @@ void init_trigger_modeswitch(uint8_t mode)
 		if(serial->serial_debug_en)
 		{
 			printf(" > SEG:AT Mode\r\n");
-			uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:AT Mode\r\n", sizeof("SEG:AT Mode\r\n"));
+			if(serial->uart_interface == UART_IF_RS422_485)
+			{
+				uart_rs485_enable(SEG_DATA_UART); 	
+				uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:AT Mode\r\n", sizeof("SEG:AT Mode\r\n"));
+				uart_rs485_disable(SEG_DATA_UART);
+			}
+			else
+			{
+				uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:AT Mode\r\n", sizeof("SEG:AT Mode\r\n"));	
+			}
 		}
 	}
 	else // DEVICE_GW_MODE
@@ -1220,7 +1242,16 @@ void init_trigger_modeswitch(uint8_t mode)
 		if(serial->serial_debug_en)
 		{
 			printf(" > SEG:GW Mode\r\n");
-			uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:GW Mode\r\n", sizeof("SEG:GW Mode\r\n"));
+			if(serial->uart_interface == UART_IF_RS422_485)
+			{
+				uart_rs485_enable(SEG_DATA_UART); 	
+				uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:GW Mode\r\n", sizeof("SEG:GW Mode\r\n"));
+				uart_rs485_disable(SEG_DATA_UART);
+			}
+			else
+			{
+				uart_puts(SEG_DATA_UART, (uint8_t *)"SEG:GW Mode\r\n", sizeof("SEG:GW Mode\r\n"));	
+			}
 		}
 		
 	}
@@ -1556,7 +1587,11 @@ uint16_t debugSerial_dataTransfer(uint8_t * buf, uint16_t size, teDEBUGTYPE type
     if((type == SEG_DEBUG_S2E) || (type == SEG_DEBUG_E2S))
     {
         printf("[%s][%04d] ", (type == SEG_DEBUG_S2E)?"S2E":"E2S", size);
-        for(bytecnt = 0; bytecnt < size; bytecnt++) printf("%02X ", buf[bytecnt]);
+		//1.4.1
+        for(bytecnt = 0; bytecnt < size; bytecnt++){
+			WDT_SetWDTLoad(0xFF0000); 
+			printf("%02X ", buf[bytecnt]);
+		}
         printf("\r\n");
     }
     

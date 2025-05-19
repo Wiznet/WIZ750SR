@@ -2,6 +2,7 @@
 #include "W7500x.h"
 #include "common.h"
 #include "flashHandler.h"
+#include "W7500x_board.h"
 
 #ifdef _FLASH_DEBUG_
 	#include <stdio.h>
@@ -124,6 +125,7 @@ void Copy_Interrupt_VectorTable(uint32_t start_addr, uint8_t * vectortable)
     __enable_irq(); 
 }
 
+static uint32_t temp_interrupt_flash; 
 
 /**
   * @brief  DO IAP Function
@@ -142,4 +144,38 @@ void DO_IAP( uint32_t id, uint32_t dst_addr, uint8_t* src_addr, uint32_t size)
 	// Restore Interrupt Set Pending Register
 	(NVIC->ISPR[0]) = temp_interrupt;
 }
+
+/* System Core Clock Update for improved stability */
+void flash_update_start(void)
+{
+    /* System Core Clock Update */
+    SystemCoreClockUpdate_User(CLOCK_SOURCE_INTERNAL, PLL_SOURCE_8MHz, SYSTEM_CLOCK_8MHz);
+    
+    /* SysTick_Config */
+    SysTick_Config((GetSystemClock()/1000));
+    
+    /* Simple UART re-init by MCU clock update */
+    UART2_Configuration();
+    
+    // Backup Interrupt Set Pending Register
+    temp_interrupt_flash = (NVIC->ISPR[0]);
+    (NVIC->ISPR[0]) = (uint32_t)0xFFFFFFFF;
+}
+
+/* System Core Clock Update - Restore */
+void flash_update_end(void)
+{
+    /* System Core Clock Update */
+    SystemCoreClockUpdate_User(DEVICE_CLOCK_SELECT, DEVICE_PLL_SOURCE_CLOCK, DEVICE_TARGET_SYSTEM_CLOCK);
+    
+    /* SysTick_Config */
+    SysTick_Config((GetSystemClock()/1000));
+    
+    /* Simple UART re-init by MCU clock update */
+    UART2_Configuration();
+    
+    // Restore Interrupt Set Pending Register
+    (NVIC->ISPR[0]) = temp_interrupt_flash;
+}
+
 

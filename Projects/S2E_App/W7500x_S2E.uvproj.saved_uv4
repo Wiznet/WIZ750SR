@@ -7,10 +7,10 @@
 
   <Targets>
     <Target>
-      <TargetName>W7500x_S2E_Boot</TargetName>
+      <TargetName>W7500x_S2E_App</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060750::V5.06 update 6 (build 750)::.\ARMCC</pCCUsed>
+      <pCCUsed>5060750::V5.06 update 6 (build 750)::ARMCC</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -47,7 +47,7 @@
             <InvalidFlash>1</InvalidFlash>
           </TargetStatus>
           <OutputDirectory>.\obj\</OutputDirectory>
-          <OutputName>W7500x_S2E_Boot</OutputName>
+          <OutputName>W7500x_S2E_App</OutputName>
           <CreateExecutable>1</CreateExecutable>
           <CreateLib>0</CreateLib>
           <CreateHexFile>1</CreateHexFile>
@@ -81,7 +81,7 @@
             <RunUserProg1>1</RunUserProg1>
             <RunUserProg2>1</RunUserProg2>
             <UserProg1Name>fromelf --bin -o "$L@L.bin" "#L"</UserProg1Name>
-            <UserProg2Name>w7500_s2e_boot_gen_production_hex2bin.bat</UserProg2Name>
+            <UserProg2Name>w7500_s2e_app_gen_production_hex2bin.bat</UserProg2Name>
             <UserProg1Dos16Mode>0</UserProg1Dos16Mode>
             <UserProg2Dos16Mode>0</UserProg2Dos16Mode>
             <nStopA1X>0</nStopA1X>
@@ -245,7 +245,7 @@
             <Ro2Chk>0</Ro2Chk>
             <Ro3Chk>0</Ro3Chk>
             <Ir1Chk>1</Ir1Chk>
-            <Ir2Chk>1</Ir2Chk>
+            <Ir2Chk>0</Ir2Chk>
             <Ra1Chk>0</Ra1Chk>
             <Ra2Chk>0</Ra2Chk>
             <Ra3Chk>0</Ra3Chk>
@@ -314,13 +314,13 @@
               </OCR_RVCT3>
               <OCR_RVCT4>
                 <Type>1</Type>
-                <StartAddress>0x0</StartAddress>
-                <Size>0x7000</Size>
+                <StartAddress>0x7000</StartAddress>
+                <Size>0x20000</Size>
               </OCR_RVCT4>
               <OCR_RVCT5>
                 <Type>1</Type>
-                <StartAddress>0x7d00</StartAddress>
-                <Size>0xff</Size>
+                <StartAddress>0x0</StartAddress>
+                <Size>0x0</Size>
               </OCR_RVCT5>
               <OCR_RVCT6>
                 <Type>0</Type>
@@ -378,7 +378,7 @@
               <MiscControls>--feedback=unused.txt</MiscControls>
               <Define>CORTEX_M0 USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\Libraries\CMSIS\Device\WIZnet\W7500\Include;..\..\Libraries\W7500x_stdPeriph_Driver\inc;..\..\Libraries\CMSIS\Include;..\..\Libraries\CMSIS\Device\WIZnet\W7500\Source\ARM;..\S2E_App\src;..\S2E_App\src\Configuration;.\src;..\..\ioLibrary\Ethernet;..\..\ioLibrary\Internet\DHCP;..\..\ioLibrary\Internet\DNS;..\..\ioLibrary\MDIO;..\..\ioLibrary\Application\loopback;.\src\Configuration;.\src\PlatformHandler;.\src\Serial_to_Ethernet;.\src\Callback</IncludePath>
+              <IncludePath>..\..\Libraries\CMSIS\Device\WIZnet\W7500\Include;..\..\Libraries\W7500x_stdPeriph_Driver\inc;..\..\Libraries\CMSIS\Include;..\..\Libraries\CMSIS\Device\WIZnet\W7500\Source\ARM;.\src;..\..\ioLibrary\Ethernet;..\..\ioLibrary\Internet\DHCP;..\..\ioLibrary\Internet\DNS;..\..\ioLibrary\MDIO;..\..\ioLibrary\Application\loopback;.\src\Configuration;.\src\PlatformHandler;.\src\Serial_to_Ethernet;.\src\Callback</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -409,7 +409,7 @@
             <TextAddressRange>0x00000000</TextAddressRange>
             <DataAddressRange>0x00000000</DataAddressRange>
             <pXoBase></pXoBase>
-            <ScatterFile></ScatterFile>
+            <ScatterFile>.\obj\W7500x_S2E_App.sct</ScatterFile>
             <IncludeLibs></IncludeLibs>
             <IncludeLibsPath></IncludeLibsPath>
             <Misc>--feedback=unused.txt
@@ -444,9 +444,19 @@
           <GroupName>W7500_Periphs</GroupName>
           <Files>
             <File>
+              <FileName>W7500x_adc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\W7500x_stdPeriph_Driver\src\W7500x_adc.c</FilePath>
+            </File>
+            <File>
               <FileName>W7500x_dualtimer.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Libraries\W7500x_stdPeriph_Driver\src\W7500x_dualtimer.c</FilePath>
+            </File>
+            <File>
+              <FileName>W7500x_exti.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\W7500x_stdPeriph_Driver\src\W7500x_exti.c</FilePath>
             </File>
             <File>
               <FileName>W7500x_gpio.c</FileName>
@@ -454,9 +464,24 @@
               <FilePath>..\..\Libraries\W7500x_stdPeriph_Driver\src\W7500x_gpio.c</FilePath>
             </File>
             <File>
+              <FileName>W7500x_pwm.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\W7500x_stdPeriph_Driver\src\W7500x_pwm.c</FilePath>
+            </File>
+            <File>
+              <FileName>W7500x_ssp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\W7500x_stdPeriph_Driver\src\W7500x_ssp.c</FilePath>
+            </File>
+            <File>
               <FileName>W7500x_uart.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\..\Libraries\W7500x_stdPeriph_Driver\src\W7500x_uart.c</FilePath>
+            </File>
+            <File>
+              <FileName>W7500x_wdt.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\W7500x_stdPeriph_Driver\src\W7500x_wdt.c</FilePath>
             </File>
             <File>
               <FileName>W7500x_wztoe.c</FileName>
@@ -469,9 +494,14 @@
               <FilePath>..\..\Libraries\W7500x_stdPeriph_Driver\src\W7500x_crg.c</FilePath>
             </File>
             <File>
-              <FileName>W7500x_wdt.c</FileName>
+              <FileName>W7500x_rng.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\..\Libraries\W7500x_stdPeriph_Driver\src\W7500x_wdt.c</FilePath>
+              <FilePath>..\..\Libraries\W7500x_stdPeriph_Driver\src\W7500x_rng.c</FilePath>
+            </File>
+            <File>
+              <FileName>W7500x_dma.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\Libraries\W7500x_stdPeriph_Driver\src\W7500x_dma.c</FilePath>
             </File>
           </Files>
         </Group>
@@ -498,6 +528,16 @@
               <FileType>1</FileType>
               <FilePath>..\..\ioLibrary\Internet\DHCP\dhcp.c</FilePath>
             </File>
+            <File>
+              <FileName>dns.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\ioLibrary\Internet\DNS\dns.c</FilePath>
+            </File>
+            <File>
+              <FileName>loopback.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\ioLibrary\Application\loopback\loopback.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
@@ -511,7 +551,7 @@
           </Files>
         </Group>
         <Group>
-          <GroupName>Boot_Main</GroupName>
+          <GroupName>User_Main</GroupName>
           <Files>
             <File>
               <FileName>W7500x_it.c</FileName>
@@ -528,11 +568,31 @@
               <FileType>1</FileType>
               <FilePath>.\src\main.c</FilePath>
             </File>
+            <File>
+              <FileName>W7500x_board.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\W7500x_board.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>Serial_to_Ethernet</GroupName>
+          <Files>
+            <File>
+              <FileName>seg.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\Serial_to_Ethernet\seg.c</FilePath>
+            </File>
           </Files>
         </Group>
         <Group>
           <GroupName>Configuration</GroupName>
           <Files>
+            <File>
+              <FileName>ConfigData.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\Configuration\ConfigData.c</FilePath>
+            </File>
             <File>
               <FileName>segcp.c</FileName>
               <FileType>1</FileType>
@@ -574,9 +634,9 @@
               <FilePath>.\src\PlatformHandler\deviceHandler.c</FilePath>
             </File>
             <File>
-              <FileName>i2cHandler.c</FileName>
+              <FileName>gpioHandler.c</FileName>
               <FileType>1</FileType>
-              <FilePath>.\src\PlatformHandler\i2cHandler.c</FilePath>
+              <FilePath>.\src\PlatformHandler\gpioHandler.c</FilePath>
             </File>
             <File>
               <FileName>eepromHandler.c</FileName>
@@ -584,24 +644,14 @@
               <FilePath>.\src\PlatformHandler\eepromHandler.c</FilePath>
             </File>
             <File>
+              <FileName>i2cHandler.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>.\src\PlatformHandler\i2cHandler.c</FilePath>
+            </File>
+            <File>
               <FileName>isr_vector.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\PlatformHandler\isr_vector.c</FilePath>
-            </File>
-          </Files>
-        </Group>
-        <Group>
-          <GroupName>Shared_code_with_App</GroupName>
-          <Files>
-            <File>
-              <FileName>W7500x_board.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\S2E_App\src\W7500x_board.c</FilePath>
-            </File>
-            <File>
-              <FileName>ConfigData.c</FileName>
-              <FileType>1</FileType>
-              <FilePath>..\S2E_App\src\Configuration\ConfigData.c</FilePath>
             </File>
           </Files>
         </Group>

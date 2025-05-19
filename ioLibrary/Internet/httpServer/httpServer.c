@@ -21,7 +21,7 @@
 #include "httpServer.h"
 #include "httpParser.h"
 #include "httpUtil.h"
-
+#include "deviceHandler.h"
 
 #ifdef	_USE_SDCARD_
 #include "ff.h" 	// header file for FatFs library (FAT file system)
@@ -245,7 +245,7 @@ void httpServer_run(uint8_t seqnum)
 #ifdef _HTTPSERVER_DEBUG_
 			printf("> HTTPSocket[%d] : CLOSED\r\n", s);
 #endif
-			if(socket(s, Sn_MR_TCP, HTTP_SERVER_PORT, 0x00) == s)    /* Reinitialize the socket */
+			if(socket(s, Sn_MR_TCP, DEVICE_HTTP_PORT, 0x00) == s)    /* Reinitialize the socket */
 			{
 #ifdef _HTTPSERVER_DEBUG_
 				printf("> HTTPSocket[%d] : OPEN\r\n", s);
@@ -479,7 +479,7 @@ static void send_http_response_cgi(uint8_t s, uint8_t * buf, uint8_t * http_body
 #ifdef _HTTPSERVER_DEBUG_
 	printf("> HTTPSocket[%d] : HTTP Response Header + Body - CGI\r\n", s);
 #endif
-	send_len = sprintf((char *)buf, "%s%d\r\n\r\n%s", RES_CGIHEAD_OK, file_len, http_body);
+  send_len = sprintf((char *)buf, "%s%d\r\n\r\n%s", RES_CGIHEAD_OK, file_len, http_body);
 #ifdef _HTTPSERVER_DEBUG_
 	printf("> HTTPSocket[%d] : HTTP Response Header + Body - send len [ %d ]byte\r\n", s, send_len);
 #endif
@@ -646,7 +646,7 @@ static void http_process_handler(uint8_t s, st_http_request * p_http_request)
 					send_http_response_cgi(s, pHTTP_TX, http_response, (uint16_t)file_len);
 
 					// Reset the H/W for apply to the change configuration information
-					if(content_found == HTTP_RESET) HTTPServer_ReStart();
+					if(content_found == HTTP_RESET) {delay(10); HTTPServer_ReStart();}
 				}
 				else
 				{

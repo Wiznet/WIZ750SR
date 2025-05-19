@@ -8,8 +8,8 @@
 //////////////////////////////////
 /* Application Firmware Version */
 #define MAJOR_VER               1
-#define MINOR_VER               3
-#define MAINTENANCE_VER         3
+#define MINOR_VER               4
+#define MAINTENANCE_VER         2
 
 //#define STR_VERSION_STATUS      //"Final"//"Develop" // or "Stable"
 #define STR_VERSION_STATUS      "Stable"
@@ -31,6 +31,13 @@
 #define SOCK_DHCP               3
 #define SOCK_DNS                4
 #define SOCK_FWUPDATE           4
+
+#define MAX_HTTPSOCK	3
+#define SOCK_HTTPSERVER_1       5
+#define SOCK_HTTPSERVER_2       6
+#define SOCK_HTTPSERVER_3       7
+
+
 
 //////////////////////////////////
 // In/External Clock Setting    //

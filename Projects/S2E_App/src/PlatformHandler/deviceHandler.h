@@ -11,6 +11,7 @@
 /* Application Port */
 #define DEVICE_SEGCP_PORT			50001	// Search / Setting Port (UDP Broadcast / TCP unicast)
 #define DEVICE_FWUP_PORT			50002	// Firmware Update Port
+#define DEVICE_HTTP_PORT			50003
 #define DEVICE_DDNS_PORT			3030	// Not 	used
 
 // HTTP Response: Status code

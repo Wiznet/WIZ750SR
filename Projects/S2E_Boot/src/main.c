@@ -47,6 +47,8 @@
 #include "W7500x_crg.h"
 #include "W7500x_wztoe.h"
 #include "W7500x_miim.h"
+#include "W7500x_wdt.h"
+
 
 #include "common.h"
 #include "W7500x_board.h"
@@ -62,6 +64,7 @@
 #include "deviceHandler.h"
 #include "eepromHandler.h"
 
+
 #include "segcp.h"
 #include "configData.h"
 
@@ -69,11 +72,25 @@
 /* Private typedef -----------------------------------------------------------*/
 typedef void (*pFunction)(void);
 
+typedef struct
+{
+  __IO   uint32_t  REMAP;          /*!< Offset: 0x000 Remap Control Register (R/W) */
+  __IO   uint32_t  PMUCTRL;        /*!< Offset: 0x004 PMU Control Register (R/W) */
+  __IO   uint32_t  RESETOP;        /*!< Offset: 0x008 Reset Option Register  (R/W) */
+  __IO   uint32_t  EMICTRL;        /*!< Offset: 0x00C EMI Control Register  (R/W) */
+  __IO   uint32_t  RSTINFO;        /*!< Offset: 0x010 Reset Information Register (R/W) */
+} W7500x_SYSCON_TypeDef;
+
 /* Private define ------------------------------------------------------------*/
 //#define _MAIN_DEBUG_	// debugging message enable
 
 // Define for MAC address settings
 #define MACSTR_SIZE		22
+
+#define W7500x_SYSCON            ((W7500x_SYSCON_TypeDef *) W7500x_SYSCTRL_BASE)
+#define W7500x_SYSCTRL_BASE      (0x4001F000)
+#define SYSRESETREQ_Msk 0x1
+#define WDTRESETREQ_Msk 0x2
 
 /* Private function prototypes -----------------------------------------------*/
 void application_jump(uint32_t AppAddress);
@@ -98,6 +115,7 @@ void delay(__IO uint32_t milliseconds); //Notice: used ioLibray
 
 /* Private variables ---------------------------------------------------------*/
 static __IO uint32_t TimingDelay;
+static WDT_InitTypeDef WDT_InitStructure;
 
 /* Public variables ---------------------------------------------------------*/
 // Shared buffer declaration
@@ -118,6 +136,7 @@ int main(void)
 	DevConfig *dev_config = get_DevConfig_pointer();
 	uint8_t appjump_enable = OFF;
 	uint8_t ret = 0;
+	int rst_info = 0;
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// W7500x Hardware Initialize
@@ -125,12 +144,18 @@ int main(void)
 	
 	/* W7500x MCU Initialization */
 	W7500x_Init(); // includes UART2 init code for debugging
-
+	
 	/* W7500x WZTOE (Hardwired TCP/IP stack) Initialization */
 	W7500x_WZTOE_Init();
 	
 	/* W7500x Board Initialization */
 	W7500x_Board_Init();
+	
+	rst_info = W7500x_SYSCON->RSTINFO;
+	if((rst_info & WDTRESETREQ_Msk) != 0) //Reset request is caused by WDT
+	{
+			WDT_IntClear();
+	}
 	
 	////////////////////////////////////////////////////////////////////////////////////////////////////
 	// W7500x Application: Initialize part1
@@ -268,9 +293,10 @@ int main(void)
 	
 	flag_s2e_application_running = ON;
 	LED_On(LED1);
-	
+
 	while(1) // main loop
 	{
+		
 		do_segcp();
 		
 #ifdef __USE_APPBOOT_DHCP__

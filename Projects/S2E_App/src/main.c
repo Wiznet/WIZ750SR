@@ -49,6 +49,7 @@
 #include "W7500x_crg.h"
 #include "W7500x_wztoe.h"
 #include "W7500x_miim.h"
+#include "W7500x_wdt.h"
 
 #include "dhcp.h"
 #include "dhcp_cb.h"
@@ -64,14 +65,27 @@
 #include "flashHandler.h"
 #include "gpioHandler.h"
 
+#include "index.h"
 // ## for debugging
 //#include "loopback.h"
 
 
 /* Private typedef -----------------------------------------------------------*/
-
+typedef struct
+{
+  __IO   uint32_t  REMAP;          /*!< Offset: 0x000 Remap Control Register (R/W) */
+  __IO   uint32_t  PMUCTRL;        /*!< Offset: 0x004 PMU Control Register (R/W) */
+  __IO   uint32_t  RESETOP;        /*!< Offset: 0x008 Reset Option Register  (R/W) */
+  __IO   uint32_t  EMICTRL;        /*!< Offset: 0x00C EMI Control Register  (R/W) */
+  __IO   uint32_t  RSTINFO;        /*!< Offset: 0x010 Reset Information Register (R/W) */
+} W7500x_SYSCON_TypeDef;
 /* Private define ------------------------------------------------------------*/
 //#define _MAIN_DEBUG_	// debugging message enable
+
+#define W7500x_SYSCON            ((W7500x_SYSCON_TypeDef *) W7500x_SYSCTRL_BASE)
+#define W7500x_SYSCTRL_BASE      (0x4001F000)
+#define SYSRESETREQ_Msk 0x1
+#define WDTRESETREQ_Msk 0x2
 
 /* Private function prototypes -----------------------------------------------*/
 static void W7500x_Init(void);
@@ -90,7 +104,9 @@ void display_Dev_Info_dns(void);
 void delay(__IO uint32_t milliseconds); //Notice: used ioLibray
 void TimingDelay_Decrement(void);
 
+uint8_t socknumlist[] = {SOCK_HTTPSERVER_1, SOCK_HTTPSERVER_2, SOCK_HTTPSERVER_3};
 /* Private variables ---------------------------------------------------------*/
+static WDT_InitTypeDef WDT_InitStructure;
 static __IO uint32_t TimingDelay;
 extern uint8_t sw_modeswitch_at_mode_on;
 extern uint8_t enable_modeswitch_timer;
@@ -107,6 +123,8 @@ uint8_t prev_triggercode_idx = 0;
 uint8_t g_send_buf[DATA_BUF_SIZE];
 uint8_t g_recv_buf[DATA_BUF_SIZE];
 
+extern uint8_t gSEGCPREQ[CONFIG_BUF_SIZE];
+extern uint8_t gSEGCPREP[CONFIG_BUF_SIZE];
 /**
   * @brief  Main program
   * @param  None
@@ -116,20 +134,35 @@ int main(void)
 {
     DevConfig *dev_config = get_DevConfig_pointer();
     wiz_NetInfo gWIZNETINFO;
-    
+		int rst_info = 0;
+		uint32_t cnt = 0;
+		uint32_t stat_;
+	  int i;
+	
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // W7500x Hardware Initialize
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     
     /* W7500x MCU Initialization */
     W7500x_Init(); // includes UART2 initialize code for print out debugging messages
-    
+	
     /* W7500x WZTOE (Hardwired TCP/IP stack) Initialization */
     W7500x_WZTOE_Init();
     
     /* W7500x Board Initialization */
     W7500x_Board_Init();
-     
+		
+		rst_info = W7500x_SYSCON->RSTINFO;
+	
+		if((rst_info & WDTRESETREQ_Msk) != 0) //Reset request is caused by WDT
+    {
+        WDT_IntClear();
+		}
+		
+		WDT_InitStructure.WDTLoad = 0xFF0000;
+		WDT_InitStructure.WDTControl_RstEn = WDTControl_RstEnable;
+		WDT_Init(&WDT_InitStructure);
+
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // W7500x Application: Initialize
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -165,6 +198,7 @@ int main(void)
     // Initialize Network Information: DHCP or Static IP allocation
     if(dev_config->options.dhcp_use)
     {
+
         if(process_dhcp() == DHCP_IP_LEASED) // DHCP success
         {
             flag_process_dhcp_success = ON;
@@ -228,11 +262,23 @@ int main(void)
     
     /* GPIO Initialization*/
     IO_Configuration();
+		
+		WDT_Start();
+
+
+    if (dev_config->options.pw_search[0] == 0) {  //search ID Disabled
+      httpServer_init(gSEGCPREQ, gSEGCPREP, MAX_HTTPSOCK, socknumlist);
+      reg_httpServer_cbfunc(NVIC_SystemReset, NULL);
+      reg_httpServer_webContent("index.html", _acindex);
+    }
+    
 
     while(1) // main loop
     {
+				WDT_SetWDTLoad(0xFF0000);
+			
         do_segcp();
-        
+				
         Dev_Mode_Check(SOCK_DATA); // while DHCP operate, Device mode change(AT mode <-> GW mode) as possibility. This took it out in do_seg funcion.
         if(flag_process_ip_success)
             do_seg(SOCK_DATA);
@@ -252,6 +298,9 @@ int main(void)
 #endif        
         if(dev_config->options.dhcp_use) DHCP_run(); // DHCP client handler for IP renewal
         
+        if (dev_config->options.pw_search[0] == 0) { //search ID Disabled
+          for(i = 0; i < MAX_HTTPSOCK; i++)	httpServer_run(i);
+        }
         // ## debugging: Data echoback
         //loopback_tcps(6, g_recv_buf, 5001); // Loopback
         //loopback_iperf(6, g_recv_buf, 5001); // iperf: Ethernet performance test

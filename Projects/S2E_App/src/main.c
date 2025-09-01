@@ -146,12 +146,12 @@ int main(void)
     /* W7500x MCU Initialization */
     W7500x_Init(); // includes UART2 initialize code for print out debugging messages
 	
-    /* W7500x WZTOE (Hardwired TCP/IP stack) Initialization */
+		/* W7500x WZTOE (Hardwired TCP/IP stack) Initialization */
     W7500x_WZTOE_Init();
-    
-    /* W7500x Board Initialization */
-    W7500x_Board_Init();
 		
+		/* W7500x Board Initialization */
+    W7500x_Board_Init();
+
 		rst_info = W7500x_SYSCON->RSTINFO;
 	
 		if((rst_info & WDTRESETREQ_Msk) != 0) //Reset request is caused by WDT
@@ -538,7 +538,7 @@ void display_Dev_Info_header(void)
     printf("\r\n");
     printf("%s\r\n", STR_BAR);
     
-#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750SR_1xx))
+#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750SR_1xx) || (DEVICE_BOARD_NAME == WIZSPE_T1L))
     printf(" %s \r\n", DEVICE_ID_DEFAULT);
     printf(" >> WIZnet Serial to Ethernet Device\r\n");
 #else
@@ -615,7 +615,7 @@ void display_Dev_Info_main(void)
         printf("\t- %s\r\n", (dev_config->options.serial_command == 1)?STR_ENABLED:STR_DISABLED);
         printf("\t- [%.2X][%.2X][%.2X] (Hex only)\r\n", dev_config->options.serial_trigger[0], dev_config->options.serial_trigger[1], dev_config->options.serial_trigger[2]);
     
-#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750SR_1xx))
+#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750SR_1xx) || (DEVICE_BOARD_NAME == WIZSPE_T1L))
     printf(" - Hardware information: Status pins\r\n");
         printf("\t- Status 1: [%s] - %s\r\n", "PA_10", dev_config->serial_info[0].dtr_en?"DTR":"PHY link");
         printf("\t- Status 2: [%s] - %s\r\n", "PA_01", dev_config->serial_info[0].dsr_en?"DSR":"TCP connection"); // shared pin; HW_TRIG (input) / TCP connection indicator (output)
@@ -691,6 +691,15 @@ void delay(__IO uint32_t milliseconds)
     while(TimingDelay != 0);
 }
 
+void mdio_delay(__IO uint32_t count) 
+{ 
+	volatile uint32_t i; 
+	
+	for (i = 0; i < count * 1600; i++) 
+	{ 
+		__asm volatile ("nop"); 
+	} 
+}
 
 /**
   * @brief  Decrements the TimingDelay variable.

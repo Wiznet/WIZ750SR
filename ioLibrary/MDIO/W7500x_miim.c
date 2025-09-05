@@ -35,7 +35,7 @@ extern void delay(__IO uint32_t nCount);
 static uint16_t MDIO = GPIO_Pin_15;
 static uint16_t MDC  = GPIO_Pin_14;
 
-uint32_t PHY_ADDR_IP101G; //(phy_id())
+//uint32_t PHY_ADDR_IP101G; //(phy_id())
 uint32_t PHY_ADDR;// PHY_ADDR_IP101G
 
 uint32_t link(void)

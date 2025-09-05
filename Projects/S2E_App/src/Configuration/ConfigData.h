@@ -22,6 +22,10 @@
 #define MAX_SAVE_RETRY              5
 #define SAVE_INTERVAL_MS            1000
 
+enum{
+    SEG_SERIAL_PROTOCOL_NONE = 0,
+    SEG_SERIAL_MODBUS_RTU    = 1
+};
 
 
 struct __network_info_common {
@@ -54,6 +58,7 @@ struct __network_info {
 
 struct __serial_info {
 	uint8_t uart_interface;		// UART interface; [0] RS-232/TTL, [1] RS-422/485, This value is determined at the initial routine of device.
+	uint8_t protocol;           // Serial communication protocol; [0] None, [1] Modbus RTU
 	uint8_t baud_rate;			// WIZ107SR: 0 ~ (enum) / WIZ550S2E: baud rate values //uint32_t baud_rate;			// WIZ107SR: 0 ~ (enum) / WIZ550S2E: baud rate values
 	uint8_t data_bits;			// 7, 8, 9
 	uint8_t parity;				// None, Odd, Even

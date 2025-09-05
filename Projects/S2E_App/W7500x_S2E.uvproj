@@ -379,7 +379,7 @@
               <MiscControls>--feedback=unused.txt</MiscControls>
               <Define>CORTEX_M0 USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\Libraries\CMSIS\Device\WIZnet\W7500\Include;..\..\Libraries\W7500x_stdPeriph_Driver\inc;..\..\Libraries\CMSIS\Include;..\..\Libraries\CMSIS\Device\WIZnet\W7500\Source\ARM;.\src;..\..\ioLibrary\Ethernet;..\..\ioLibrary\Internet\DHCP;..\..\ioLibrary\Internet\DNS;..\..\ioLibrary\Internet\httpServer;..\..\ioLibrary\MDIO;..\..\ioLibrary\Application\loopback;.\src\Configuration;.\src\PlatformHandler;.\src\Serial_to_Ethernet;.\src\Callback</IncludePath>
+              <IncludePath>..\..\Libraries\CMSIS\Device\WIZnet\W7500\Include;..\..\Libraries\W7500x_stdPeriph_Driver\inc;..\..\Libraries\CMSIS\Include;..\..\Libraries\CMSIS\Device\WIZnet\W7500\Source\ARM;.\src;..\..\ioLibrary\Ethernet;..\..\ioLibrary\Internet\DHCP;..\..\ioLibrary\Internet\DNS;..\..\ioLibrary\Internet\httpServer;..\..\ioLibrary\MDIO;..\..\ioLibrary\Application\loopback;.\src\Configuration;.\src\PlatformHandler;.\src\Serial_to_Ethernet;.\src\Callback;..\..\modbus\inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -673,6 +673,41 @@
               <FileName>httpHandler.c</FileName>
               <FileType>1</FileType>
               <FilePath>.\src\PlatformHandler\httpHandler.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
+          <GroupName>modbus</GroupName>
+          <Files>
+            <File>
+              <FileName>mbtimer.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\modbus\src\mbtimer.c</FilePath>
+            </File>
+            <File>
+              <FileName>mbtcp.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\modbus\src\mbtcp.c</FilePath>
+            </File>
+            <File>
+              <FileName>mbserial.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\modbus\src\mbserial.c</FilePath>
+            </File>
+            <File>
+              <FileName>mbrtu.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\modbus\src\mbrtu.c</FilePath>
+            </File>
+            <File>
+              <FileName>mbcrc.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\modbus\src\mbcrc.c</FilePath>
+            </File>
+            <File>
+              <FileName>mb.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\..\modbus\src\mb.c</FilePath>
             </File>
           </Files>
         </Group>

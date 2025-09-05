@@ -10,6 +10,8 @@
 #include "dhcp.h"
 #include "dns.h"
 
+#include "mbtimer.h"
+
 static volatile uint16_t msec_cnt = 0;
 static volatile uint8_t  sec_cnt = 0;
 static volatile uint8_t  min_cnt = 0;
@@ -112,6 +114,7 @@ void Timer_IRQ_Handler(void)
 	if(DUALTIMER_GetIntStatus(DUALTIMER0_1))
 	{
 		DUALTIMER_IntClear(DUALTIMER0_1);
+		xMBRTUTimerT35Expired(); 
 	}
 }
 

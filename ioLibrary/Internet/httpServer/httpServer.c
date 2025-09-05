@@ -34,7 +34,7 @@
 /*****************************************************************************
  * Private types/enumerations/variables
  ****************************************************************************/
-static uint8_t HTTPSock_Num[_WIZCHIP_SOCK_NUM_] = {0, };
+static uint8_t HTTPSock_Num[MAX_HTTPSOCK] = {0, };
 static st_http_request * http_request;				/**< Pointer to received HTTP request */
 static st_http_request * parsed_http_request;		/**< Pointer to parsed HTTP request */
 static uint8_t * http_response;						/**< Pointer to HTTP response */
@@ -51,7 +51,7 @@ uint8_t * pHTTP_TX;
 uint8_t * pHTTP_RX;
 
 volatile uint32_t httpServer_tick_1s = 0;
-st_http_socket HTTPSock_Status[_WIZCHIP_SOCK_NUM_] = { {STATE_HTTP_IDLE, }, };
+st_http_socket HTTPSock_Status[MAX_HTTPSOCK] = { {STATE_HTTP_IDLE, }, };
 httpServer_webContent web_content[MAX_CONTENT_CALLBACK];
 
 #ifdef	_USE_SDCARD_
@@ -717,7 +717,7 @@ void reg_httpServer_webContent(uint8_t * content_name, uint8_t * content)
 
 	total_content_cnt++;
 }
-
+/*
 uint8_t display_reg_webContent_list(void)
 {
 	uint16_t i;
@@ -746,7 +746,7 @@ uint8_t display_reg_webContent_list(void)
 
 	return ret;
 }
-
+*/
 uint8_t find_userReg_webContent(uint8_t * content_name, uint16_t * content_num, uint32_t * file_len)
 {
 	uint16_t i;

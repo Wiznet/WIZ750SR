@@ -109,6 +109,9 @@ typedef enum
 #define RET_NOK                 -1
 #define RET_TIMEOUT             -2
 
+#define TRUE										1
+#define FALSE										0
+
 #define STR_UART                "UART"
 #define STR_ENABLED             "Enabled"
 #define STR_DISABLED            "Disabled"

@@ -363,7 +363,7 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                         break;
                     case SEGCP_DD: sprintf(trep,"%d", 0); // Not used
                         break;
-                    case SEGCP_PO: sprintf(trep,"%d", 0); // Not used
+                    case SEGCP_PO: sprintf(trep, "%d", dev_config->serial_info[0].protocol);
                         break;
                     case SEGCP_CP: sprintf(trep,"%d", dev_config->options.pw_connect_en);
                         break;
@@ -670,10 +670,17 @@ uint16_t proc_SEGCP(uint8_t* segcp_req, uint8_t* segcp_rep)
                         if(param_len != 1 || tmp_byte > SEGCP_ENABLE) ret |= SEGCP_RET_ERR_INVALIDPARAM;
                         break;               
                     case SEGCP_PO: // ## Does nothing
+												tmp_int = atoi(param);
+												if (param_len > 2 || tmp_int > SEG_SERIAL_MODBUS_RTU) {
+														ret |= SEGCP_RET_ERR_INVALIDPARAM;
+												} else {
+														dev_config->serial_info[0].protocol = tmp_int;
+												}							
+	
                         //if(param_len != 1 || tmp_byte > SEGCP_TELNET) ret |= SEGCP_RET_ERR_INVALIDPARAM;
                         //else tsvDEVCONFnew.telnet_en[0] = tmp_byte;
-                        tmp_byte = is_hex(*param);
-                        if(param_len != 1 || tmp_byte > SEGCP_TELNET) ret |= SEGCP_RET_ERR_INVALIDPARAM;
+                        //tmp_byte = is_hex(*param);
+                        //if(param_len != 1 || tmp_byte > SEGCP_TELNET) ret |= SEGCP_RET_ERR_INVALIDPARAM;
                         break;
                     case SEGCP_CP:
                         tmp_byte = is_hex(*param);

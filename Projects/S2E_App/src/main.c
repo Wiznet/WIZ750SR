@@ -66,6 +66,8 @@
 #include "gpioHandler.h"
 
 #include "index.h"
+#include "mb.h"
+#include "mbrtu.h"
 // ## for debugging
 //#include "loopback.h"
 
@@ -104,7 +106,7 @@ void display_Dev_Info_dns(void);
 void delay(__IO uint32_t milliseconds); //Notice: used ioLibray
 void TimingDelay_Decrement(void);
 
-uint8_t socknumlist[] = {SOCK_HTTPSERVER_1, SOCK_HTTPSERVER_2, SOCK_HTTPSERVER_3};
+const uint8_t socknumlist[] = {SOCK_HTTPSERVER_1, SOCK_HTTPSERVER_2, SOCK_HTTPSERVER_3};
 /* Private variables ---------------------------------------------------------*/
 static WDT_InitTypeDef WDT_InitStructure;
 static __IO uint32_t TimingDelay;
@@ -166,7 +168,7 @@ int main(void)
     ////////////////////////////////////////////////////////////////////////////////////////////////////
     // W7500x Application: Initialize
     ////////////////////////////////////////////////////////////////////////////////////////////////////
-    
+
     /* Load the Configuration data */
     load_DevConfig_from_storage();
     dev_config->network_info[0].state = ST_OPEN;
@@ -271,8 +273,14 @@ int main(void)
       reg_httpServer_cbfunc(NVIC_SystemReset, NULL);
       reg_httpServer_webContent("index.html", _acindex);
     }
+		
+		if(dev_config->serial_info[0].protocol == SEG_SERIAL_MODBUS_RTU)
+		{
+			printf(" > Modbus Mode\r\n");
+			eMBRTUInit(dev_config->serial_info[0].baud_rate);
+		}
+		
     
-
     while(1) // main loop
     {
 				WDT_SetWDTLoad(0xFF0000);

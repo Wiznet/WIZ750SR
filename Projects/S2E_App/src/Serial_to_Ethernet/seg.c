@@ -9,6 +9,9 @@
 #include "timerHandler.h"
 #include "uartHandler.h"
 #include "gpioHandler.h"
+#include "mb.h"
+#include "mbrtu.h"
+#include "mbtimer.h"
 
 /* Private define ------------------------------------------------------------*/
 // Ring Buffer
@@ -246,8 +249,26 @@ void proc_SEG_udp(uint8_t sock)
 	switch(state)
 	{
 		case SOCK_UDP:
-			if(BUFFER_USED_SIZE(data_rx) || u2e_size)	uart_to_ether(sock);
-			if(getSn_RX_RSR(sock) 	|| e2u_size)		ether_to_uart(sock);
+			switch(serial->protocol)
+			{
+				case SEG_SERIAL_PROTOCOL_NONE :
+					if(BUFFER_USED_SIZE(data_rx) || u2e_size)	uart_to_ether(sock);
+					if(getSn_RX_RSR(sock) 	|| e2u_size)		ether_to_uart(sock);
+					break;
+				
+				case SEG_SERIAL_MODBUS_RTU :
+					RTU_Uart_RX();
+					if(mb_state_rtu_finish == TRUE) {
+							mb_state_rtu_finish = FALSE;
+							mbRTUtoTCP(sock);
+					}
+					
+					if(getSn_RX_RSR(sock) 	|| e2u_size)
+					{
+						mbTCPtoRTU(sock);
+					}
+					break;
+			}
 			break;
 			
 		case SOCK_CLOSED:
@@ -359,8 +380,26 @@ void proc_SEG_tcp_client(uint8_t sock)
 			}
 			
 			// Serial to Ethernet process
-			if(BUFFER_USED_SIZE(data_rx) || u2e_size)	uart_to_ether(sock);
-			if(getSn_RX_RSR(sock) 	|| e2u_size)		ether_to_uart(sock);
+			switch(serial->protocol)
+			{
+				case SEG_SERIAL_PROTOCOL_NONE :
+					if(BUFFER_USED_SIZE(data_rx) || u2e_size)	uart_to_ether(sock);
+					if(getSn_RX_RSR(sock) 	|| e2u_size)		ether_to_uart(sock);
+					break;
+				
+				case SEG_SERIAL_MODBUS_RTU :
+					RTU_Uart_RX();
+					if(mb_state_rtu_finish == TRUE) {
+							mb_state_rtu_finish = FALSE;
+							mbRTUtoTCP(sock);
+					}
+					
+					if(getSn_RX_RSR(sock) 	|| e2u_size)
+					{
+						mbTCPtoRTU(sock);
+					}
+					break;
+			}
 			
 			// Check the inactivity timer
 			if((enable_inactivity_timer == SEG_ENABLE) && (inactivity_time >= net->inactivity))
@@ -404,11 +443,22 @@ void proc_SEG_tcp_client(uint8_t sock)
 			break;
 		
 		case SOCK_CLOSE_WAIT:
-			while(getSn_RX_RSR(sock) || e2u_size) 
+			if(serial->protocol == SEG_SERIAL_PROTOCOL_NONE)
 			{
-				WDT_SetWDTLoad(0xFF0000);
-				ether_to_uart(sock); // receive remaining packets
+				while(getSn_RX_RSR(sock) || e2u_size) 
+				{
+					WDT_SetWDTLoad(0xFF0000);
+					ether_to_uart(sock); // receive remaining packets
+				}
 			}
+			else
+			{
+				while(getSn_RX_RSR(sock) || e2u_size) 
+				{
+					WDT_SetWDTLoad(0xFF0000);
+				}	
+			}
+	
 			disconnect(sock);
 			break;
 		
@@ -505,9 +555,27 @@ void proc_SEG_tcp_server(uint8_t sock)
 			}
 			
 			// Serial to Ethernet process
-
-			if(BUFFER_USED_SIZE(data_rx) || u2e_size)	uart_to_ether(sock);
-			if(getSn_RX_RSR(sock) || e2u_size)	ether_to_uart(sock);
+			switch(serial->protocol)
+			{
+				case SEG_SERIAL_PROTOCOL_NONE :
+					if(BUFFER_USED_SIZE(data_rx) || u2e_size)	uart_to_ether(sock);
+					if(getSn_RX_RSR(sock) 	|| e2u_size)		ether_to_uart(sock);
+					break;
+				
+				case SEG_SERIAL_MODBUS_RTU :
+					RTU_Uart_RX();
+	
+					if(mb_state_rtu_finish == TRUE) {
+							mb_state_rtu_finish = FALSE;
+							mbRTUtoTCP(sock);
+					}
+					
+					if(getSn_RX_RSR(sock) 	|| e2u_size)
+					{
+						mbTCPtoRTU(sock);
+					}
+					break;
+			}
 			
 			// Check the inactivity timer
 			if((enable_inactivity_timer == SEG_ENABLE) && (inactivity_time >= net->inactivity))
@@ -566,10 +634,20 @@ void proc_SEG_tcp_server(uint8_t sock)
 			break;
 		
 		case SOCK_CLOSE_WAIT:
-			while(getSn_RX_RSR(sock) || e2u_size) 
+			if(serial->protocol == SEG_SERIAL_PROTOCOL_NONE)
 			{
-				WDT_SetWDTLoad(0xFF0000);
-				ether_to_uart(sock); // receive remaining packets
+				while(getSn_RX_RSR(sock) || e2u_size) 
+				{
+					WDT_SetWDTLoad(0xFF0000);
+					ether_to_uart(sock); // receive remaining packets
+				}
+			}
+			else
+			{
+				while(getSn_RX_RSR(sock) || e2u_size) 
+				{
+					WDT_SetWDTLoad(0xFF0000);
+				}	
 			}
 			disconnect(sock);
 			break;
@@ -728,8 +806,26 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 			}
 			
 			// Serial to Ethernet process
-			if(BUFFER_USED_SIZE(data_rx) || u2e_size)	uart_to_ether(sock);
-			if(getSn_RX_RSR(sock) 	|| e2u_size)		ether_to_uart(sock);
+			switch(serial->protocol)
+			{
+				case SEG_SERIAL_PROTOCOL_NONE :
+					if(BUFFER_USED_SIZE(data_rx) || u2e_size)	uart_to_ether(sock);
+					if(getSn_RX_RSR(sock) 	|| e2u_size)		ether_to_uart(sock);
+					break;
+				
+				case SEG_SERIAL_MODBUS_RTU :
+					RTU_Uart_RX();
+					if(mb_state_rtu_finish == TRUE) {
+							mb_state_rtu_finish = FALSE;
+							mbRTUtoTCP(sock);
+					}
+					
+					if(getSn_RX_RSR(sock) 	|| e2u_size)
+					{
+						mbTCPtoRTU(sock);
+					}
+					break;
+			}
 			
 			// Check the inactivity timer
 			if((enable_inactivity_timer == SEG_ENABLE) && (inactivity_time >= net->inactivity))
@@ -790,10 +886,20 @@ void proc_SEG_tcp_mixed(uint8_t sock)
 			break;
 		
 		case SOCK_CLOSE_WAIT:
-			while(getSn_RX_RSR(sock) || e2u_size) 
+			if(serial->protocol == SEG_SERIAL_PROTOCOL_NONE)
 			{
-				WDT_SetWDTLoad(0xFF0000);
-				ether_to_uart(sock); // receive remaining packets
+				while(getSn_RX_RSR(sock) || e2u_size) 
+				{
+					WDT_SetWDTLoad(0xFF0000);
+					ether_to_uart(sock); // receive remaining packets
+				}
+			}
+			else
+			{
+				while(getSn_RX_RSR(sock) || e2u_size) 
+				{
+					WDT_SetWDTLoad(0xFF0000);
+				}	
 			}
 			disconnect(sock);
 			break;

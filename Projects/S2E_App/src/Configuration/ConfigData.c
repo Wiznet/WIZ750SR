@@ -79,6 +79,7 @@ void set_DevConfig_to_factory_value(void)
 
 	// Default Settings for Data UART: 115200-8-N-1, No flowctrl
 	dev_config.serial_info[0].uart_interface = UART_IF_RS232_TTL;
+	dev_config.serial_info[0].protocol = SEG_SERIAL_PROTOCOL_NONE;
 	dev_config.serial_info[0].baud_rate = baud_115200;
 	dev_config.serial_info[0].data_bits = word_len8;
 	dev_config.serial_info[0].parity = parity_none;

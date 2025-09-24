@@ -10,6 +10,11 @@
 #include "uartHandler.h"
 #include "gpioHandler.h"
 
+#include "mb.h"
+#include "mbrtu.h"
+#include "mbascii.h"
+#include "mbserial.h"
+
 /* Private define ------------------------------------------------------------*/
 // Ring Buffer
 BUFFER_DECLARATION(data_rx);
@@ -82,6 +87,10 @@ uint8_t isSocketOpen_TCPclient = OFF;
 
 // ## timeflag for debugging
 uint8_t tmp_timeflag_for_debug = 0;
+
+/*the flag of modbus*/
+extern volatile uint8_t mb_state_rtu_finish;
+extern volatile uint8_t mb_state_ascii_finish;
 
 /* Private functions prototypes ----------------------------------------------*/
 void proc_SEG_tcp_client(uint8_t sock);
@@ -242,12 +251,38 @@ void proc_SEG_udp(uint8_t sock)
 	uint8_t state = getSn_SR(sock);
 	uint8_t multicast_mac[6];
 	uint8_t flag=0;
+	uint8_t serial_mode = get_serial_communation_protocol();
 	
 	switch(state)
 	{
 		case SOCK_UDP:
-			if(BUFFER_USED_SIZE(data_rx) || u2e_size)	uart_to_ether(sock);
-			if(getSn_RX_RSR(sock) 	|| e2u_size)		ether_to_uart(sock);
+			if (serial_mode == MODBUS_NONE) {
+				// Serial to Ethernet process
+				if(BUFFER_USED_SIZE(data_rx) || u2e_size)	uart_to_ether(sock);
+				if(getSn_RX_RSR(sock) 	|| e2u_size)		ether_to_uart(sock);
+			}
+			else if(serial_mode == MODBUS_RTU) {
+                RTU_Uart_RX();
+
+				if(mb_state_rtu_finish == true) {
+					mb_state_rtu_finish = false;
+					mbRTUtoTCP(sock);
+				}
+				if(getSn_RX_RSR(sock)) {
+					mbTCPtoRTU(sock);
+				}
+            }
+            else if(serial_mode == MODBUS_ASCII) {
+                ASCII_Uart_RX();
+
+				if(mb_state_ascii_finish == true) {
+					mb_state_ascii_finish = false;
+					mbASCIItoTCP(sock);
+				}
+				if(getSn_RX_RSR(sock)) {
+					mbTCPtoASCII(sock);
+				}
+            }
 			break;
 			
 		case SOCK_CLOSED:
@@ -459,7 +494,8 @@ void proc_SEG_tcp_server(uint8_t sock)
 	
 	uint8_t destip[4] = {0, };
 	uint16_t destport = 0;
-	
+	uint8_t serial_mode = get_serial_communation_protocol();
+
 	uint8_t state = getSn_SR(sock);
 	switch(state)
 	{
@@ -505,9 +541,31 @@ void proc_SEG_tcp_server(uint8_t sock)
 			}
 			
 			// Serial to Ethernet process
+			if (serial_mode == MODBUS_NONE) {
+				if(BUFFER_USED_SIZE(data_rx) || u2e_size)	uart_to_ether(sock);
+				if(getSn_RX_RSR(sock) 	|| e2u_size)		ether_to_uart(sock);
+			}
+			else if(serial_mode == MODBUS_RTU) {
+				RTU_Uart_RX();
 
-			if(BUFFER_USED_SIZE(data_rx) || u2e_size)	uart_to_ether(sock);
-			if(getSn_RX_RSR(sock) || e2u_size)	ether_to_uart(sock);
+				if(mb_state_rtu_finish == true) {
+					mb_state_rtu_finish = false;
+					mbRTUtoTCP(sock);
+				}
+				if(getSn_RX_RSR(sock)) {
+					mbTCPtoRTU(sock);
+				}
+			}
+			else if(serial_mode == MODBUS_ASCII) {
+				ASCII_Uart_RX();
+				if(mb_state_ascii_finish == true) {
+					mb_state_ascii_finish = false;
+					mbASCIItoTCP(sock);
+				}
+				if(getSn_RX_RSR(sock)) {
+					mbTCPtoASCII(sock);
+				}
+			}
 			
 			// Check the inactivity timer
 			if((enable_inactivity_timer == SEG_ENABLE) && (inactivity_time >= net->inactivity))
@@ -1598,7 +1656,9 @@ uint16_t debugSerial_dataTransfer(uint8_t * buf, uint16_t size, teDEBUGTYPE type
     return bytecnt;
 }
 
-
+uint8_t get_serial_communation_protocol(void) {
+    return (get_DevConfig_pointer()->modbus_enable);
+}
 
 // This function have to call every 1 millisecond by Timer IRQ handler routine.
 void seg_timer_msec(void)

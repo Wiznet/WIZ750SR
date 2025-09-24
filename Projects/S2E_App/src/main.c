@@ -66,6 +66,8 @@
 #include "gpioHandler.h"
 
 #include "index.h"
+#include "mb.h"
+#include "mbrtu.h"
 // ## for debugging
 //#include "loopback.h"
 
@@ -181,7 +183,10 @@ int main(void)
     
     /* UART Initialization */
     S2E_UART_Configuration();
-    
+    if ((dev_config->network_info[0].working_mode == TCP_SERVER_MODE || dev_config->network_info[0].working_mode == UDP_MODE) && get_serial_communation_protocol() == MODBUS_RTU) {
+        eMBRTUInit(dev_config->serial_info[0].baud_rate);
+    }
+
     if(dev_config->serial_info[0].serial_debug_en)
     {
         // Debug UART: Device information print out

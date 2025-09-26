@@ -1,4 +1,4 @@
-;#<FEEDBACK># ARM Linker, 5060960: Last Updated: Wed Sep 24 08:33:28 2025
+;#<FEEDBACK># ARM Linker, 5060960: Last Updated: Fri Sep 26 10:18:09 2025
 ;VERSION 0.2
 ;FILE configdata.o
 Mac_Conf <= IW 0
@@ -346,6 +346,7 @@ __asm___7_mbtcp_c_fd7be780____REV16 <= IW 0
 __asm___7_mbtcp_c_fd7be780____REVSH <= USED 0
 __asm___7_mbtcp_c_fd7be780____REVSH <= IW 0
 ;FILE mbtimer.o
+__ARM_common_ll_muluu <= IW 0
 __asm___9_mbtimer_c_ebc59195____REV16 <= USED 0
 __asm___9_mbtimer_c_ebc59195____REV16 <= IW 0
 __asm___9_mbtimer_c_ebc59195____REVSH <= USED 0
@@ -639,7 +640,6 @@ DUALTIMER_SetTimerBGLoad <= USED 0
 DUALTIMER_SetTimerBGLoad <= IW 0
 DUALTIMER_SetTimerControl <= USED 0
 DUALTIMER_SetTimerControl <= IW 0
-DUALTIMER_SetTimerLoad <= USED 0
 DUALTIMER_SetTimerLoad <= IW 0
 DUALTIMER_Start <= IW 0
 DUALTIMER_Stop <= IW 0

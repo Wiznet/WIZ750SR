@@ -35,8 +35,11 @@ int UART_read(void *data, int bytes) {
 
 uint32_t UART_write(void *data, int bytes) {
     int i;
+		uart_rs485_enable(SEG_DATA_UART);
     for(i = 0; i < bytes; i++) {
+				
         uart_putc(SEG_DATA_UART, ((uint8_t *)data)[i]);
     }
+		uart_rs485_disable(SEG_DATA_UART);
     return bytes;
 }

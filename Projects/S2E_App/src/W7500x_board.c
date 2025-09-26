@@ -44,7 +44,7 @@ void W7500x_Board_Init(void)
 	flag_hw_trig_enable = (get_hw_trig_pin()?0:1);
 	
 	/* PHY link input pin */
-#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750SR_1xx) || (DEVICE_BOARD_NAME == WIZSPE_T1L))
+#if ((DEVICE_BOARD_NAME == WIZ750SR) || (DEVICE_BOARD_NAME == W7500P_S2E) || (DEVICE_BOARD_NAME == WIZ750SR_1xx) || (DEVICE_BOARD_NAME == WIZ750SR_T1L))
 	init_phylink_in_pin();
 #endif
 	
@@ -102,7 +102,7 @@ static void PHY_Init(void)
 #ifdef __DEF_USED_MDIO__ 
     /* mdio Init */
     mdio_init(GPIOB, W7500x_MDC, W7500x_MDIO);
-#if (DEVICE_BOARD_NAME == WIZSPE_T1L)
+#if (DEVICE_BOARD_NAME == WIZ750SR_T1L)
 		YT8111_init();
 #else
     mdio_write(GPIOB, PHYREG_CONTROL, CNTL_RESET); // PHY Reset
@@ -136,7 +136,7 @@ void init_phylink_in_pin(void)
 
 uint8_t get_phylink_in_pin(void)
 {
-#if (DEVICE_BOARD_NAME == WIZSPE_T1L)
+#if (DEVICE_BOARD_NAME == WIZ750SR_T1L)
 	return !(GPIO_ReadInputDataBit(PHYLINK_IN_PORT, PHYLINK_IN_PIN));
 #else
 	// PHYlink input; Active low

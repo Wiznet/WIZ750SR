@@ -24,7 +24,7 @@
 
 #define __DEF_DBG_LEVEL1__
 
-#if (DEVICE_BOARD_NAME == WIZSPE_T1L)
+#if (DEVICE_BOARD_NAME == WIZ750SR_T1L)
 extern void mdio_delay(__IO uint32_t count);
 #else
 extern void delay(__IO uint32_t nCount);
@@ -94,13 +94,13 @@ void output_MDIO(GPIO_TypeDef* GPIOx, uint32_t val, uint32_t n)
         else
             GPIO_ResetBits(GPIOx, MDIO);
 
-#if (DEVICE_BOARD_NAME == WIZSPE_T1L)
+#if (DEVICE_BOARD_NAME == WIZ750SR_T1L)
 				mdio_delay(1);
 #else
         delay(1);
 #endif
         GPIO_SetBits(GPIOx, MDC); 
-#if (DEVICE_BOARD_NAME == WIZSPE_T1L)
+#if (DEVICE_BOARD_NAME == WIZ750SR_T1L)
 				mdio_delay(1);
 #else
         delay(1);
@@ -116,13 +116,13 @@ uint32_t input_MDIO(GPIO_TypeDef* GPIOx)
     {
         val <<=1;
         GPIO_SetBits(GPIOx, MDC); 
-#if (DEVICE_BOARD_NAME == WIZSPE_T1L)
+#if (DEVICE_BOARD_NAME == WIZ750SR_T1L)
 				mdio_delay(1);
 #else
         delay(1);
 #endif
         GPIO_ResetBits(GPIOx, MDC);
-#if (DEVICE_BOARD_NAME == WIZSPE_T1L)
+#if (DEVICE_BOARD_NAME == WIZ750SR_T1L)
 				mdio_delay(1);
 #else
         delay(1);
@@ -137,19 +137,19 @@ void turnaround_MDIO(GPIO_TypeDef* GPIOx)
 
     GPIOx->OUTENCLR = MDIO ;
 
-#if (DEVICE_BOARD_NAME == WIZSPE_T1L)
+#if (DEVICE_BOARD_NAME == WIZ750SR_T1L)
 		mdio_delay(1);
 #else
 		delay(1);
 #endif
     GPIO_SetBits(GPIOx, MDC); 
-#if (DEVICE_BOARD_NAME == WIZSPE_T1L)
+#if (DEVICE_BOARD_NAME == WIZ750SR_T1L)
 		mdio_delay(1);
 #else
 		delay(1);
 #endif
     GPIO_ResetBits(GPIOx, MDC);
-#if (DEVICE_BOARD_NAME == WIZSPE_T1L)
+#if (DEVICE_BOARD_NAME == WIZ750SR_T1L)
 		mdio_delay(1);
 #else
 		delay(1);
@@ -162,13 +162,13 @@ void idle_MDIO(GPIO_TypeDef* GPIOx)
     GPIOx->OUTENSET = MDIO ;
 
     GPIO_SetBits(GPIOx,MDC); 
-#if (DEVICE_BOARD_NAME == WIZSPE_T1L)
+#if (DEVICE_BOARD_NAME == WIZ750SR_T1L)
 		mdio_delay(1);
 #else
 		delay(1);
 #endif
     GPIO_ResetBits(GPIOx, MDC);
-#if (DEVICE_BOARD_NAME == WIZSPE_T1L)
+#if (DEVICE_BOARD_NAME == WIZ750SR_T1L)
 		mdio_delay(1);
 #else
 		delay(1);

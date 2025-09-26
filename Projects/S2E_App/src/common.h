@@ -75,7 +75,7 @@
 #define WIZ750SR                2
 #define W7500P_S2E              3
 #define WIZ750SR_1xx            5
-#define WIZSPE_T1L            	6
+#define WIZ750SR_T1L            6
 #define UNKNOWN_DEVICE          0xff
 
 //////////////////////////////////

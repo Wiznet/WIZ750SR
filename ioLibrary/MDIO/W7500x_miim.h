@@ -31,7 +31,7 @@
 #define CNTL_SPEED      (0x01ul<<13)
 #define CNTL_RESET      (0x01ul<<15)
 
-#if (DEVICE_BOARD_NAME == WIZSPE_T1L)
+#if (DEVICE_BOARD_NAME == WIZ750SR_T1L)
 #define MMD_CTRL     0x0D  // MMD Access Control Register
 #define MMD_ADDR     0x0E  // MMD Address/Data Register
 #endif
@@ -57,7 +57,7 @@ uint32_t mdio_read(GPIO_TypeDef* GPIOx, uint32_t PhyRegAddr);
 uint32_t link(void);
 void set_link(SetLink_Type mode);
 
-#if (DEVICE_BOARD_NAME == WIZSPE_T1L)
+#if (DEVICE_BOARD_NAME == WIZ750SR_T1L)
 uint32_t mdio_read_ext(GPIO_TypeDef* GPIOx, uint32_t PhyRegAddr);
 void mdio_write_ext(GPIO_TypeDef* GPIOx, uint32_t PhyRegAddr, uint32_t val);
 uint16_t mdio_read_mmd(GPIO_TypeDef* GPIOx, uint8_t devad, uint16_t reg_addr);

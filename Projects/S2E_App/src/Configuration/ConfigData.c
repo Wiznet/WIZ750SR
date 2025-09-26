@@ -12,6 +12,7 @@
 #include "deviceHandler.h"
 #include "segcp.h"
 #include "uartHandler.h"
+#include "mb.h"
 
 extern void delay(__IO uint32_t milliseconds);
 
@@ -144,6 +145,8 @@ void set_DevConfig_to_factory_value(void)
 	memcpy(dev_config.firmware_update_extend.fwup_server_domain, FWUP_SERVER_DOMAIN, sizeof(FWUP_SERVER_DOMAIN));
 	memset(dev_config.firmware_update_extend.fwup_server_binpath, 0x00, sizeof(dev_config.firmware_update_extend.fwup_server_binpath));
 	memcpy(dev_config.firmware_update_extend.fwup_server_binpath, FWUP_SERVER_BINPATH, sizeof(FWUP_SERVER_BINPATH));
+
+	dev_config.modbus_enable = MODBUS_NONE;
 }
 
 void load_DevConfig_from_storage(void)

@@ -379,7 +379,7 @@
               <MiscControls>--feedback=unused.txt</MiscControls>
               <Define>CORTEX_M0 USE_STDPERIPH_DRIVER</Define>
               <Undefine></Undefine>
-              <IncludePath>..\..\Libraries\CMSIS\Device\WIZnet\W7500\Include;..\..\Libraries\W7500x_stdPeriph_Driver\inc;..\..\Libraries\CMSIS\Include;..\..\Libraries\CMSIS\Device\WIZnet\W7500\Source\ARM;..\S2E_App\src;..\S2E_App\src\Configuration;.\src;..\..\ioLibrary\Ethernet;..\..\ioLibrary\Internet\DHCP;..\..\ioLibrary\Internet\DNS;..\..\ioLibrary\MDIO;..\..\ioLibrary\Application\loopback;.\src\Configuration;.\src\PlatformHandler;.\src\Serial_to_Ethernet;.\src\Callback</IncludePath>
+              <IncludePath>..\..\Libraries\CMSIS\Device\WIZnet\W7500\Include;..\..\Libraries\W7500x_stdPeriph_Driver\inc;..\..\Libraries\CMSIS\Include;..\..\Libraries\CMSIS\Device\WIZnet\W7500\Source\ARM;..\S2E_App\src;..\S2E_App\src\Configuration;.\src;..\..\ioLibrary\Ethernet;..\..\ioLibrary\Internet\DHCP;..\..\ioLibrary\Internet\DNS;..\..\ioLibrary\MDIO;..\..\ioLibrary\Application\loopback;.\src\Configuration;.\src\PlatformHandler;.\src\Serial_to_Ethernet;.\src\Callback;..\S2E_App\src\Modbus</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>

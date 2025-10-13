@@ -174,6 +174,11 @@ void load_DevConfig_from_storage(void)
 	{
 		dev_config.serial_info[0].uart_interface = get_uart_if_sel_pin();
 	}
+	
+	if((dev_config.modbus_enable != MODBUS_RTU) && (dev_config.modbus_enable != MODBUS_ASCII))
+	{
+		dev_config.modbus_enable = MODBUS_NONE;
+	}
 }
 
 

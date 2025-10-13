@@ -84,7 +84,7 @@ static bool mbTCPGet(uint8_t sock, uint8_t ** ppucMBTCPFrame, uint16_t * usTCPLe
     return false;
 }
 
-static bool mbTCPPackage(uint8_t sock, uint8_t* pucRcvAddress, uint8_t** ppucFrame, uint16_t * pusLength) {
+static bool mbTCPPackage(uint8_t sock, uint8_t* pucRcvAddress, uint8_t** ppucFrame, int32_t * pusLength) {
     uint8_t		*pucMBTCPFrame;
     uint16_t	usLength;
     uint16_t	usPID;
@@ -103,6 +103,10 @@ static bool mbTCPPackage(uint8_t sock, uint8_t* pucRcvAddress, uint8_t** ppucFra
 
             *ppucFrame = &pucMBTCPFrame[MB_TCP_FUNC];
             *pusLength = usLength - MB_TCP_FUNC;
+						if(*pusLength < 0)
+						{
+							return false;
+						}
             return true;
         }
     }
@@ -111,14 +115,14 @@ static bool mbTCPPackage(uint8_t sock, uint8_t* pucRcvAddress, uint8_t** ppucFra
 
 bool MBtcp2rtuFrame(uint8_t sock) {
     uint8_t pucRcvAddress;
-    uint16_t pusLength;
+    int32_t pusLength;
     uint8_t* ppucFrame;
     uint16_t usCRC16;
 
     if (mbTCPPackage(sock, &pucRcvAddress, &ppucFrame, &pusLength) != false) {
         pucRTUBufferCur = ppucFrame - 1;
         pucRTUBufferCur[MB_SER_PDU_ADDR_OFF] = (uint8_t)pucRcvAddress;
-        usRTUBufferPos = pusLength + MB_RTU_ADDR_SIZE;
+        usRTUBufferPos = (uint16_t)pusLength + MB_RTU_ADDR_SIZE;
         usCRC16 = usMBCRC16((uint8_t *) pucRTUBufferCur, usRTUBufferPos);
         pucRTUBufferCur[usRTUBufferPos++] = (uint8_t)(usCRC16 & 0xFF);
         pucRTUBufferCur[usRTUBufferPos++] = (uint8_t)(usCRC16 >> 8);
@@ -130,7 +134,7 @@ bool MBtcp2rtuFrame(uint8_t sock) {
 
 bool MBtcp2asciiFrame(uint8_t sock) {
     uint8_t pucRcvAddress;
-    uint16_t pusLength;
+    int32_t pusLength;
     uint8_t* ppucFrame;
     uint8_t usLRC;
 
@@ -138,7 +142,7 @@ bool MBtcp2asciiFrame(uint8_t sock) {
         pucASCIIBufferCur = ppucFrame - 1;
         pucASCIIBufferCur[MB_SER_PDU_ADDR_OFF] = pucRcvAddress;
 
-        usASCIIBufferPos = pusLength + MB_RTU_ADDR_SIZE;
+        usASCIIBufferPos = (uint16_t)pusLength + MB_RTU_ADDR_SIZE;
 
         usLRC = prvucMBLRC((uint8_t *) pucASCIIBufferCur, usASCIIBufferPos);
         pucASCIIBufferCur[usASCIIBufferPos++] = usLRC;

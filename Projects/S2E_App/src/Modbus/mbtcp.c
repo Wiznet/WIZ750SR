@@ -102,11 +102,12 @@ static bool mbTCPPackage(uint8_t sock, uint8_t* pucRcvAddress, uint8_t** ppucFra
             mbTCPtid2 = pucMBTCPFrame[MB_TCP_TID2];
 
             *ppucFrame = &pucMBTCPFrame[MB_TCP_FUNC];
-            *pusLength = usLength - MB_TCP_FUNC;
-						if(*pusLength < 0)
+						if(usLength < MB_TCP_FUNC)
 						{
 							return false;
 						}
+            *pusLength = usLength - MB_TCP_FUNC;
+
             return true;
         }
     }
